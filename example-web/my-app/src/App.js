@@ -15,6 +15,7 @@ import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import "./App.css";
+import RegComponent from "./Reg.tsx";
 
 function CircularIndeterminate() {
   return (
@@ -198,6 +199,7 @@ function App() {
             <Button variant="contained" color="error" onClick={removeData}>
               Logout
             </Button>
+            <RegComponent data={parsedSignifyData}></RegComponent>
           </div>
         ) : (
           renderData()
