@@ -199,7 +199,7 @@ function App() {
             <Button variant="contained" color="error" onClick={removeData}>
               Logout
             </Button>
-            <RegComponent data={parsedSignifyData}></RegComponent>
+            <RegComponent data={parsedSignifyData} ></RegComponent>
           </div>
         ) : (
           renderData()

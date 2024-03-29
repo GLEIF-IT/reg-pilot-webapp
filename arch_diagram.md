@@ -7,6 +7,7 @@ graph
     AID([User selected identifier]) --> SIGN
     CRED([User selected credential]) --> SIGN
     AUTO([User selected auto-signin]) --> SIGN
+    VEND([User set vendor config]) --> EXTUI
     PASS([User Passcode])--Temporarily Stored-->EXTUI
         subgraph example web app
         CONTENT[\Content Script\]-- Active tab\nmessages-->BSCRIPT;

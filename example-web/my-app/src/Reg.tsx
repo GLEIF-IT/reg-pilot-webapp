@@ -54,8 +54,8 @@ const RegComponent = (data) => {
   const [open, setOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false); // Open drawer by default
   const [status, setStatus] = useState('Connect');
-  const [selectedOption1, setSelectedOption1] = useState(data.headers["signify-resource"]); // Step 2 Selection
-  const [selectedOption2, setSelectedOption2] = useState(data.credential.anchor.pre); // Step 3 Selection
+  const [selectedOption1, setSelectedOption1] = useState(data.data.headers["signify-resource"]); // Step 2 Selection
+  const [selectedOption2, setSelectedOption2] = useState(data.data.credential.anchor.pre); // Step 3 Selection
 //   const [activeStep, setActiveStep] = useState(0);
   const [modalError, setModalError] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -137,12 +137,12 @@ const RegComponent = (data) => {
     }
     setSelectedComponent(componentName);
   };
-//   const checkHeaderSignatures = async (aid: any, name: any) => {
-//     console.log("Checking header signatures")
-//     const response_signed = await client.signedFetch(serverUrl,`${verSigPath}`, 'GET',null,name)
-//     const response_signed_data = await response_signed.json();
-//     console.log("header signature verification response",response_signed_data)
-//   }
+  // const checkHeaderSignatures = async (aid: any, name: any) => {
+  //   console.log("Checking header signatures")
+  //   const response_signed = await client.signedFetch(serverUrl,`${verSigPath}`, 'GET',null,name)
+  //   const response_signed_data = await response_signed.json();
+  //   console.log("header signature verification response",response_signed_data)
+  // }
 
   const loginReal = async () => {
     let vlei_cesr = data.credential
@@ -193,14 +193,14 @@ const RegComponent = (data) => {
 //     return undefined
 //   }
 
-//   const resetAidSelected = () => {
-//     setActiveStep(1)
-//     handleClickOpen()
-//     setSelectedOption1('')
-//     setSelectedOption2('')
-//     setStatus('Connecting')
-//     setModalError('Select a new identifier and credential')
-//   }
+  // const resetAidSelected = () => {
+  //   // setActiveStep(1)
+  //   handleClickOpen()
+  //   setSelectedOption1('')
+  //   setSelectedOption2('')
+  //   setStatus('Connecting')
+  //   setModalError('Select a new identifier and credential')
+  // }
 
 //   const connectToAgent = async (client: SignifyClient) => {
 //     try {
@@ -213,6 +213,394 @@ const RegComponent = (data) => {
 //       await client.state();
 //     }
 //   }
+
+
+//write a function that takes a string and adds ellipses to it if it is too long in the middle of the string, only show 4 characters on each side of the ellipses
+const reduceString = (str: string) => {
+  if (str.length > 40) { //TODO change to smaller number
+    return str.slice(0, 6) + '...' + str.slice(str.length - 6, str.length)
+  }
+  return str
+}
+
+interface TextComponentProps {
+  text: string;
+}
+
+const TextComponent: React.FC<TextComponentProps> = ({ text }) => (
+  <Grid item xs={1} lg={1} left={'50%'}><Box><Typography> {text}</Typography></Box></Grid>
+)
+
+const LandingComponent: React.FC<TextComponentProps> = ({ text }) => (
+  <Grid item xs={1} lg={1} left={'50%'}>
+    <Box textAlign={'center'}>
+      <Typography variant='h1'>{text}</Typography>
+      <br />
+      <Divider />
+      <br />
+      <br />
+      <Typography variant='h5'>Please start by connecting using the button in the top right.</Typography>
+    </Box>
+  </Grid>
+)
+
+
+const DragAndDropUploader = ({ errorUpload, setErrorUpload, submitResult, setSubmitResult, selectedFile, setSelectedFile, setSelectedComponent, selectedAid, selectedAcdc }) => {
+
+  useEffect(() => {
+    setErrorUpload('')
+    setSelectedFile(null)
+    setSubmitResult('')
+  }
+    , [])
+
+  const setFile = (file: any) => {
+    const acceptedTypes = ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip', 'application/zip-compressed', 'application/octet-stream'];
+
+    if (!acceptedTypes.includes(file.type)) {
+      setSelectedFile(null);
+      setErrorUpload(`${file.name} is not a zip file. \n Please select a zip file.`)
+      setSubmitResult('')
+      return
+    }
+    setErrorUpload('')
+    setSubmitResult('')
+    setSelectedFile(file);
+  }
+  const handleFileSelect = (event: any) => {
+    let file = event.target.files[0]
+    setFile(file)
+
+  };
+
+
+  const handleDrop = (event: any) => {
+    event.preventDefault();
+    let file = event.dataTransfer.files[0]
+    setFile(file)
+  };
+
+  const handleDragOver = (event: any) => {
+    event.preventDefault();
+  };
+
+  // Function to perform the upload request
+  async function upload(aid: object, said: string, report: string): Promise<any> {
+    const formData = new FormData();
+    formData.append('upload', report);
+    
+    // // Send signed request
+    console.log("Form data is",formData.get('upload'))
+    // const response_signed = await client.signedFetch(serverUrl,`${uploadPath}/${aid["prefix"]}/${said}`, 'POST',formData,aid["name"])
+    // const response_signed_data = await response_signed.json();
+    // console.log("upload response",response_signed_data)
+
+
+    // Return the response data
+    // return response_signed_data;
+    return {"200":{"description":"OK","content":{"application/json":{"schema":{"type":"object","example":{
+      "submitter": "EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk",
+      "filename": "test_ifgroup2023.zip",
+      "status": "verified",
+      "contentType": "application/zip",
+      "size": 4467,
+      "message": "All 6 files in report package have been signed by submitter (EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk)."
+  }}}}}}
+  }
+
+  const handleSubmit = async () => {
+    // Add your upload logic her
+    setSubmitResult('uploading')
+    //wait 2 seconds
+    //await new Promise(r => setTimeout(r, 2000));
+    await upload(selectedOption1, selectedOption2, selectedFile)
+
+    setSubmitResult(`done|${selectedFile.name}`)
+    // await new Promise(r => setTimeout(r, 2000));
+    // setSubmitResult(`fail|${selectedFile.name}` )
+    setSelectedFile(null);
+  };
+
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        // justifyContent: 'center',
+        gap: 2,
+        height: '80%',
+      }}
+    >
+
+      <Typography variant="h4">Upload your report</Typography>
+
+
+      {errorUpload !== '' && (
+        <Alert
+          severity="error"
+
+        >
+          {errorUpload}
+        </Alert>
+      )}
+
+      {submitResult.split('|')[0] === 'fail' && (
+        <Alert
+          severity="error"
+          action={
+            <Button color="inherit" size="small" onClick={() => { setSubmitResult(''); setSelectedComponent('Check Status') }}>
+              Check Status
+            </Button>
+          }
+        >
+          Failed submitted the report {submitResult.split('|')[1]}
+        </Alert>
+      )}
+
+      {submitResult.split('|')[0] === 'done' && (
+        <Alert
+          severity="success"
+          action={
+            <Button color="inherit" size="small" onClick={() => { setSubmitResult(''); setSelectedComponent('Check Status') }}>
+              Check Status
+            </Button>
+          }
+        >
+          Successfuly submitted the report {submitResult.split('|')[1]}
+        </Alert>
+      )}
+
+      {submitResult === 'uploading' && (
+        <Alert
+          severity="info"
+        >
+          Uploading {selectedFile.name}
+        </Alert>
+      )}
+
+      {errorUpload === '' && selectedFile !== null && submitResult === '' && (
+        <Alert
+          severity="success"
+        >
+          Succesfully loaded report {selectedFile.name}
+          {<br />}
+          Submit your report next.
+        </Alert>
+      )}
+      <Box
+        sx={{
+          width: '100%',
+          height: '200px',
+          border: '2px dashed gray',
+          borderRadius: '4px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexDirection: 'column',
+          p: 1
+        }}
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+      >
+        {selectedFile ? (
+          <>
+            <UploadFile /> <p>Selected File: {selectedFile.name}</p>
+          </>
+        ) : (<>
+          <UploadFile />
+          <p>Drag and drop a file here or <br /> click the button to select a file.</p>
+        </>
+        )}
+        <input
+          type="file"
+          id="file-input"
+          style={{ display: 'none' }}
+          onChange={handleFileSelect}
+        />
+        <label htmlFor="file-input">
+          <Button variant="contained" component="span">
+            Select File
+          </Button>
+        </label>
+      </Box>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={async () => { await handleSubmit() }}
+        disabled={!selectedFile}
+      >
+        Submit Report
+      </Button>
+    </Box>
+  );
+
+};
+
+const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
+  const [data, setData] = useState<Array<any>>();
+  const [selectedReport, setSelectedReport] = useState<Object>();
+  const [openModalTable, setOpenModalTable] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const _fakedata = [
+    { filename: 'File 1', size: '10 MB', message: 'last update 2023-06-01', status: 'Uploaded' },
+    { filename: 'File 2', size: '5 MB', message: 'last update 2023-06-02', status: 'Failed' },
+    { filename: 'File 3', size: '2 MB', message: 'last update 2023-06-03', status: 'Uploaded' },
+    { filename: 'File 4', size: '1 MB', message: 'last update 2023-06-04', status: 'Processing' },
+  ]
+  useEffect(() => {
+    // Simulating fetch request
+    const fetchData = async () => {
+      try {
+        // Replace this with your actual fetch URL
+        setLoading(true);
+        let d = await checkUpload(selectedAid)
+        console.log("Response data is type and data",typeof(d),d)
+        let newData = new Set<any>()
+        let statuses = Object.keys(d).map((item: any) => {
+          return d[item].map((status: any) => {
+            newData.add(status)
+          })
+        });
+        console.log("Status data converted type and data",typeof(statuses),statuses)
+        console.log("New data converted type and data",typeof(newData),newData)
+        setData(Array.from(newData))
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching data: ', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleRowClick = (report) => {
+    setSelectedReport(report);
+    setOpenModalTable(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModalTable(false);
+  };
+
+  // Function to perform the upload request
+  async function checkUpload(aid): Promise<any> {
+     // // Send signed request
+    // const response_signed = await client.signedFetch(serverUrl,`${statusPath}/${aid.prefix}`, 'GET',null,aid.name)
+    // const response_signed_data = await response_signed.json();
+    // console.log(response_signed_data)
+    // return response_signed_data;
+    return {"200":{"description":"OK","content":{"application/json":{"schema":{"type":"object","example":{
+      "EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk": [
+          "{\"submitter\": \"EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk\", \"filename\": \"test_MetaInfReportJson_noSigs.zip\", \"status\": \"failed\", \"contentType\": \"application/zip\", \"size\": 3059, \"message\": \"5 files from report package not signed {'parameters.csv', 'FilingIndicators.csv', 'report.json', 'i_10.01.csv', 'i_10.02.csv'}, []\"}",
+          "{\"submitter\": \"EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk\", \"filename\": \"test_ifclass3.zip\", \"status\": \"verified\", \"contentType\": \"application/zip\", \"size\": 5662, \"message\": \"All 9 files in report package have been signed by submitter (EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk).\"}",
+          "{\"submitter\": \"EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk\", \"filename\": \"test_ifgroup2023.zip\", \"status\": \"verified\", \"contentType\": \"application/zip\", \"size\": 4467, \"message\": \"All 6 files in report package have been signed by submitter (EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk).\"}"
+      ]
+      }}}}}}
+  }
+
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '80%',
+        gap: 2
+      }}
+    >
+      <Typography variant="h4">Check Status</Typography>
+      {loading &&
+        <CircularProgress
+          sx={{
+            margin: 'auto'
+          }}
+        />}
+
+      {(!data || data.length == 0) && !loading && <Alert severity="info" action={
+        <Button color="inherit" size="small" onClick={() => {
+          setSelectedComponent('Upload Report')
+        }}>
+          Upload Report
+        </Button>
+      }>You don't have any reports yet.</Alert>}
+      {data && !loading && <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>File</TableCell>
+              <TableCell>Size</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Message</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {data.map((item: any) => (
+              <TableRow key={item.filename} onClick={() => handleRowClick(item)}>
+                <TableCell>{item.filename == undefined ? "unknown" : item.filename.substring(0,75)}</TableCell>
+                <TableCell>{item.size == undefined ? "unknown" : item.size}</TableCell>
+                <TableCell style={
+                  item.status === 'verified' ? {'color': 'green'} : item.status === 'failed' ? {'color': 'red'} : {'color': 'yellow'}}>
+                  {item.status.charAt(0).toUpperCase() + item.status.slice(1)}</TableCell>
+                <TableCell>{item.message == undefined ? "unknown" : item.message.substring(0,75)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>}
+
+      <Modal open={openModalTable} onClose={handleCloseModal}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            bgcolor: '#348ceb',
+            boxShadow: 24,
+            p: 4,
+            minWidth: 275,
+          }}
+        >
+          <IconButton onClick={handleCloseModal} sx={{ position: 'absolute', right: 8, top: 8 }}>
+            <CloseIcon />
+          </IconButton>
+          {selectedReport && (
+            <>
+              <Typography variant="h6" gutterBottom>
+                Report Details
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                Filename: {selectedReport["filename"]}
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                Size: {selectedReport["size"]}
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                Status: {selectedReport["status"]}
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                Message: {selectedReport["message"]}
+              </Typography>
+            </>
+          )}
+        </Box>
+      </Modal>
+
+      {!loading && <Fab
+        color="primary"
+        aria-label="add"
+        style={{ position: 'fixed', bottom: '20px', right: '20px' }}
+        onClick={async () => {
+          setData(_fakedata);
+
+        }}
+      >
+        <AddIcon />
+      </Fab>}
+    </Box>
+  );
+
   return (
     <Box
       display="flex"
@@ -322,7 +710,7 @@ const RegComponent = (data) => {
             </Typography>
           </Alert>}
                     <>
-                    <Tooltip title={data.credential.sad.d} key={'cred sad'}><Typography variant="body2">{data.credential.sad.d}</Typography></Tooltip>
+                    <Tooltip title={selectedAcdc.sad.d} key={'cred sad'}><Typography variant="body2">{selectedAcdc.sad.d}</Typography></Tooltip>
                             {/* <FormControlLabel key={index} value={acdc['sad']['d']} control={<Radio />} label={acdc.sad.a.engagementContextRole} /> */}
                           
                         
@@ -339,402 +727,30 @@ const RegComponent = (data) => {
                          Next
                        </Button>
                      </>
-                  )
 
         </DialogContent>
       </Dialog>
-      {/* // <LandingComponent text='Welcome to Reg portal' />
-      // {selectedComponent === 'Check Status' && <MyTable
-      //   client={client}
-      //   setSelectedComponent={setSelectedComponent}
-      //   selectedAcdc={selectedOption2}
-      //   selectedAid={selectedOption1}
-      // />}
-      // {selectedComponent === 'Upload Report' && <DragAndDropUploader
-      //   errorUpload={errorUpload}
-      //   setErrorUpload={setErrorUpload}
-      //   submitResult={submitResult}
-      //   setSubmitResult={setSubmitResult}
-      //   selectedFile={selectedFile}
-      //   setSelectedFile={setSelectedFile}
-      //   setSelectedComponent={setSelectedComponent}
-      //   selectedAcdc={selectedOption2}
-      //   selectedAid={selectedOption1}
-      // />} */}
+      <LandingComponent text='Welcome to Reg portal' />
+      {selectedComponent === 'Check Status' && <MyTable
+        setSelectedComponent={setSelectedComponent}
+        selectedAcdc={selectedOption2}
+        selectedAid={selectedOption1}
+      />}
+      {selectedComponent === 'Upload Report' && <DragAndDropUploader
+        errorUpload={errorUpload}
+        setErrorUpload={setErrorUpload}
+        submitResult={submitResult}
+        setSubmitResult={setSubmitResult}
+        selectedFile={selectedFile}
+        setSelectedFile={setSelectedFile}
+        setSelectedComponent={setSelectedComponent}
+        selectedAcdc={selectedOption2}
+        selectedAid={selectedOption1}
+      />}
 
     </Box>
   );
 };
-
-//write a function that takes a string and adds ellipses to it if it is too long in the middle of the string, only show 4 characters on each side of the ellipses
-const reduceString = (str: string) => {
-  if (str.length > 40) { //TODO change to smaller number
-    return str.slice(0, 6) + '...' + str.slice(str.length - 6, str.length)
-  }
-  return str
-}
-
-interface TextComponentProps {
-  text: string;
-}
-
-const TextComponent: React.FC<TextComponentProps> = ({ text }) => (
-  <Grid item xs={1} lg={1} left={'50%'}><Box><Typography> {text}</Typography></Box></Grid>
-)
-
-const LandingComponent: React.FC<TextComponentProps> = ({ text }) => (
-  <Grid item xs={1} lg={1} left={'50%'}>
-    <Box textAlign={'center'}>
-      <Typography variant='h1'>{text}</Typography>
-      <br />
-      <Divider />
-      <br />
-      <br />
-      <Typography variant='h5'>Please start by connecting using the button in the top right.</Typography>
-    </Box>
-  </Grid>
-)
-
-
-// const DragAndDropUploader = ({ client, errorUpload, setErrorUpload, submitResult, setSubmitResult, selectedFile, setSelectedFile, setSelectedComponent, resetAidSelected, selectedAid, selectedAcdc }) => {
-
-//   useEffect(() => {
-//     setErrorUpload('')
-//     setSelectedFile(null)
-//     setSubmitResult('')
-//   }
-//     , [])
-
-//   const setFile = (file: any) => {
-//     const acceptedTypes = ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip', 'application/zip-compressed', 'application/octet-stream'];
-
-//     if (!acceptedTypes.includes(file.type)) {
-//       setSelectedFile(null);
-//       setErrorUpload(`${file.name} is not a zip file. \n Please select a zip file.`)
-//       setSubmitResult('')
-//       return
-//     }
-//     setErrorUpload('')
-//     setSubmitResult('')
-//     setSelectedFile(file);
-//   }
-  const handleFileSelect = (event: any) => {
-    let file = event.target.files[0]
-    setFile(file)
-
-  };
-
-
-  const handleDrop = (event: any) => {
-    event.preventDefault();
-    let file = event.dataTransfer.files[0]
-    setFile(file)
-  };
-
-  const handleDragOver = (event: any) => {
-    event.preventDefault();
-  };
-
-  // Function to perform the upload request
-  async function upload(aid: string, said: string, report: string): Promise<any> {
-    const formData = new FormData();
-    formData.append('upload', report);
-    
-    // // Send signed request
-    console.log("Form data is",formData.get('upload'))
-    const response_signed = await client.signedFetch(serverUrl,`${uploadPath}/${aid}/${said}`, 'POST',formData,aid.name)
-    const response_signed_data = await response_signed.json();
-    console.log("upload response",response_signed_data)
-
-
-    // Return the response data
-    return response_signed_data;
-  }
-
-  const handleSubmit = async () => {
-    // Add your upload logic her
-    setSubmitResult('uploading')
-    //wait 2 seconds
-    //await new Promise(r => setTimeout(r, 2000));
-    await upload(selectedAid, selectedAcdc, selectedFile)
-
-    setSubmitResult(`done|${selectedFile.name}`)
-    // await new Promise(r => setTimeout(r, 2000));
-    // setSubmitResult(`fail|${selectedFile.name}` )
-    setSelectedFile(null);
-  };
-
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        // justifyContent: 'center',
-        gap: 2,
-        height: '80%',
-      }}
-    >
-
-      <Typography variant="h4">Upload your report</Typography>
-
-
-      {errorUpload !== '' && (
-        <Alert
-          severity="error"
-
-        >
-          {errorUpload}
-        </Alert>
-      )}
-
-      {submitResult.split('|')[0] === 'fail' && (
-        <Alert
-          severity="error"
-          action={
-            <Button color="inherit" size="small" onClick={() => { setSubmitResult(''), setSelectedComponent('Check Status') }}>
-              Check Status
-            </Button>
-          }
-        >
-          Failed submitted the report {submitResult.split('|')[1]}
-        </Alert>
-      )}
-
-      {submitResult.split('|')[0] === 'done' && (
-        <Alert
-          severity="success"
-          action={
-            <Button color="inherit" size="small" onClick={() => { setSubmitResult(''), setSelectedComponent('Check Status') }}>
-              Check Status
-            </Button>
-          }
-        >
-          Successfuly submitted the report {submitResult.split('|')[1]}
-        </Alert>
-      )}
-
-      {submitResult === 'uploading' && (
-        <Alert
-          severity="info"
-        >
-          Uploading {selectedFile.name}
-        </Alert>
-      )}
-
-      {errorUpload === '' && selectedFile !== null && submitResult === '' && (
-        <Alert
-          severity="success"
-        >
-          Succesfully loaded report {selectedFile.name}
-          {<br />}
-          Submit your report next.
-        </Alert>
-      )}
-      <Box
-        sx={{
-          width: '100%',
-          height: '200px',
-          border: '2px dashed gray',
-          borderRadius: '4px',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexDirection: 'column',
-          p: 1
-        }}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-      >
-        {selectedFile ? (
-          <>
-            <UploadFile /> <p>Selected File: {selectedFile.name}</p>
-          </>
-        ) : (<>
-          <UploadFile />
-          <p>Drag and drop a file here or <br /> click the button to select a file.</p>
-        </>
-        )}
-        <input
-          type="file"
-          id="file-input"
-          style={{ display: 'none' }}
-          onChange={handleFileSelect}
-        />
-        <label htmlFor="file-input">
-          <Button variant="contained" component="span">
-            Select File
-          </Button>
-        </label>
-      </Box>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={async () => { await handleSubmit() }}
-        disabled={!selectedFile}
-      >
-        Submit Report
-      </Button>
-    </Box>
-  );
-};
-
-const MyTable = ({ client, setSelectedComponent, selectedAid, selectedAcdc }) => {
-  const [data, setData] = useState<Array<any>>();
-  const [selectedReport, setSelectedReport] = useState(null);
-  const [openModalTable, setOpenModalTable] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const _fakedata = [
-    { filename: 'File 1', size: '10 MB', message: 'last update 2023-06-01', status: 'Uploaded' },
-    { filename: 'File 2', size: '5 MB', message: 'last update 2023-06-02', status: 'Failed' },
-    { filename: 'File 3', size: '2 MB', message: 'last update 2023-06-03', status: 'Uploaded' },
-    { filename: 'File 4', size: '1 MB', message: 'last update 2023-06-04', status: 'Processing' },
-  ]
-  useEffect(() => {
-    // Simulating fetch request
-    const fetchData = async () => {
-      try {
-        // Replace this with your actual fetch URL
-        setLoading(true);
-        let d = await checkUpload(selectedAid)
-        console.log("Response data is type and data",typeof(d),d)
-        let newData = new Set<any>()
-        let statuses = Object.keys(d).map((item: any) => {
-          return d[item].map((status: any) => {
-            newData.add(status)
-          })
-        });
-        console.log("Status data converted type and data",typeof(statuses),statuses)
-        console.log("New data converted type and data",typeof(newData),newData)
-        setData(Array.from(newData))
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching data: ', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const handleRowClick = (report) => {
-    setSelectedReport(report);
-    setOpenModalTable(true);
-  };
-
-  const handleCloseModal = () => {
-    setOpenModalTable(false);
-  };
-
-  // Function to perform the upload request
-  async function checkUpload(aid): Promise<any> {
-     // // Send signed request
-    const response_signed = await client.signedFetch(serverUrl,`${statusPath}/${aid.prefix}`, 'GET',null,aid.name)
-    const response_signed_data = await response_signed.json();
-    console.log(response_signed_data)
-    return response_signed_data;
-  }
-
-//   return (
-//     <Box
-//       sx={{
-//         display: 'flex',
-//         flexDirection: 'column',
-//         height: '80%',
-//         gap: 2
-//       }}
-//     >
-//       <Typography variant="h4">Check Status</Typography>
-//       {loading &&
-//         <CircularProgress
-//           sx={{
-//             margin: 'auto'
-//           }}
-//         />}
-
-//       {(!data || data.length == 0) && !loading && <Alert severity="info" action={
-//         <Button color="inherit" size="small" onClick={() => {
-//           setSelectedComponent('Upload Report')
-//         }}>
-//           Upload Report
-//         </Button>
-//       }>You don't have any reports yet.</Alert>}
-//       {data && !loading && <TableContainer component={Paper}>
-//         <Table>
-//           <TableHead>
-//             <TableRow>
-//               <TableCell>File</TableCell>
-//               <TableCell>Size</TableCell>
-//               <TableCell>Status</TableCell>
-//               <TableCell>Message</TableCell>
-//             </TableRow>
-//           </TableHead>
-//           <TableBody>
-//             {data.map((item: any) => (
-//               <TableRow key={item.filename} onClick={() => handleRowClick(item)}>
-//                 <TableCell>{item.filename == undefined ? "unknown" : item.filename.substring(0,75)}</TableCell>
-//                 <TableCell>{item.size == undefined ? "unknown" : item.size}</TableCell>
-//                 <TableCell style={
-//                   item.status === 'verified' ? {'color': 'green'} : item.status === 'failed' ? {'color': 'red'} : {'color': 'yellow'}}>
-//                   {item.status.charAt(0).toUpperCase() + item.status.slice(1)}</TableCell>
-//                 <TableCell>{item.message == undefined ? "unknown" : item.message.substring(0,75)}</TableCell>
-//               </TableRow>
-//             ))}
-//           </TableBody>
-//         </Table>
-//       </TableContainer>}
-
-//       <Modal open={openModalTable} onClose={handleCloseModal}>
-//         <Box
-//           sx={{
-//             position: 'absolute',
-//             top: '50%',
-//             left: '50%',
-//             transform: 'translate(-50%, -50%)',
-//             bgcolor: '#348ceb',
-//             boxShadow: 24,
-//             p: 4,
-//             minWidth: 275,
-//           }}
-//         >
-//           <IconButton onClick={handleCloseModal} sx={{ position: 'absolute', right: 8, top: 8 }}>
-//             <CloseIcon />
-//           </IconButton>
-//           {selectedReport && (
-//             <>
-//               <Typography variant="h6" gutterBottom>
-//                 Report Details
-//               </Typography>
-//               <Typography variant="body1" gutterBottom>
-//                 Filename: {selectedReport.filename}
-//               </Typography>
-//               <Typography variant="body1" gutterBottom>
-//                 Size: {selectedReport.size}
-//               </Typography>
-//               <Typography variant="body1" gutterBottom>
-//                 Status: {selectedReport.status}
-//               </Typography>
-//               <Typography variant="body1" gutterBottom>
-//                 Message: {selectedReport.message}
-//               </Typography>
-//             </>
-//           )}
-//         </Box>
-//       </Modal>
-
-//       {!loading && <Fab
-//         color="primary"
-//         aria-label="add"
-//         style={{ position: 'fixed', bottom: '20px', right: '20px' }}
-//         onClick={async () => {
-//           setData(_fakedata);
-
-//         }}
-//       >
-//         <AddIcon />
-//       </Fab>}
-//     </Box>
-//   );
 };
 
 export default RegComponent;
