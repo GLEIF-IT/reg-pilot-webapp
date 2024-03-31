@@ -15,7 +15,7 @@ import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import "./App.css";
-import RegComponent from "./Reg.tsx";
+import RegComponent from "./reg/Reg.tsx";
 
 function CircularIndeterminate() {
   return (
@@ -32,8 +32,9 @@ const GITHUB_URL = "https://api.npoint.io/a75a0383d2820a2153c1";
 
 function App() {
   const [signifyData, setSignifyData] = useState();
-  const [extensionInstalled, setExtensionInstalled] = useState(null);
+  const [extensionInstalled, setExtensionInstalled] = useState();
   const [parsedSignifyData, setParsedSignifyData] = useState();
+  const [selectedComponent, setSelectedComponent] = useState('');
 
   const fetchData = () => {
     const data = localStorage.getItem("signify-data");
@@ -66,6 +67,10 @@ function App() {
     localStorage.removeItem("signify-data");
     setSignifyData(null);
     setParsedSignifyData(null);
+  };
+
+  const checkStatus = () => {
+    setSelectedComponent('Check Status')
   };
 
   const handleSettingVendorUrl = async (url) => {
@@ -180,7 +185,8 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        {signifyData ? (
+        {signifyData === null && renderData()}
+        {signifyData !== null && selectedComponent === '' && 
           <div className="Welcome">
             <div>
               <h3>Welcome!</h3>
@@ -199,11 +205,13 @@ function App() {
             <Button variant="contained" color="error" onClick={removeData}>
               Logout
             </Button>
-            <RegComponent data={parsedSignifyData} ></RegComponent>
+            <Button variant="contained" color="error" onClick={checkStatus}>
+              Report Portal
+            </Button>
           </div>
-        ) : (
-          renderData()
-        )}
+        }
+        {signifyData !== null && selectedComponent === 'Check Status' && <RegComponent data={parsedSignifyData} />}
+
       </header>
     </div>
   );

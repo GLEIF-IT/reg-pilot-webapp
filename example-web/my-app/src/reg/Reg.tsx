@@ -54,8 +54,8 @@ const RegComponent = (data) => {
   const [open, setOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false); // Open drawer by default
   const [status, setStatus] = useState('Connect');
-  const [selectedOption1, setSelectedOption1] = useState(data.data.headers["signify-resource"]); // Step 2 Selection
-  const [selectedOption2, setSelectedOption2] = useState(data.data.credential.anchor.pre); // Step 3 Selection
+  const [selectedId, setSelectedId] = useState(data.data.headers["signify-resource"]); // Step 2 Selection
+  const [selectedAcdc, setSelectedAcdc] = useState(data.data.credential); // Step 3 Selection
 //   const [activeStep, setActiveStep] = useState(0);
   const [modalError, setModalError] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -129,7 +129,7 @@ const RegComponent = (data) => {
   };
   const renderComponent = (componentName: any) => {
     //check if the client is not null then render the component otherwise set the drwar to true
-    if (selectedOption2 === '') {
+    if (selectedAcdc === '') {
       setDrawerOpen(true);
       setModalError(`Please connect to the agent first`)
       setOpen(true);
@@ -148,7 +148,7 @@ const RegComponent = (data) => {
     let vlei_cesr = data.credential
     console.log("vlei cesr",vlei_cesr)
 
-    let logged_in = await login(selectedOption1, selectedOption2, vlei_cesr)
+    let logged_in = await login(selectedId, selectedAcdc.anchor.pre, vlei_cesr)
     console.log("logged in result",logged_in)
     if (logged_in.aid === data.headers["signify-resource"]) {
       setStatus('Connected')
@@ -167,7 +167,7 @@ const RegComponent = (data) => {
 
   // const renderComponent = (componentName: any) => {
   //   //check if the client is not null then render the component otherwise set the drwar to true
-  //   if (client === null || selectedOption2 === '') {
+  //   if (client === null || selectedAcdc === '') {
   //     setDrawerOpen(true);
   //     setModalError(`Please connect to the agent first`)
   //     setOpen(true);
@@ -177,7 +177,7 @@ const RegComponent = (data) => {
   // };
 
 //   const getSelectedAid = () => {
-//     const aid_found = aids.find(aid => aid.name === selectedOption1)
+//     const aid_found = aids.find(aid => aid.name === selectedId)
 //     if (aid_found !== undefined) {
 //       return aid_found
 //     }
@@ -186,7 +186,7 @@ const RegComponent = (data) => {
 //   }
 
 //   const getSelectedAcdc = () => {
-//     const acdc_found = acdcs.find(acdc => acdc.sad.d === selectedOption2)
+//     const acdc_found = acdcs.find(acdc => acdc.sad.d === selectedAcdc)
 //     if (acdc_found !== undefined) {
 //       return acdc_found
 //     }
@@ -196,8 +196,8 @@ const RegComponent = (data) => {
   // const resetAidSelected = () => {
   //   // setActiveStep(1)
   //   handleClickOpen()
-  //   setSelectedOption1('')
-  //   setSelectedOption2('')
+  //   setSelectedId('')
+  //   setSelectedAcdc('')
   //   setStatus('Connecting')
   //   setModalError('Select a new identifier and credential')
   // }
@@ -313,7 +313,7 @@ const DragAndDropUploader = ({ errorUpload, setErrorUpload, submitResult, setSub
     setSubmitResult('uploading')
     //wait 2 seconds
     //await new Promise(r => setTimeout(r, 2000));
-    await upload(selectedOption1, selectedOption2, selectedFile)
+    await upload(selectedId, selectedAcdc.anchor.pre, selectedFile)
 
     setSubmitResult(`done|${selectedFile.name}`)
     // await new Promise(r => setTimeout(r, 2000));
@@ -599,7 +599,7 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
         <AddIcon />
       </Fab>}
     </Box>
-  );
+  );};
 
   return (
     <Box
@@ -710,7 +710,9 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
             </Typography>
           </Alert>}
                     <>
-                    <Tooltip title={selectedAcdc.sad.d} key={'cred sad'}><Typography variant="body2">{selectedAcdc.sad.d}</Typography></Tooltip>
+                    <Tooltip title={selectedAcdc.sad.d} key={'cred sad'}>
+                      <Typography variant="body2">{selectedAcdc.sad.d}</Typography>
+                      </Tooltip>
                             {/* <FormControlLabel key={index} value={acdc['sad']['d']} control={<Radio />} label={acdc.sad.a.engagementContextRole} /> */}
                           
                         
@@ -733,8 +735,8 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
       <LandingComponent text='Welcome to Reg portal' />
       {selectedComponent === 'Check Status' && <MyTable
         setSelectedComponent={setSelectedComponent}
-        selectedAcdc={selectedOption2}
-        selectedAid={selectedOption1}
+        selectedAcdc={selectedAcdc.anchor.pre}
+        selectedAid={selectedId}
       />}
       {selectedComponent === 'Upload Report' && <DragAndDropUploader
         errorUpload={errorUpload}
@@ -744,13 +746,13 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
         selectedFile={selectedFile}
         setSelectedFile={setSelectedFile}
         setSelectedComponent={setSelectedComponent}
-        selectedAcdc={selectedOption2}
-        selectedAid={selectedOption1}
+        selectedAcdc={selectedAcdc.anchor.pre}
+        selectedAid={selectedId}
       />}
 
     </Box>
   );
-};
+
 };
 
 export default RegComponent;
