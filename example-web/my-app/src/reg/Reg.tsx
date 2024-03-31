@@ -49,7 +49,7 @@ const verSigPath = '/verify/header';
 const serverUrl = "https://localhost:7699/";
 
 const RegComponent = (data) => {
-  const [selectedComponent, setSelectedComponent] = useState(null);
+  const [selectedComponent, setSelectedComponent] = useState('Welcome');
 //   const [client, setClient] = useState<any | null>(null);
   const [open, setOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false); // Open drawer by default
@@ -121,8 +121,8 @@ const RegComponent = (data) => {
   };
 
   const handleClose = () => {
-    if (status !== 'Connected')
-      return;
+    // if (status !== 'Connected')
+    //   return;
     setOpen(false);
     setModalError('')
 
@@ -710,9 +710,16 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
             </Typography>
           </Alert>}
                     <>
-                    <Tooltip title={selectedAcdc.sad.d} key={'cred sad'}>
-                      <Typography variant="body2">{selectedAcdc.sad.d}</Typography>
-                      </Tooltip>
+                      <Typography variant="body2">AID: </Typography>
+                      <Typography variant="body2">{selectedId}</Typography>
+                      <Typography variant="body2">Credential: </Typography>
+                      {Object.entries(selectedAcdc.sad.a).map(([key, value]) => (
+                        <div key={key} style={{ marginLeft: '20px' }}>
+                          <Typography variant="body2">{key}: {value}</Typography>
+                        </div>
+                      ))}
+                      <Typography variant="body2">{selectedAcdc.sad.a.items}</Typography>
+
                             {/* <FormControlLabel key={index} value={acdc['sad']['d']} control={<Radio />} label={acdc.sad.a.engagementContextRole} /> */}
                           
                         
@@ -732,7 +739,7 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
 
         </DialogContent>
       </Dialog>
-      <LandingComponent text='Welcome to Reg portal' />
+      {selectedComponent === 'Welcome' && <LandingComponent text='Reg portal' />}
       {selectedComponent === 'Check Status' && <MyTable
         setSelectedComponent={setSelectedComponent}
         selectedAcdc={selectedAcdc.anchor.pre}
