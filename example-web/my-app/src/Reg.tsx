@@ -33,7 +33,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import BadgeIcon from '@mui/icons-material/Badge';
 import GridViewIcon from '@mui/icons-material/GridView';
-
+import "./App.css";
 import {
   isExtensionInstalled,
   subscribeToSignature,
@@ -63,8 +63,8 @@ const RegComponent = () => {
   const [open, setOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false); // Open drawer by default
   const [status, setStatus] = useState('Sign-in');
-  const [selectedId, setSelectedId] = useState(); // Step 2 Selection
-  const [selectedAcdc, setSelectedAcdc] = useState(); // Step 3 Selection
+  const [selectedId, setSelectedId] = useState(''); // Step 2 Selection
+  const [selectedAcdc, setSelectedAcdc] = useState(null); // Step 3 Selection
 //   const [activeStep, setActiveStep] = useState(0);
   const [modalError, setModalError] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
@@ -74,23 +74,24 @@ const RegComponent = () => {
   const pingPath = '/ping';
   const loginPath = '/login';
 
-  const fetchData = () => {
-    const sigDat = localStorage.getItem("signify-data");
-    if (sigDat) {
-      alert("Sig data is " + sigDat)
-      setSigData(sigDat);
-      setSigJson(JSON.parse(sigData));
-      setSelectedId(sigJson?.headers["signify-resource"])
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   fetchData();
+  // }, []);
 
   const handleSignifyData = (data) => {
+    // alert("Handling sig data " + JSON.stringify(data))
     localStorage.setItem("signify-data", JSON.stringify(data, null, 2));
-    fetchData();
+    const sigDat = localStorage.getItem("signify-data");
+    if (sigDat) {
+      // alert("Sig data is " + sigDat)
+      setSigData(sigDat);
+      const sigObj = JSON.parse(sigDat)
+      setSigJson(sigObj);
+      setSelectedId(sigObj.headers["signify-resource"])
+      setSelectedAcdc(sigObj.credential)
+    } else {
+      alert("Could not set signify data")
+    }
   };
 
   useEffect(() => {
@@ -137,16 +138,6 @@ const RegComponent = () => {
       </Box>
     );
   }
-
-  const renderConfig = () => {
-    return <Button variant="contained" color="error" onClick={() => handleSettingVendorUrl(ROOTSID_CONF_URL)}>Configure Extension</Button>
-  }
-
-  const renderSignin = () => {
-      // alert("Render request cred" );
-      return <Button variant="contained" color="success" onClick={() => requestCredential()}>Sign-in w/ Credential</Button>
-  }
-
 //   // Function to handle the API request and response
 
   // Function to perform the ping request
@@ -223,12 +214,12 @@ const RegComponent = () => {
   // }
 
   const loginReal = async () => {
-    let vlei_cesr = sigJson.credential
+    let vlei_cesr = sigJson?.credential
     console.log("vlei cesr",vlei_cesr)
 
     let logged_in = await login(selectedId, selectedAcdc?.anchor.pre, vlei_cesr)
     console.log("logged in result",logged_in)
-    if (logged_in.aid === sigJson.headers["signify-resource"]) {
+    if (logged_in.aid === sigJson?.headers["signify-resource"]) {
       setStatus('Connected')
       setModalError('')
       // await checkHeaderSignatures(getSelectedAid().prefix,getSelectedAid().name);
@@ -306,98 +297,52 @@ interface TextComponentProps {
 }
 
 const LandingComponent: React.FC<TextComponentProps> = ({ text }) => (
-  <Grid item xs={1} lg={1} left={'50%'}>
-    <Box textAlign={'center'}>
+  <Grid container spacing={1} class="welcome">
+    <Grid item xs={12} lg={12}>
       <Typography variant='h1'>{text}</Typography>
       <br />
       <Divider />
       <br />
       <br />
-      <Typography variant='h5'>Please start by connecting with a secure extension.</Typography>
-    </Box>
-    <Box textAlign={'center'}>
-      <Grid container spacing={1} alignItems={'center'}>
-        {/* <Grid item xs={1} lg={1}>
-          <Typography >Status: </Typography>
-        </Grid>
-        <Grid item xs={3} lg={3}>
-          <Button
-            sx={{
-              "&.Mui-disabled": {
-                width: '109px',
-                color: "black"
-              }
-            }} onClick={requestCredential}
-            disabled={true}
-            startIcon={
-              <Circle sx={{
-                color: status === 'Connected' ? 'green' : (status === 'Connecting' ? 'orange' : 'red')
-              }} />
-            }
-          >
-            {status}
-          </Button>
-        </Grid> */}
-        <Grid item xs={12} lg={12}>
-          <Typography>Is extension installed? {(extensionInstalled !== null).toString()}</Typography>
-          <Typography>Is vendor set? {(vendorConf !== '').toString()}</Typography>
-          <Typography>Have signify data? {(sigData !== '').toString()}</Typography>
-          {sigJson && <Typography>Signify json? {JSON.stringify(sigJson)}</Typography>}
-        </Grid>
-        <Grid item xs={12} lg={12}>
-        {modalError !== '' && <Alert severity={modalError.includes('agent') ? 'error' : 'warning'}>
-        <Typography variant="body2">
-          {modalError}
-        </Typography>
-      </Alert>}
-      {extensionInstalled === null && vendorConf === '' && <CircularIndeterminate />}
-      {extensionInstalled !== null && <Button variant="contained" color="error" onClick={removeData}>Clear</Button>}
-      {extensionInstalled !== null && vendorConf === '' && renderConfig()}
-      {extensionInstalled !== null && vendorConf !== '' && sigData === '' && renderSignin()}
-      {extensionInstalled !== null && vendorConf !== '' && sigData !== '' && selectedId && selectedAcdc &&
-          <>
-            {/* <Typography variant="body2">AID: {selectedId}</Typography> */}
-            <Typography variant="body2">Credential: </Typography>
-            <div className="Welcome">
-            <div>
-            <textarea
-                id="message"
-                rows={16} 
-                className="signify-data"
-                placeholder="Credential viewer"
-              >{sigJson}</textarea>
-              </div>
-              </div>
-            {/* {Object.entries(selectedAcdc?.sad.a).map(([key, value]) => (
-              <div key={key} style={{ marginLeft: '20px' }}>
-                <Typography variant="body2">{key}: {value}</Typography>
-              </div>
-            ))} */}
-            {/* <Typography variant="body2">{selectedAcdc?.sad.a.items}</Typography> */}
-
-                  {/* <FormControlLabel key={index} value={acdc['sad']['d']} control={<Radio />} label={acdc.sad.a.engagementContextRole} /> */}
-                
-              
-            <Button
-              variant="contained"
-              color="primary"
-              disabled={false}
-              onClick={
-                async () => {
-                  await loginReal()
-                }
-              }
-            >
-                Verify Login
-              </Button>
-            </>
-        }
-        </Grid>
-      </Grid>
-      </Box>
+      <Typography variant='h5'>Please start by signing in with a secure extension.</Typography>
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      <Typography>Is extension installed? {(extensionInstalled !== null).toString()}</Typography>
+      <Typography>Is vendor set? {(vendorConf !== '').toString()}</Typography>
+      <Typography>Have signify data? {(sigData !== '').toString()}</Typography>
+      {/*sigJson && <Typography>Signify json? {JSON.stringify(sigJson)}</Typography>*/}
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      {modalError !== '' && <Alert severity={modalError.includes('agent') ? 'error' : 'warning'}>
+        <Typography variant="body2">{modalError}</Typography></Alert>}
+    </Grid>
   </Grid>
 )
 
+const VerifyComponent: React.FC<TextComponentProps> = ({ text }) => {
+  // alert("Selected id is " + selectedId)
+  return (
+  <Grid container spacing={1} class="welcome">
+    <Grid item xs={12} lg={12}>
+      <Typography variant="body2">AID: {selectedId}</Typography>
+    </Grid>
+    <Grid item xs={1} lg={1}>
+      <Typography variant="body2">Credential:</Typography>
+    </Grid>
+    <Grid item xs={8} lg={8}>
+      <textarea
+          id="message"
+          rows={15}
+          className="signify-data"
+          placeholder={sigData}
+        >{JSON.stringify(sigJson, null, 2)}</textarea>
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      <Button variant="contained" color="primary" disabled={false} onClick={async () => {await loginReal()}}>Verify Login</Button>
+    </Grid>
+  </Grid>
+)
+  }
 
 const DragAndDropUploader = ({ errorUpload, setErrorUpload, submitResult, setSubmitResult, selectedFile, setSelectedFile, setSelectedComponent, selectedAid, selectedAcdc }) => {
 
@@ -605,7 +550,7 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
   ]
   useEffect(() => {
     // Simulating fetch request
-    const fetchData = async () => {
+    const tblData = async () => {
       try {
         // Replace this with your actual fetch URL
         setLoading(true);
@@ -626,7 +571,7 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
       }
     };
 
-    fetchData();
+    tblData();
   }, []);
 
   const handleRowClick = (report) => {
@@ -809,7 +754,7 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
           onKeyDown={toggleDrawer(false)}
         >
           <List>
-            {['Check Status', 'Upload Report'].map((text, index) => (
+            {['Welcome', 'Check Status', 'Upload Report'].map((text, index) => (
               <ListItem key={text} onClick={() => renderComponent(text)
 
               }
@@ -828,7 +773,14 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
         </div>
 
       </Drawer>
-      {selectedComponent === 'Welcome' && <LandingComponent text='Customer portal' />}
+      <Grid container spacing={1} class="welcome">
+        {selectedComponent === 'Welcome' && <LandingComponent text='Customer portal' />}
+        {selectedComponent === 'Welcome' && extensionInstalled === null && vendorConf === '' && <Typography variant="h5">Please connect to the extension</Typography>}
+        {selectedComponent === 'Welcome' && extensionInstalled !== null && <Button variant="contained" color="error" onClick={removeData}>Clear</Button>}
+        {selectedComponent === 'Welcome' && extensionInstalled !== null && vendorConf === '' && <Button variant="contained" color="error" onClick={async () => await handleSettingVendorUrl(ROOTSID_CONF_URL)}>Configure Extension</Button>}
+        {selectedComponent === 'Welcome' && extensionInstalled !== null && vendorConf !== '' && sigData === '' && <Button variant="contained" color="success" onClick={requestCredential}>Sign-in w/ Credential</Button>}
+        {selectedComponent === 'Welcome' && extensionInstalled !== null && vendorConf !== '' && sigData !== '' && <VerifyComponent text='Verify signin' />}
+      </Grid>
       {selectedComponent === 'Check Status' && <MyTable
         setSelectedComponent={setSelectedComponent}
         selectedAcdc={selectedAcdc?.anchor.pre}
