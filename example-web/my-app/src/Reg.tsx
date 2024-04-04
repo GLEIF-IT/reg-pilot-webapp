@@ -14,14 +14,6 @@ import {
   ListItem,
   ListItemText,
   Drawer,
-  TextField,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  Stepper,
-  Step,
-  StepLabel,
-  StepContent,
   Grid,
   Box,
   CircularProgress,
@@ -42,32 +34,118 @@ import FingerprintIcon from '@mui/icons-material/Fingerprint';
 import BadgeIcon from '@mui/icons-material/Badge';
 import GridViewIcon from '@mui/icons-material/GridView';
 
+import {
+  isExtensionInstalled,
+  subscribeToSignature,
+  unsubscribeFromSignature,
+  requestAutoSignin,
+  requestAid,
+  requestCredential,
+  requestAidORCred,
+  trySettingVendorUrl,
+  canCallAsync,
+} from "signify-polaris-web";
+
 const uploadPath = '/upload';
 const statusPath = '/status';
 const verSigPath = '/verify/header';
 
+const ROOTSID_CONF_URL = "https://api.npoint.io/52639f849bb31823a8c0";
 const serverUrl = "https://localhost:7699/";
 
-const RegComponent = (data) => {
+const RegComponent = () => {
+  const [sigData, setSigData] = useState('');
+  const [sigJson, setSigJson] = useState(null);
+  const [extensionInstalled, setExtensionInstalled] = useState(null);
   const [selectedComponent, setSelectedComponent] = useState('Welcome');
-//   const [client, setClient] = useState<any | null>(null);
+  const [vendorConf, setVendorConf] = useState('');
+
   const [open, setOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false); // Open drawer by default
-  const [status, setStatus] = useState('Connect');
-  const [selectedId, setSelectedId] = useState(data.data.headers["signify-resource"]); // Step 2 Selection
-  const [selectedAcdc, setSelectedAcdc] = useState(data.data.credential); // Step 3 Selection
+  const [status, setStatus] = useState('Sign-in');
+  const [selectedId, setSelectedId] = useState(); // Step 2 Selection
+  const [selectedAcdc, setSelectedAcdc] = useState(); // Step 3 Selection
 //   const [activeStep, setActiveStep] = useState(0);
   const [modalError, setModalError] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [errorUpload, setErrorUpload] = useState('');
   const [submitResult, setSubmitResult] = useState('');
-
-//   const [aids, setAids] = useState([]);
-//   const [acdcs, setAcdcs] = useState([]);
-
   // Define the endpoint paths
   const pingPath = '/ping';
   const loginPath = '/login';
+
+  const fetchData = () => {
+    const sigDat = localStorage.getItem("signify-data");
+    if (sigDat) {
+      alert("Sig data is " + sigDat)
+      setSigData(sigDat);
+      setSigJson(JSON.parse(sigData));
+      setSelectedId(sigJson?.headers["signify-resource"])
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleSignifyData = (data) => {
+    localStorage.setItem("signify-data", JSON.stringify(data, null, 2));
+    fetchData();
+  };
+
+  useEffect(() => {
+    subscribeToSignature(handleSignifyData);
+    isExtensionInstalled((extensionId) => {
+      setExtensionInstalled(extensionId);
+    });
+    return () => {
+      unsubscribeFromSignature();
+    };
+  }, []);
+
+  const removeData = () => {
+    localStorage.removeItem("signify-data");
+    setSigData('');
+    setSigJson(null);
+  };
+
+  const checkStatus = () => {
+    setSelectedComponent('Check Status')
+  };
+
+  const handleRequestAutoSignin = async () => {
+    console.log("canCallAsync()", canCallAsync());
+    if (canCallAsync()) {
+      const resp = await requestAutoSignin();
+      if (resp) {
+        handleSignifyData(resp);
+      }
+    } else {
+      requestAutoSignin();
+    }
+  };
+
+  const handleSettingVendorUrl = async (url) => {
+    await trySettingVendorUrl(url);
+    setVendorConf(url)
+  };
+
+  const CircularIndeterminate = () => {
+    return (
+      <Box sx={{ display: "flex" }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  const renderConfig = () => {
+    return <Button variant="contained" color="error" onClick={() => handleSettingVendorUrl(ROOTSID_CONF_URL)}>Configure Extension</Button>
+  }
+
+  const renderSignin = () => {
+      // alert("Render request cred" );
+      return <Button variant="contained" color="success" onClick={() => requestCredential()}>Sign-in w/ Credential</Button>
+  }
 
 //   // Function to handle the API request and response
 
@@ -145,12 +223,12 @@ const RegComponent = (data) => {
   // }
 
   const loginReal = async () => {
-    let vlei_cesr = data.credential
+    let vlei_cesr = sigJson.credential
     console.log("vlei cesr",vlei_cesr)
 
-    let logged_in = await login(selectedId, selectedAcdc.anchor.pre, vlei_cesr)
+    let logged_in = await login(selectedId, selectedAcdc?.anchor.pre, vlei_cesr)
     console.log("logged in result",logged_in)
-    if (logged_in.aid === data.headers["signify-resource"]) {
+    if (logged_in.aid === sigJson.headers["signify-resource"]) {
       setStatus('Connected')
       setModalError('')
       // await checkHeaderSignatures(getSelectedAid().prefix,getSelectedAid().name);
@@ -227,10 +305,6 @@ interface TextComponentProps {
   text: string;
 }
 
-const TextComponent: React.FC<TextComponentProps> = ({ text }) => (
-  <Grid item xs={1} lg={1} left={'50%'}><Box><Typography> {text}</Typography></Box></Grid>
-)
-
 const LandingComponent: React.FC<TextComponentProps> = ({ text }) => (
   <Grid item xs={1} lg={1} left={'50%'}>
     <Box textAlign={'center'}>
@@ -239,8 +313,88 @@ const LandingComponent: React.FC<TextComponentProps> = ({ text }) => (
       <Divider />
       <br />
       <br />
-      <Typography variant='h5'>Please start by connecting using the button in the top right.</Typography>
+      <Typography variant='h5'>Please start by connecting with a secure extension.</Typography>
     </Box>
+    <Box textAlign={'center'}>
+      <Grid container spacing={1} alignItems={'center'}>
+        {/* <Grid item xs={1} lg={1}>
+          <Typography >Status: </Typography>
+        </Grid>
+        <Grid item xs={3} lg={3}>
+          <Button
+            sx={{
+              "&.Mui-disabled": {
+                width: '109px',
+                color: "black"
+              }
+            }} onClick={requestCredential}
+            disabled={true}
+            startIcon={
+              <Circle sx={{
+                color: status === 'Connected' ? 'green' : (status === 'Connecting' ? 'orange' : 'red')
+              }} />
+            }
+          >
+            {status}
+          </Button>
+        </Grid> */}
+        <Grid item xs={12} lg={12}>
+          <Typography>Is extension installed? {(extensionInstalled !== null).toString()}</Typography>
+          <Typography>Is vendor set? {(vendorConf !== '').toString()}</Typography>
+          <Typography>Have signify data? {(sigData !== '').toString()}</Typography>
+          {sigJson && <Typography>Signify json? {JSON.stringify(sigJson)}</Typography>}
+        </Grid>
+        <Grid item xs={12} lg={12}>
+        {modalError !== '' && <Alert severity={modalError.includes('agent') ? 'error' : 'warning'}>
+        <Typography variant="body2">
+          {modalError}
+        </Typography>
+      </Alert>}
+      {extensionInstalled === null && vendorConf === '' && <CircularIndeterminate />}
+      {extensionInstalled !== null && <Button variant="contained" color="error" onClick={removeData}>Clear</Button>}
+      {extensionInstalled !== null && vendorConf === '' && renderConfig()}
+      {extensionInstalled !== null && vendorConf !== '' && sigData === '' && renderSignin()}
+      {extensionInstalled !== null && vendorConf !== '' && sigData !== '' && selectedId && selectedAcdc &&
+          <>
+            {/* <Typography variant="body2">AID: {selectedId}</Typography> */}
+            <Typography variant="body2">Credential: </Typography>
+            <div className="Welcome">
+            <div>
+            <textarea
+                id="message"
+                rows={16} 
+                className="signify-data"
+                placeholder="Credential viewer"
+              >{sigJson}</textarea>
+              </div>
+              </div>
+            {/* {Object.entries(selectedAcdc?.sad.a).map(([key, value]) => (
+              <div key={key} style={{ marginLeft: '20px' }}>
+                <Typography variant="body2">{key}: {value}</Typography>
+              </div>
+            ))} */}
+            {/* <Typography variant="body2">{selectedAcdc?.sad.a.items}</Typography> */}
+
+                  {/* <FormControlLabel key={index} value={acdc['sad']['d']} control={<Radio />} label={acdc.sad.a.engagementContextRole} /> */}
+                
+              
+            <Button
+              variant="contained"
+              color="primary"
+              disabled={false}
+              onClick={
+                async () => {
+                  await loginReal()
+                }
+              }
+            >
+                Verify Login
+              </Button>
+            </>
+        }
+        </Grid>
+      </Grid>
+      </Box>
   </Grid>
 )
 
@@ -674,75 +828,10 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
         </div>
 
       </Drawer>
-      <Dialog open={open} onClose={handleClose} disableEscapeKeyDown={true}>
-        <DialogTitle>
-          <Button
-
-            sx={{
-              "&.Mui-disabled": {
-                color: "black"
-              }
-            }} onClick={handleClickOpen}
-            disabled={true}
-            startIcon={
-              <Circle sx={{
-                color: status === 'Connected' ? 'green' : (status === 'Connecting' ? 'orange' : 'red')
-              }} />
-            }
-          >
-            {status}
-          </Button>
-          <Tooltip title="Close" key={'close'}>
-            <IconButton
-              component="div"
-              sx={{ position: 'absolute', right: 10, top: 10 }}
-              onClick={handleClose}
-              disabled={status === 'Failed'}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Tooltip>
-        </DialogTitle>
-        <DialogContent>
-          {modalError !== '' && <Alert severity={modalError.includes('agent') ? 'error' : 'warning'}>
-            <Typography variant="body2">
-              {modalError}
-            </Typography>
-          </Alert>}
-                    <>
-                      <Typography variant="body2">AID: </Typography>
-                      <Typography variant="body2">{selectedId}</Typography>
-                      <Typography variant="body2">Credential: </Typography>
-                      {Object.entries(selectedAcdc.sad.a).map(([key, value]) => (
-                        <div key={key} style={{ marginLeft: '20px' }}>
-                          <Typography variant="body2">{key}: {value}</Typography>
-                        </div>
-                      ))}
-                      <Typography variant="body2">{selectedAcdc.sad.a.items}</Typography>
-
-                            {/* <FormControlLabel key={index} value={acdc['sad']['d']} control={<Radio />} label={acdc.sad.a.engagementContextRole} /> */}
-                          
-                        
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        disabled={false}
-                        onClick={
-                          async () => {
-                            await loginReal()
-                          }
-                        }
-                      >
-                         Next
-                       </Button>
-                     </>
-
-        </DialogContent>
-      </Dialog>
-      {selectedComponent === 'Welcome' && <LandingComponent text='Reg portal' />}
+      {selectedComponent === 'Welcome' && <LandingComponent text='Customer portal' />}
       {selectedComponent === 'Check Status' && <MyTable
         setSelectedComponent={setSelectedComponent}
-        selectedAcdc={selectedAcdc.anchor.pre}
+        selectedAcdc={selectedAcdc?.anchor.pre}
         selectedAid={selectedId}
       />}
       {selectedComponent === 'Upload Report' && <DragAndDropUploader
@@ -753,7 +842,7 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
         selectedFile={selectedFile}
         setSelectedFile={setSelectedFile}
         setSelectedComponent={setSelectedComponent}
-        selectedAcdc={selectedAcdc.anchor.pre}
+        selectedAcdc={selectedAcdc?.anchor.pre}
         selectedAid={selectedId}
       />}
 
