@@ -46,6 +46,10 @@ import {
   canCallAsync,
 } from "signify-polaris-web";
 
+import fakeSigData from './test/fakeSigData.json';
+import fakeCheckStatus from './test/fakeCheckStatus.json';
+import fakeFileUpload from './test/fakeFileUpload.json'
+
 const uploadPath = '/upload';
 const statusPath = '/status';
 const verSigPath = '/verify/header';
@@ -54,6 +58,8 @@ const ROOTSID_CONF_URL = "https://api.npoint.io/52639f849bb31823a8c0";
 const serverUrl = "https://localhost:7699/";
 
 const RegComponent = () => {
+  const [devMode, setDevMode] = useState(false);
+
   const [sigData, setSigData] = useState('');
   const [sigJson, setSigJson] = useState(null);
   const [extensionInstalled, setExtensionInstalled] = useState(null);
@@ -78,6 +84,10 @@ const RegComponent = () => {
   //   fetchData();
   // }, []);
 
+  const toggleDevMode = () => {
+    setDevMode(!devMode);
+  };
+
   const handleSignifyData = (data) => {
     // alert("Handling sig data " + JSON.stringify(data))
     localStorage.setItem("signify-data", JSON.stringify(data, null, 2));
@@ -95,13 +105,19 @@ const RegComponent = () => {
   };
 
   useEffect(() => {
-    subscribeToSignature(handleSignifyData);
-    isExtensionInstalled((extensionId) => {
-      setExtensionInstalled(extensionId);
-    });
-    return () => {
-      unsubscribeFromSignature();
-    };
+    if(!devMode) {
+      subscribeToSignature(handleSignifyData);
+      isExtensionInstalled((extensionId) => {
+        setExtensionInstalled(extensionId);
+      });
+      return () => {
+        unsubscribeFromSignature();
+      };
+    } else {
+      if(!sigData) {
+        handleSignifyData(fakeSigData)
+      }
+    }
   }, []);
 
   const removeData = () => {
@@ -217,7 +233,7 @@ const RegComponent = () => {
     let vlei_cesr = sigJson?.credential
     console.log("vlei cesr",vlei_cesr)
 
-    let logged_in = await login(selectedId, selectedAcdc?.anchor.pre, vlei_cesr)
+    let logged_in = await login(selectedId, selectedAcdc?.sad.a.personLegalName, vlei_cesr)
     console.log("logged in result",logged_in)
     if (logged_in.aid === sigJson?.headers["signify-resource"]) {
       setStatus('Connected')
@@ -344,14 +360,11 @@ const VerifyComponent: React.FC<TextComponentProps> = ({ text }) => {
 )
   }
 
-const DragAndDropUploader = ({ errorUpload, setErrorUpload, submitResult, setSubmitResult, selectedFile, setSelectedFile, setSelectedComponent, selectedAid, selectedAcdc }) => {
+const DragAndDropUploader = ({ }) => {
 
-  useEffect(() => {
-    setErrorUpload('')
-    setSelectedFile(null)
-    setSubmitResult('')
-  }
-    , [])
+  // useEffect(() => {
+
+  // }, [])
 
   const setFile = (file: any) => {
     const acceptedTypes = ['application/zip', 'application/x-zip-compressed', 'multipart/x-zip', 'application/zip-compressed', 'application/octet-stream'];
@@ -360,18 +373,19 @@ const DragAndDropUploader = ({ errorUpload, setErrorUpload, submitResult, setSub
       setSelectedFile(null);
       setErrorUpload(`${file.name} is not a zip file. \n Please select a zip file.`)
       setSubmitResult('')
+      alert("file is not a zip file")
       return
     }
     setErrorUpload('')
     setSubmitResult('')
     setSelectedFile(file);
   }
+
   const handleFileSelect = (event: any) => {
     let file = event.target.files[0]
+    alert("handle select file "+file.name)
     setFile(file)
-
   };
-
 
   const handleDrop = (event: any) => {
     event.preventDefault();
@@ -384,35 +398,32 @@ const DragAndDropUploader = ({ errorUpload, setErrorUpload, submitResult, setSub
   };
 
   // Function to perform the upload request
-  async function upload(aid: object, said: string, report: string): Promise<any> {
+  async function upload(aid: string, name: string, said: string, report: string): Promise<any> {
     const formData = new FormData();
     formData.append('upload', report);
     
     // // Send signed request
     console.log("Form data is",formData.get('upload'))
-    // const response_signed = await client.signedFetch(serverUrl,`${uploadPath}/${aid["prefix"]}/${said}`, 'POST',formData,aid["name"])
-    // const response_signed_data = await response_signed.json();
-    // console.log("upload response",response_signed_data)
+    
+    if (!devMode) {
+      const response_signed = await client.signedFetch(serverUrl,`${uploadPath}/${aid}/${said}`, 'POST',formData,name)
+      const response_signed_data = await response_signed.json();
+      console.log("upload response",response_signed_data)
 
-
-    // Return the response data
-    // return response_signed_data;
-    return {"200":{"description":"OK","content":{"application/json":{"schema":{"type":"object","example":{
-      "submitter": "EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk",
-      "filename": "test_ifgroup2023.zip",
-      "status": "verified",
-      "contentType": "application/zip",
-      "size": 4467,
-      "message": "All 6 files in report package have been signed by submitter (EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk)."
-  }}}}}}
+      // Return the response data
+      return response_signed_data;
+    } else {
+      return fakeFileUpload
+    }
   }
 
   const handleSubmit = async () => {
+    alert("handling report submit")
     // Add your upload logic her
     setSubmitResult('uploading')
     //wait 2 seconds
     //await new Promise(r => setTimeout(r, 2000));
-    await upload(selectedId, selectedAcdc.anchor.pre, selectedFile)
+    await upload(selectedId, selectedAcdc.sad.a.personLegalName,selectedAcdc.anchor.pre, selectedFile)
 
     setSubmitResult(`done|${selectedFile.name}`)
     // await new Promise(r => setTimeout(r, 2000));
@@ -542,27 +553,23 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
   const [openModalTable, setOpenModalTable] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const _fakedata = [
-    { filename: 'File 1', size: '10 MB', message: 'last update 2023-06-01', status: 'Uploaded' },
-    { filename: 'File 2', size: '5 MB', message: 'last update 2023-06-02', status: 'Failed' },
-    { filename: 'File 3', size: '2 MB', message: 'last update 2023-06-03', status: 'Uploaded' },
-    { filename: 'File 4', size: '1 MB', message: 'last update 2023-06-04', status: 'Processing' },
-  ]
   useEffect(() => {
     // Simulating fetch request
     const tblData = async () => {
       try {
         // Replace this with your actual fetch URL
         setLoading(true);
-        let d = await checkUpload(selectedAid)
+        // alert("Selected aid is " + selectedAid)
+        // alert("Selected aid name is " + JSON.stringify(selectedAcdc.sad.a.personLegalName))
+        let d = await checkUpload(selectedAid,selectedAcdc.sad.a.personLegalName)
         console.log("Response data is type and data",typeof(d),d)
         let newData = new Set<any>()
-        let statuses = Object.keys(d).map((item: any) => {
+        Object.keys(d).map((item: any) => {
           return d[item].map((status: any) => {
-            newData.add(status)
+            newData.add(JSON.parse(status))
           })
         });
-        console.log("Status data converted type and data",typeof(statuses),statuses)
+        // console.log("Status data converted type and data",typeof(statuses),statuses)
         console.log("New data converted type and data",typeof(newData),newData)
         setData(Array.from(newData))
         setLoading(false);
@@ -584,19 +591,21 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
   };
 
   // Function to perform the upload request
-  async function checkUpload(aid): Promise<any> {
-     // // Send signed request
-    // const response_signed = await client.signedFetch(serverUrl,`${statusPath}/${aid.prefix}`, 'GET',null,aid.name)
-    // const response_signed_data = await response_signed.json();
-    // console.log(response_signed_data)
-    // return response_signed_data;
-    return {"200":{"description":"OK","content":{"application/json":{"schema":{"type":"object","example":{
-      "EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk": [
-          "{\"submitter\": \"EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk\", \"filename\": \"test_MetaInfReportJson_noSigs.zip\", \"status\": \"failed\", \"contentType\": \"application/zip\", \"size\": 3059, \"message\": \"5 files from report package not signed {'parameters.csv', 'FilingIndicators.csv', 'report.json', 'i_10.01.csv', 'i_10.02.csv'}, []\"}",
-          "{\"submitter\": \"EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk\", \"filename\": \"test_ifclass3.zip\", \"status\": \"verified\", \"contentType\": \"application/zip\", \"size\": 5662, \"message\": \"All 9 files in report package have been signed by submitter (EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk).\"}",
-          "{\"submitter\": \"EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk\", \"filename\": \"test_ifgroup2023.zip\", \"status\": \"verified\", \"contentType\": \"application/zip\", \"size\": 4467, \"message\": \"All 6 files in report package have been signed by submitter (EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk).\"}"
-      ]
-      }}}}}}
+  async function checkUpload(aid, name): Promise<any> {
+     // Send signed request
+    if(!devMode) {
+      const response_signed = await client.signedFetch(serverUrl,`${statusPath}/${aid}`, 'GET',null,name)
+      const response_signed_data = await response_signed.json();
+      console.log(response_signed_data)
+      return response_signed_data;
+    } else {
+      if(Object.keys(fakeCheckStatus).includes(aid)) {
+        // alert("check status fake data: " + fakeCheckStatus)
+        return fakeCheckStatus
+      } else {
+        alert("check status fake data: no data found for aid: " + aid)
+      }
+    }
   }
 
   return (
@@ -731,20 +740,36 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
               Menu
             </Typography>
           </Box>
-          <Button
-            sx={{
-              marginLeft: 'auto', backgroundColor: 'lightblue', color: 'black', '&:hover': {
-                color: 'white'
+          <Box>
+            <Button
+              sx={{
+                marginLeft: 'auto', backgroundColor: 'lightblue', color: 'black', '&:hover': {
+                  color: 'white'
+                }
+              }} onClick={handleClickOpen} variant='contained'
+              startIcon={
+                <Circle sx={{
+                  color: status === 'Connected' ? 'green' : (status === 'Connecting' ? 'orange' : 'red')
+                }} />
               }
-            }} onClick={handleClickOpen} variant='contained'
-            startIcon={
-              <Circle sx={{
-                color: status === 'Connected' ? 'green' : (status === 'Connecting' ? 'orange' : 'red')
-              }} />
-            }
-          >
-            {status}
-          </Button>
+            >
+              {status}
+            </Button>
+            <Button
+              sx={{
+                marginLeft: 'auto', backgroundColor: 'lightblue', color: 'black', '&:hover': {
+                  color: 'white'
+                }
+              }} onClick={toggleDevMode} variant='contained'
+              startIcon={
+                <Circle sx={{
+                  color: (devMode ? 'green' : 'red')
+                }} />
+              }
+            >
+              Dev Mode
+            </Button>
+          </Box>
         </Toolbar>
       </AppBar>
       <Drawer open={drawerOpen} onClose={toggleDrawer(false)}>
@@ -777,26 +802,16 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
         {selectedComponent === 'Welcome' && <LandingComponent text='Customer portal' />}
         {selectedComponent === 'Welcome' && extensionInstalled === null && vendorConf === '' && <Typography variant="h5">Please connect to the extension</Typography>}
         {selectedComponent === 'Welcome' && extensionInstalled !== null && <Button variant="contained" color="error" onClick={removeData}>Clear</Button>}
-        {selectedComponent === 'Welcome' && extensionInstalled !== null && vendorConf === '' && <Button variant="contained" color="error" onClick={async () => await handleSettingVendorUrl(ROOTSID_CONF_URL)}>Configure Extension</Button>}
-        {selectedComponent === 'Welcome' && extensionInstalled !== null && vendorConf !== '' && sigData === '' && <Button variant="contained" color="success" onClick={requestCredential}>Sign-in w/ Credential</Button>}
-        {selectedComponent === 'Welcome' && extensionInstalled !== null && vendorConf !== '' && sigData !== '' && <VerifyComponent text='Verify signin' />}
+        {selectedComponent === 'Welcome' && extensionInstalled !== null && vendorConf === '' && !devMode && <Button variant="contained" color="success" onClick={async () => await handleSettingVendorUrl(ROOTSID_CONF_URL)}>Configure Extension</Button>}
+        {selectedComponent === 'Welcome' && ((extensionInstalled !== null && vendorConf !== '' && sigData === '') || devMode) && <Button variant="contained" color="success" onClick={(devMode ? () => handleSignifyData(fakeSigData) : (requestCredential))}>Sign-in w/ Credential</Button>}
+        {selectedComponent === 'Welcome' && ((extensionInstalled !== null && vendorConf !== '') || devMode) && sigData !== '' && <VerifyComponent text='Verify signin' />}
       </Grid>
       {selectedComponent === 'Check Status' && <MyTable
         setSelectedComponent={setSelectedComponent}
-        selectedAcdc={selectedAcdc?.anchor.pre}
+        selectedAcdc={selectedAcdc}
         selectedAid={selectedId}
       />}
-      {selectedComponent === 'Upload Report' && <DragAndDropUploader
-        errorUpload={errorUpload}
-        setErrorUpload={setErrorUpload}
-        submitResult={submitResult}
-        setSubmitResult={setSubmitResult}
-        selectedFile={selectedFile}
-        setSelectedFile={setSelectedFile}
-        setSelectedComponent={setSelectedComponent}
-        selectedAcdc={selectedAcdc?.anchor.pre}
-        selectedAid={selectedId}
-      />}
+      {selectedComponent === 'Upload Report' && (selectedFile || !selectedFile) && <DragAndDropUploader />}
 
     </Box>
   );

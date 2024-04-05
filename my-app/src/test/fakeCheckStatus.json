@@ -1,0 +1,7 @@
+{
+    "ECJLhLl1-xtrgi9SktH-8_Qc5yz2B24fT6fhdO9o3BdQ": [
+        "{\"submitter\": \"ECJLhLl1-xtrgi9SktH-8_Qc5yz2B24fT6fhdO9o3BdQ\", \"filename\": \"test_MetaInfReportJson_noSigs.zip\", \"status\": \"failed\", \"contentType\": \"application/zip\", \"size\": 3059, \"message\": \"5 files from report package not signed {'parameters.csv', 'FilingIndicators.csv', 'report.json', 'i_10.01.csv', 'i_10.02.csv'}, []\"}",
+        "{\"submitter\": \"ECJLhLl1-xtrgi9SktH-8_Qc5yz2B24fT6fhdO9o3BdQ\", \"filename\": \"test_ifclass3.zip\", \"status\": \"verified\", \"contentType\": \"application/zip\", \"size\": 5662, \"message\": \"All 9 files in report package have been signed by submitter (ECJLhLl1-xtrgi9SktH-8_Qc5yz2B24fT6fhdO9o3BdQ).\"}",
+        "{\"submitter\": \"ECJLhLl1-xtrgi9SktH-8_Qc5yz2B24fT6fhdO9o3BdQ\", \"filename\": \"test_ifgroup2023.zip\", \"status\": \"verified\", \"contentType\": \"application/zip\", \"size\": 4467, \"message\": \"All 6 files in report package have been signed by submitter (ECJLhLl1-xtrgi9SktH-8_Qc5yz2B24fT6fhdO9o3BdQ).\"}"
+    ]
+}
