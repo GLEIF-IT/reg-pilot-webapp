@@ -565,8 +565,8 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
         console.log("Response data is type and data",typeof(d),d)
         let newData = new Set<any>()
         Object.keys(d).map((item: any) => {
-          return d[item].map((status: any) => {
-            newData.add(JSON.parse(status))
+          return d[item].map((ustat: any) => {
+            newData.add(JSON.parse(ustat))
           })
         });
         // console.log("Status data converted type and data",typeof(statuses),statuses)
