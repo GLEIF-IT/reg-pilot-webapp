@@ -68,7 +68,7 @@ const RegComponent = () => {
 
   const [open, setOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false); // Open drawer by default
-  const [status, setStatus] = useState('Sign-in');
+  const [status, setStatus] = useState('Signed out');
   const [selectedId, setSelectedId] = useState(''); // Step 2 Selection
   const [selectedAcdc, setSelectedAcdc] = useState(null); // Step 3 Selection
 //   const [activeStep, setActiveStep] = useState(0);
@@ -229,6 +229,10 @@ const RegComponent = () => {
   //   console.log("header signature verification response",response_signed_data)
   // }
 
+  const loginFake = async () => {
+    setStatus('Connected')
+  }
+
   const loginReal = async () => {
     let vlei_cesr = sigJson?.credential
     console.log("vlei cesr",vlei_cesr)
@@ -312,10 +316,10 @@ interface TextComponentProps {
   text: string;
 }
 
-const LandingComponent: React.FC<TextComponentProps> = ({ text }) => (
+const LandingComponent: React.FC<TextComponentProps> = () => (
   <Grid container spacing={1} class="welcome">
     <Grid item xs={12} lg={12}>
-      <Typography variant='h1'>{text}</Typography>
+      <Typography variant='h1'>Customer portal</Typography>
       <br />
       <Divider />
       <br />
@@ -335,7 +339,7 @@ const LandingComponent: React.FC<TextComponentProps> = ({ text }) => (
   </Grid>
 )
 
-const VerifyComponent: React.FC<TextComponentProps> = ({ text }) => {
+const VerifyComponent: React.FC<TextComponentProps> = () => {
   // alert("Selected id is " + selectedId)
   return (
   <Grid container spacing={1} class="welcome">
@@ -351,10 +355,11 @@ const VerifyComponent: React.FC<TextComponentProps> = ({ text }) => {
           rows={15}
           className="signify-data"
           placeholder={sigData}
-        >{JSON.stringify(sigJson, null, 2)}</textarea>
+          value={JSON.stringify(sigJson, null, 2)}
+        />
     </Grid>
     <Grid item xs={12} lg={12}>
-      <Button variant="contained" color="primary" disabled={false} onClick={async () => {await loginReal()}}>Verify Login</Button>
+      <Button variant="contained" color="primary" disabled={false} onClick={async () => {(devMode) ? loginFake() : await loginReal()}}>Verify Login</Button>
     </Grid>
   </Grid>
 )
@@ -383,7 +388,7 @@ const DragAndDropUploader = ({ }) => {
 
   const handleFileSelect = (event: any) => {
     let file = event.target.files[0]
-    alert("handle select file "+file.name)
+    // alert("handle select file "+file.name)
     setFile(file)
   };
 
@@ -418,7 +423,7 @@ const DragAndDropUploader = ({ }) => {
   }
 
   const handleSubmit = async () => {
-    alert("handling report submit")
+    // alert("handling report submit")
     // Add your upload logic her
     setSubmitResult('uploading')
     //wait 2 seconds
@@ -565,8 +570,8 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
         console.log("Response data is type and data",typeof(d),d)
         let newData = new Set<any>()
         Object.keys(d).map((item: any) => {
-          return d[item].map((status: any) => {
-            newData.add(JSON.parse(status))
+          return d[item].map((ustat: any) => {
+            newData.add(JSON.parse(ustat))
           })
         });
         // console.log("Status data converted type and data",typeof(statuses),statuses)
@@ -645,12 +650,12 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
           <TableBody>
             {data.map((item: any) => (
               <TableRow key={item.filename} onClick={() => handleRowClick(item)}>
-                <TableCell>{item.filename == undefined ? "unknown" : item.filename.substring(0,75)}</TableCell>
-                <TableCell>{item.size == undefined ? "unknown" : item.size}</TableCell>
+                <TableCell>{item.filename === undefined ? "unknown" : item.filename.substring(0,75)}</TableCell>
+                <TableCell>{item.size === undefined ? "unknown" : item.size}</TableCell>
                 <TableCell style={
                   item.status === 'verified' ? {'color': 'green'} : item.status === 'failed' ? {'color': 'red'} : {'color': 'yellow'}}>
                   {item.status.charAt(0).toUpperCase() + item.status.slice(1)}</TableCell>
-                <TableCell>{item.message == undefined ? "unknown" : item.message.substring(0,75)}</TableCell>
+                <TableCell>{item.message === undefined ? "unknown" : item.message.substring(0,75)}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -799,7 +804,7 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
 
       </Drawer>
       <Grid container spacing={1} class="welcome">
-        {selectedComponent === 'Welcome' && <LandingComponent text='Customer portal' />}
+        {selectedComponent === 'Welcome' && <LandingComponent />}
         {selectedComponent === 'Welcome' && extensionInstalled === null && vendorConf === '' && <Typography variant="h5">Please connect to the extension</Typography>}
         {selectedComponent === 'Welcome' && extensionInstalled !== null && <Button variant="contained" color="error" onClick={removeData}>Clear</Button>}
         {selectedComponent === 'Welcome' && extensionInstalled !== null && vendorConf === '' && !devMode && <Button variant="contained" color="success" onClick={async () => await handleSettingVendorUrl(ROOTSID_CONF_URL)}>Configure Extension</Button>}
