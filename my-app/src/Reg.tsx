@@ -18,7 +18,8 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Divider,
   ListItemIcon,
-  Fab
+  Fab,
+  TextField
 } from '@mui/material';
 import {
   Circle, FileUpload, Menu,
@@ -46,21 +47,19 @@ const uploadPath = '/upload';
 const statusPath = '/status';
 const verSigPath = '/verify/header';
 
-const ROOTSID_CONF_URL = "https://api.npoint.io/52639f849bb31823a8c0";
-const serverUrl = "https://localhost:8000/";
-
 const RegComponent = () => {
   const [devMode, setDevMode] = useState(false);
 
   const [sigData, setSigData] = useState('');
   const [sigJson, setSigJson] = useState(null);
   const [extensionInstalled, setExtensionInstalled] = useState(null);
+  const [extConf, setExtConf] = useState('https://api.npoint.io/52639f849bb31823a8c0');
   const [selectedComponent, setSelectedComponent] = useState('Welcome');
   const [vendorConf, setVendorConf] = useState('');
 
   const [open, setOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false); // Open drawer by default
-  const [status, setStatus] = useState('Signed out');
+  const [cstatus, setCstatus] = useState('Signed out');
   const [selectedId, setSelectedId] = useState(''); // Step 2 Selection
   const [selectedAcdc, setSelectedAcdc] = useState(null); // Step 3 Selection
 //   const [activeStep, setActiveStep] = useState(0);
@@ -68,6 +67,8 @@ const RegComponent = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [errorUpload, setErrorUpload] = useState('');
   const [submitResult, setSubmitResult] = useState('');
+
+  const [serverUrl, setServerUrl] = useState('https://localhost:8000/');
   // Define the endpoint paths
   const pingPath = '/ping';
   const loginPath = '/login';
@@ -223,7 +224,7 @@ const RegComponent = () => {
   // }
 
   const loginFake = async () => {
-    setStatus('Connected')
+    setCstatus('Connected')
   }
 
   const loginReal = async () => {
@@ -317,12 +318,20 @@ const LandingComponent: React.FC<TextComponentProps> = () => (
       <Divider />
       <br />
       <br />
+    </Grid>
+  </Grid>
+);
+
+const ExtensionComponent: React.FC<TextComponentProps> = () => (
+  <Grid container spacing={1} class="welcome">
+    <Grid item xs={12} lg={12}>
       <Typography variant='h5'>Please start by signing in with a secure extension.</Typography>
     </Grid>
     <Grid item xs={12} lg={12}>
+      <Typography variant='h6'>Extension related information:</Typography>
       <Typography>Is extension installed? {(extensionInstalled !== null).toString()}</Typography>
       <Typography>Is vendor set? {(vendorConf !== '').toString()}</Typography>
-      <Typography>Have signify data? {(sigData !== '').toString()}</Typography>
+      <Typography>Signed data? {(sigData !== '').toString()}</Typography>
       {/*sigJson && <Typography>Signify json? {JSON.stringify(sigJson)}</Typography>*/}
     </Grid>
     <Grid item xs={12} lg={12}>
@@ -332,10 +341,38 @@ const LandingComponent: React.FC<TextComponentProps> = () => (
   </Grid>
 )
 
-const VerifyComponent: React.FC<TextComponentProps> = () => {
+const RegServerComponent: React.FC<TextComponentProps> = () => {
+  return (
+  <Grid container spacing={1} class="welcome">
+    <Grid item xs={12} lg={12}>
+      <br/>
+      <Divider/>
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      <Typography variant='h6'>Verification server related information:</Typography>
+    </Grid>
+    <TextField id="outlined-basic" label="Verification server URl" variant="outlined" value={serverUrl}
+      onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+        setServerUrl(event.target.value);
+      }}
+    />
+    <Button variant="contained" color="primary" disabled={false} onClick={async () => {ping()}}>Ping</Button>
+    <Button variant="contained" color="primary" disabled={false} onClick={async () => {(devMode) ? loginFake() : await loginReal()}}>Verify Login</Button>
+  </Grid>
+  )
+}
+
+const SignifyComponent: React.FC<TextComponentProps> = () => {
   // alert("Selected id is " + selectedId)
   return (
   <Grid container spacing={1} class="welcome">
+    <Grid item xs={12} lg={12}>
+      <br/>
+      <Divider/>
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      <Typography variant='h6'>Signify information:</Typography>
+    </Grid>
     <Grid item xs={12} lg={12}>
       <Typography variant="body2">AID: {selectedId}</Typography>
     </Grid>
@@ -345,18 +382,15 @@ const VerifyComponent: React.FC<TextComponentProps> = () => {
     <Grid item xs={8} lg={8}>
       <textarea
           id="message"
-          rows={15}
+          rows={8}
           className="signify-data"
           placeholder={sigData}
-          value={JSON.stringify(sigJson, null, 2)}
+          defaultValue={JSON.stringify(sigJson, null, 2)}
         />
     </Grid>
-    <Grid item xs={12} lg={12}>
-      <Button variant="contained" color="primary" disabled={false} onClick={async () => {(devMode) ? loginFake() : await loginReal()}}>Verify Login</Button>
-    </Grid>
   </Grid>
-)
-  }
+  )
+}
 
 const DragAndDropUploader = ({ }) => {
 
@@ -734,16 +768,8 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
               }
             }}
           >
-            <Typography variant="h6">
-              Menu
-            </Typography>
           </Box>
           <Box>
-            <Typography>
-              <Circle sx={{
-                color: status === 'Connected' ? 'green' : (status === 'Connecting' ? 'orange' : 'red')
-              }}/> {status}
-            </Typography>
             <Button
               sx={{
                 marginLeft: 'auto', backgroundColor: 'lightblue', color: 'black', '&:hover': {
@@ -788,12 +814,14 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
 
       </Drawer>
       <Grid container spacing={1} class="welcome">
-        {selectedComponent === 'Welcome' && <LandingComponent />}
+        {selectedComponent === 'Welcome' && <LandingComponent text=""/>}
+        {selectedComponent === 'Welcome' && <ExtensionComponent text=""/>}
         {selectedComponent === 'Welcome' && extensionInstalled === null && vendorConf === '' && <Typography variant="h5">Please connect to the extension</Typography>}
         {selectedComponent === 'Welcome' && extensionInstalled !== null && <Button variant="contained" color="error" onClick={removeData}>Clear</Button>}
-        {selectedComponent === 'Welcome' && extensionInstalled !== null && vendorConf === '' && !devMode && <Button variant="contained" color="success" onClick={async () => await handleSettingVendorUrl(ROOTSID_CONF_URL)}>Configure Extension</Button>}
+        {selectedComponent === 'Welcome' && extensionInstalled !== null && vendorConf === '' && !devMode && <Button variant="contained" color="success" onClick={async () => await handleSettingVendorUrl(extConf)}>Configure Extension</Button>}
         {selectedComponent === 'Welcome' && ((extensionInstalled !== null && vendorConf !== '' && sigData === '') || devMode) && <Button variant="contained" color="success" onClick={(devMode ? () => handleSignifyData(fakeSigData) : (requestCredential))}>Sign-in w/ Credential</Button>}
-        {selectedComponent === 'Welcome' && ((extensionInstalled !== null && vendorConf !== '') || devMode) && sigData !== '' && <VerifyComponent text='Verify signin' />}
+        {selectedComponent === 'Welcome' && ((extensionInstalled !== null && vendorConf !== '') || devMode) && sigData !== '' && <SignifyComponent text='Signin info' />}
+        {selectedComponent === 'Welcome' && ((extensionInstalled !== null && vendorConf !== '') || devMode) && sigData !== '' && <RegServerComponent text=""/>}
       </Grid>
       {selectedComponent === 'Check Status' && <MyTable
         setSelectedComponent={setSelectedComponent}
