@@ -7,6 +7,12 @@ services:
       context: .
       dockerfile: ./images/webapp.dockerfile
     image: 2byrds/reg-webapp:latest
+    healthcheck:
+        test: ['CMD', 'curl', '-f', 'http://localhost:3000/']
+        interval: 2s
+        timeout: 3s
+        retries: 5
+        start_period: 8s
     ports:
       - 3000:3000
 
@@ -64,8 +70,8 @@ services:
       - vlei-server
     ports:
       - 7676:7676
-    volumes:
-      - './data/keri:/usr/local/var/keri'
+    # volumes:
+    #   - './data/verifier:/usr/local/var/keri'
 
   vlei-server:
     image: 2byrds/vlei:latest
@@ -74,15 +80,15 @@ services:
     depends_on:
       - witness-demo
     healthcheck:
-            test:
-                - CMD
-                - curl
-                - -f
-                - http://localhost:7723/oobi/EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao
-            interval: 2s
-            timeout: 3s
-            retries: 5
-            start_period: 2s
+      test:
+          - CMD
+          - curl
+          - -f
+          - http://localhost:7723/oobi/EBfdlu8R27Fbx-ehrqwImnK-8Cm79sqbAQ4MmvEAYqao
+      interval: 2s
+      timeout: 3s
+      retries: 5
+      start_period: 2s
 
   witness-demo:
     # container_name: witnesshost
@@ -90,11 +96,14 @@ services:
     image: 2byrds/keripy:latest
     tty: true
     volumes:
-      - ./scripts/keri/cf/main/:/keripy/scripts/keri/cf/main/
+      - ./config/witness-demo/:/keripy/scripts/keri/cf/main/
     ports:
         - 5642:5642  # witness
         - 5643:5643  # witness
         - 5644:5644  # witness
+        - 5645:5645  # witness
+        - 5646:5646  # witness
+        - 5647:5647  # witness
     entrypoint: kli witness demo
     healthcheck:
                 test: ['CMD', 'curl', '-f', 'http://localhost:5642/oobi']
@@ -104,14 +113,29 @@ services:
                 start_period: 2s
 
   deps:
-      image: alpine
-      command: ['echo', 'Dependencies running']
-      depends_on:
-          vlei-server:
-              condition: service_healthy
-          keria:
-              condition: service_healthy
-          witness-demo:
-              condition: service_healthy
-          reg-server:
-              condition: service_healthy
+    image: alpine
+    command: ['echo', 'Dependencies running']
+    depends_on:
+      vlei-server:
+          condition: service_healthy
+      keria:
+          condition: service_healthy
+      witness-demo:
+          condition: service_healthy
+      reg-server:
+          condition: service_healthy
+      reg-webapp:
+          condition: service_healthy
+
+  dev-deps:
+    image: alpine
+    command: ['echo', 'Dependencies running']
+    depends_on:
+      vlei-server:
+          condition: service_healthy
+      keria:
+          condition: service_healthy
+      witness-demo:
+          condition: service_healthy
+      reg-server:
+          condition: service_healthy
