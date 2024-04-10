@@ -4,12 +4,9 @@ import {
   Alert,
   Paper,
   Toolbar,
-  DialogTitle,
-  DialogContent,
   IconButton,
   Typography,
   Button,
-  Dialog,
   List,
   ListItem,
   ListItemText,
@@ -19,7 +16,6 @@ import {
   CircularProgress,
   Modal,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Tooltip,
   Divider,
   ListItemIcon,
   Fab
@@ -30,8 +26,6 @@ import {
 } from '@mui/icons-material';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
-import FingerprintIcon from '@mui/icons-material/Fingerprint';
-import BadgeIcon from '@mui/icons-material/Badge';
 import GridViewIcon from '@mui/icons-material/GridView';
 import "./App.css";
 import {
@@ -39,9 +33,7 @@ import {
   subscribeToSignature,
   unsubscribeFromSignature,
   requestAutoSignin,
-  requestAid,
   requestCredential,
-  requestAidORCred,
   trySettingVendorUrl,
   canCallAsync,
 } from "signify-polaris-web";
@@ -55,7 +47,7 @@ const statusPath = '/status';
 const verSigPath = '/verify/header';
 
 const ROOTSID_CONF_URL = "https://api.npoint.io/52639f849bb31823a8c0";
-const serverUrl = "https://localhost:7699/";
+const serverUrl = "https://localhost:8000/";
 
 const RegComponent = () => {
   const [devMode, setDevMode] = useState(false);
@@ -171,6 +163,7 @@ const RegComponent = () => {
   // Function to perform the login request
   async function login(aid: string, said: string, vlei: string): Promise<any> {
     const url = `${serverUrl}${loginPath}`;
+    console.log("Login url is",url)
 
     // Create the request body object
     const requestBody = {
@@ -189,7 +182,7 @@ const RegComponent = () => {
     });
 
     const responseData = await response.json();
-
+    console.log("Login response data",responseData)
     // Return the response data
     return responseData;
   }
@@ -630,7 +623,7 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
           }}
         />}
 
-      {(!data || data.length == 0) && !loading && <Alert severity="info" action={
+      {(!data || data.length === 0) && !loading && <Alert severity="info" action={
         <Button color="inherit" size="small" onClick={() => {
           setSelectedComponent('Upload Report')
         }}>
@@ -746,20 +739,11 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
             </Typography>
           </Box>
           <Box>
-            <Button
-              sx={{
-                marginLeft: 'auto', backgroundColor: 'lightblue', color: 'black', '&:hover': {
-                  color: 'white'
-                }
-              }} onClick={handleClickOpen} variant='contained'
-              startIcon={
-                <Circle sx={{
-                  color: status === 'Connected' ? 'green' : (status === 'Connecting' ? 'orange' : 'red')
-                }} />
-              }
-            >
-              {status}
-            </Button>
+            <Typography>
+              <Circle sx={{
+                color: status === 'Connected' ? 'green' : (status === 'Connecting' ? 'orange' : 'red')
+              }}/> {status}
+            </Typography>
             <Button
               sx={{
                 marginLeft: 'auto', backgroundColor: 'lightblue', color: 'black', '&:hover': {
