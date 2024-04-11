@@ -68,14 +68,18 @@ const RegComponent = () => {
   const [errorUpload, setErrorUpload] = useState('');
   const [submitResult, setSubmitResult] = useState('');
 
-  const [serverUrl, setServerUrl] = useState('https://localhost:8000/');
+  const [serverUrl, setServerUrl] = useState('http://localhost:8000');
   // Define the endpoint paths
-  const pingPath = '/ping';
-  const loginPath = '/login';
+  const [pingUrl, setPingUrl] = useState('');
+  const [loginUrl, setLoginUrl] = useState('');
 
-  // useEffect(() => {
-  //   fetchData();
-  // }, []);
+  const [pingResponse, setPingResponse] = useState('');
+  const [loginResponse, setLoginResponse] = useState(null);
+
+  useEffect(() => {
+    setPingUrl(serverUrl + '/ping');
+    setLoginUrl(serverUrl + '/login');
+  }, [serverUrl]);
 
   const toggleDevMode = () => {
     setDevMode(!devMode);
@@ -151,20 +155,20 @@ const RegComponent = () => {
 
   // Function to perform the ping request
   async function ping(): Promise<string> {
-    const url = `${serverUrl}${pingPath}`;
 
     // Make the API request using the fetch function
-    const response = await fetch(url);
-    const responseData = await response.json();
-
-    // Return the pong message
-    return responseData;
+    const response = await fetch(pingUrl);
+    if (response) { 
+      const responseData = await response.text();
+      setPingResponse(responseData);
+      return responseData;
+    }
+    return 'Ping failed'
   }
 
   // Function to perform the login request
   async function login(aid: string, said: string, vlei: string): Promise<any> {
-    const url = `${serverUrl}${loginPath}`;
-    console.log("Login url is",url)
+    console.log("Login url is",loginUrl)
 
     // Create the request body object
     const requestBody = {
@@ -174,11 +178,9 @@ const RegComponent = () => {
     };
 
     // Make the API request using the fetch function
-    const response = await fetch(url, {
+    const response = await fetch(loginUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: sigJson?.headers,
       body: JSON.stringify(requestBody)
     });
 
@@ -234,12 +236,12 @@ const RegComponent = () => {
     let logged_in = await login(selectedId, selectedAcdc?.sad.a.personLegalName, vlei_cesr)
     console.log("logged in result",logged_in)
     if (logged_in.aid === sigJson?.headers["signify-resource"]) {
-      setStatus('Connected')
+      setCstatus('Connected')
       setModalError('')
       // await checkHeaderSignatures(getSelectedAid().prefix,getSelectedAid().name);
     }
     else if (JSON.stringify(logged_in).includes('Exception')) {
-      setStatus('Failed')
+      setCstatus('Failed')
       setModalError('Login Failed. Please pick different credential')
     } else {
       setStatus('Connecting')
@@ -327,12 +329,18 @@ const ExtensionComponent: React.FC<TextComponentProps> = () => (
     <Grid item xs={12} lg={12}>
       <Typography variant='h5'>Please start by signing in with a secure extension.</Typography>
     </Grid>
-    <Grid item xs={12} lg={12}>
+    <Grid item xs={5} lg={5}>
       <Typography variant='h6'>Extension related information:</Typography>
       <Typography>Is extension installed? {(extensionInstalled !== null).toString()}</Typography>
       <Typography>Is vendor set? {(vendorConf !== '').toString()}</Typography>
       <Typography>Signed data? {(sigData !== '').toString()}</Typography>
       {/*sigJson && <Typography>Signify json? {JSON.stringify(sigJson)}</Typography>*/}
+    </Grid>
+    <Grid item xs={7} lg={7}>
+      <Typography variant='h6'>Extension test data:</Typography>
+      <Typography>Test Agent Url: http://localhost:3901</Typography>
+      <Typography>Test Boot Url: http://localhost:3903</Typography>
+      <Typography>Test passcode: CGbMVe0SzH_aor_TmUweIN</Typography>
     </Grid>
     <Grid item xs={12} lg={12}>
       {modalError !== '' && <Alert severity={modalError.includes('agent') ? 'error' : 'warning'}>
@@ -351,13 +359,31 @@ const RegServerComponent: React.FC<TextComponentProps> = () => {
     <Grid item xs={12} lg={12}>
       <Typography variant='h6'>Verification server related information:</Typography>
     </Grid>
-    <TextField id="outlined-basic" label="Verification server URl" variant="outlined" value={serverUrl}
-      onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
-        setServerUrl(event.target.value);
-      }}
-    />
-    <Button variant="contained" color="primary" disabled={false} onClick={async () => {ping()}}>Ping</Button>
-    <Button variant="contained" color="primary" disabled={false} onClick={async () => {(devMode) ? loginFake() : await loginReal()}}>Verify Login</Button>
+    <Grid item xs={12} lg={12}>
+      <TextField id="outlined-basic" label="Verification server URl" variant="outlined" value={serverUrl}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          setServerUrl(event.target.value);
+        }}
+      />
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      <br/>
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      <TextField id="outlined-basic" label="Ping server URl" variant="outlined" value={pingUrl}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            setPingUrl(event.target.value);
+          }}
+      />
+      <Button variant="contained" color="primary" disabled={false} onClick={async () => {ping()}}>Ping</Button>
+      <textarea
+          id="message"
+          rows={1}
+          style={{width: '30%', height: '100%'}}
+          placeholder={"ping response"}
+          defaultValue={JSON.stringify(pingResponse)}
+        />
+    </Grid>
   </Grid>
   )
 }
@@ -387,6 +413,9 @@ const SignifyComponent: React.FC<TextComponentProps> = () => {
           placeholder={sigData}
           defaultValue={JSON.stringify(sigJson, null, 2)}
         />
+
+      <Button variant="contained" color="primary" disabled={false} onClick={async () => {(devMode) ? loginFake() : await loginReal()}}>Verify Login</Button>
+
     </Grid>
   </Grid>
   )
@@ -732,7 +761,7 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
         aria-label="add"
         style={{ position: 'fixed', bottom: '20px', right: '20px' }}
         onClick={async () => {
-          setData(_fakedata);
+          setData(fakeCheckStatus[selectedAid]);
 
         }}
       >
