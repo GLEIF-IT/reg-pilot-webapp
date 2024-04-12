@@ -41,7 +41,8 @@ import {
 
 import fakeSigData from './test/fakeSigData.json';
 import fakeCheckStatus from './test/fakeCheckStatus.json';
-import fakeFileUpload from './test/fakeFileUpload.json'
+import fakeFileUpload from './test/fakeFileUpload.json';
+import fakeLoginResponse from './test/fakeLoginResponse.json';
 
 const uploadPath = '/upload';
 const statusPath = '/status';
@@ -74,7 +75,8 @@ const RegComponent = () => {
   const [loginUrl, setLoginUrl] = useState('');
 
   const [pingResponse, setPingResponse] = useState('');
-  const [loginResponse, setLoginResponse] = useState(null);
+  const [loginResponse, setLoginResponse] = useState('');
+  const [loginPost, setLoginPost] = useState('');
 
   useEffect(() => {
     setPingUrl(serverUrl + '/ping');
@@ -167,7 +169,7 @@ const RegComponent = () => {
   }
 
   // Function to perform the login request
-  async function login(aid: string, said: string, vlei: string): Promise<any> {
+  async function postLogin(aid: string, said: string, vlei: string): Promise<any> {
     console.log("Login url is",loginUrl)
 
     // Create the request body object
@@ -177,17 +179,22 @@ const RegComponent = () => {
       vlei
     };
 
-    // Make the API request using the fetch function
-    const response = await fetch(loginUrl, {
+    const lpost = {
       method: 'POST',
       headers: sigJson?.headers,
       body: JSON.stringify(requestBody)
-    });
+    }
+    setLoginPost(JSON.stringify(lpost))
 
-    const responseData = await response.json();
-    console.log("Login response data",responseData)
-    // Return the response data
-    return responseData;
+    // Make the API request using the fetch function
+    const response = devMode ? fakeLoginResponse : await fetch(loginUrl, lpost);
+
+    if (response) { 
+      const responseData = await response.text();
+      setLoginResponse(responseData);
+      return responseData;
+    }
+    return 'Login failed'
   }
 
   const toggleDrawer = (open: any) => (event: any) => {
@@ -225,15 +232,11 @@ const RegComponent = () => {
   //   console.log("header signature verification response",response_signed_data)
   // }
 
-  const loginFake = async () => {
-    setCstatus('Connected')
-  }
-
-  const loginReal = async () => {
+  const login = async () => {
     let vlei_cesr = sigJson?.credential
     console.log("vlei cesr",vlei_cesr)
 
-    let logged_in = await login(selectedId, selectedAcdc?.sad.a.personLegalName, vlei_cesr)
+    let logged_in = await postLogin(selectedId, selectedAcdc?.sad.a.personLegalName, vlei_cesr)
     console.log("logged in result",logged_in)
     if (logged_in.aid === sigJson?.headers["signify-resource"]) {
       setCstatus('Connected')
@@ -376,12 +379,43 @@ const RegServerComponent: React.FC<TextComponentProps> = () => {
           }}
       />
       <Button variant="contained" color="primary" disabled={false} onClick={async () => {ping()}}>Ping</Button>
+    </Grid>
+    <Grid item xs={12} lg={12}>
       <textarea
           id="message"
-          rows={1}
+          rows={5}
           style={{width: '30%', height: '100%'}}
           placeholder={"ping response"}
           defaultValue={JSON.stringify(pingResponse)}
+        />
+    </Grid>
+    <br/>
+    <Grid item xs={12} lg={12}>
+      <TextField id="outlined-basic" label="Login server URl" variant="outlined" value={loginUrl}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            setLoginUrl(event.target.value);
+          }}
+      />
+      <Button variant="contained" color="primary" disabled={false} onClick={async () => {await login()}}>Verify Login</Button>
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      <Typography variant='h6'>Request</Typography>
+      <textarea
+          id="login-post"
+          rows={5}
+          style={{width: '30%', height: '100%'}}
+          placeholder={"login post"}
+          defaultValue={JSON.stringify(loginPost)}
+        />
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      <Typography variant='h6'>Response</Typography>
+      <textarea
+          id="login-response"
+          rows={5}
+          style={{width: '30%', height: '100%'}}
+          placeholder={"login response"}
+          defaultValue={JSON.stringify(loginResponse)}
         />
     </Grid>
   </Grid>
@@ -413,9 +447,6 @@ const SignifyComponent: React.FC<TextComponentProps> = () => {
           placeholder={sigData}
           defaultValue={JSON.stringify(sigJson, null, 2)}
         />
-
-      <Button variant="contained" color="primary" disabled={false} onClick={async () => {(devMode) ? loginFake() : await loginReal()}}>Verify Login</Button>
-
     </Grid>
   </Grid>
   )
