@@ -18,7 +18,8 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Divider,
   ListItemIcon,
-  Fab
+  Fab,
+  TextField
 } from '@mui/material';
 import {
   Circle, FileUpload, Menu,
@@ -40,14 +41,12 @@ import {
 
 import fakeSigData from './test/fakeSigData.json';
 import fakeCheckStatus from './test/fakeCheckStatus.json';
-import fakeFileUpload from './test/fakeFileUpload.json'
+import fakeFileUpload from './test/fakeFileUpload.json';
+import fakeLoginResponse from './test/fakeLoginResponse.json';
 
 const uploadPath = '/upload';
 const statusPath = '/status';
 const verSigPath = '/verify/header';
-
-const ROOTSID_CONF_URL = "https://api.npoint.io/52639f849bb31823a8c0";
-const serverUrl = "https://localhost:8000/";
 
 const RegComponent = () => {
   const [devMode, setDevMode] = useState(false);
@@ -55,12 +54,13 @@ const RegComponent = () => {
   const [sigData, setSigData] = useState('');
   const [sigJson, setSigJson] = useState(null);
   const [extensionInstalled, setExtensionInstalled] = useState(null);
+  const [extConf, setExtConf] = useState('https://api.npoint.io/52639f849bb31823a8c0');
   const [selectedComponent, setSelectedComponent] = useState('Welcome');
   const [vendorConf, setVendorConf] = useState('');
 
   const [open, setOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false); // Open drawer by default
-  const [status, setStatus] = useState('Signed out');
+  const [cstatus, setCstatus] = useState('Signed out');
   const [selectedId, setSelectedId] = useState(''); // Step 2 Selection
   const [selectedAcdc, setSelectedAcdc] = useState(null); // Step 3 Selection
 //   const [activeStep, setActiveStep] = useState(0);
@@ -68,13 +68,20 @@ const RegComponent = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [errorUpload, setErrorUpload] = useState('');
   const [submitResult, setSubmitResult] = useState('');
-  // Define the endpoint paths
-  const pingPath = '/ping';
-  const loginPath = '/login';
 
-  // useEffect(() => {
-  //   fetchData();
-  // }, []);
+  const [serverUrl, setServerUrl] = useState('http://localhost:8000');
+  // Define the endpoint paths
+  const [pingUrl, setPingUrl] = useState('');
+  const [loginUrl, setLoginUrl] = useState('');
+
+  const [pingResponse, setPingResponse] = useState('');
+  const [loginResponse, setLoginResponse] = useState('');
+  const [loginPost, setLoginPost] = useState('');
+
+  useEffect(() => {
+    setPingUrl(serverUrl + '/ping');
+    setLoginUrl(serverUrl + '/login');
+  }, [serverUrl]);
 
   const toggleDevMode = () => {
     setDevMode(!devMode);
@@ -150,20 +157,20 @@ const RegComponent = () => {
 
   // Function to perform the ping request
   async function ping(): Promise<string> {
-    const url = `${serverUrl}${pingPath}`;
 
     // Make the API request using the fetch function
-    const response = await fetch(url);
-    const responseData = await response.json();
-
-    // Return the pong message
-    return responseData;
+    const response = await fetch(pingUrl);
+    if (response) { 
+      const responseData = await response.text();
+      setPingResponse(responseData);
+      return responseData;
+    }
+    return 'Ping failed'
   }
 
   // Function to perform the login request
-  async function login(aid: string, said: string, vlei: string): Promise<any> {
-    const url = `${serverUrl}${loginPath}`;
-    console.log("Login url is",url)
+  async function postLogin(aid: string, said: string, vlei: string): Promise<any> {
+    console.log("Login url is",loginUrl)
 
     // Create the request body object
     const requestBody = {
@@ -172,19 +179,22 @@ const RegComponent = () => {
       vlei
     };
 
-    // Make the API request using the fetch function
-    const response = await fetch(url, {
+    const lpost = {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: sigJson?.headers,
       body: JSON.stringify(requestBody)
-    });
+    }
+    setLoginPost(JSON.stringify(lpost))
 
-    const responseData = await response.json();
-    console.log("Login response data",responseData)
-    // Return the response data
-    return responseData;
+    // Make the API request using the fetch function
+    const response = devMode ? fakeLoginResponse : await fetch(loginUrl, lpost);
+
+    if (response) { 
+      const responseData = await response.text();
+      setLoginResponse(responseData);
+      return responseData;
+    }
+    return 'Login failed'
   }
 
   const toggleDrawer = (open: any) => (event: any) => {
@@ -222,23 +232,19 @@ const RegComponent = () => {
   //   console.log("header signature verification response",response_signed_data)
   // }
 
-  const loginFake = async () => {
-    setStatus('Connected')
-  }
-
-  const loginReal = async () => {
+  const login = async () => {
     let vlei_cesr = sigJson?.credential
     console.log("vlei cesr",vlei_cesr)
 
-    let logged_in = await login(selectedId, selectedAcdc?.sad.a.personLegalName, vlei_cesr)
+    let logged_in = await postLogin(selectedId, selectedAcdc?.sad.a.personLegalName, vlei_cesr)
     console.log("logged in result",logged_in)
     if (logged_in.aid === sigJson?.headers["signify-resource"]) {
-      setStatus('Connected')
+      setCstatus('Connected')
       setModalError('')
       // await checkHeaderSignatures(getSelectedAid().prefix,getSelectedAid().name);
     }
     else if (JSON.stringify(logged_in).includes('Exception')) {
-      setStatus('Failed')
+      setCstatus('Failed')
       setModalError('Login Failed. Please pick different credential')
     } else {
       setStatus('Connecting')
@@ -317,13 +323,27 @@ const LandingComponent: React.FC<TextComponentProps> = () => (
       <Divider />
       <br />
       <br />
+    </Grid>
+  </Grid>
+);
+
+const ExtensionComponent: React.FC<TextComponentProps> = () => (
+  <Grid container spacing={1} class="welcome">
+    <Grid item xs={12} lg={12}>
       <Typography variant='h5'>Please start by signing in with a secure extension.</Typography>
     </Grid>
-    <Grid item xs={12} lg={12}>
+    <Grid item xs={5} lg={5}>
+      <Typography variant='h6'>Extension related information:</Typography>
       <Typography>Is extension installed? {(extensionInstalled !== null).toString()}</Typography>
       <Typography>Is vendor set? {(vendorConf !== '').toString()}</Typography>
-      <Typography>Have signify data? {(sigData !== '').toString()}</Typography>
+      <Typography>Signed data? {(sigData !== '').toString()}</Typography>
       {/*sigJson && <Typography>Signify json? {JSON.stringify(sigJson)}</Typography>*/}
+    </Grid>
+    <Grid item xs={7} lg={7}>
+      <Typography variant='h6'>Extension test data:</Typography>
+      <Typography>Test Agent Url: http://localhost:3901</Typography>
+      <Typography>Test Boot Url: http://localhost:3903</Typography>
+      <Typography>Test passcode: CGbMVe0SzH_aor_TmUweIN</Typography>
     </Grid>
     <Grid item xs={12} lg={12}>
       {modalError !== '' && <Alert severity={modalError.includes('agent') ? 'error' : 'warning'}>
@@ -332,10 +352,87 @@ const LandingComponent: React.FC<TextComponentProps> = () => (
   </Grid>
 )
 
-const VerifyComponent: React.FC<TextComponentProps> = () => {
+const RegServerComponent: React.FC<TextComponentProps> = () => {
+  return (
+  <Grid container spacing={1} class="welcome">
+    <Grid item xs={12} lg={12}>
+      <br/>
+      <Divider/>
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      <Typography variant='h6'>Verification server related information:</Typography>
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      <TextField id="outlined-basic" label="Verification server URl" variant="outlined" value={serverUrl}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+          setServerUrl(event.target.value);
+        }}
+      />
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      <br/>
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      <TextField id="outlined-basic" label="Ping server URl" variant="outlined" value={pingUrl}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            setPingUrl(event.target.value);
+          }}
+      />
+      <Button variant="contained" color="primary" disabled={false} onClick={async () => {ping()}}>Ping</Button>
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      <textarea
+          id="message"
+          rows={5}
+          style={{width: '30%', height: '100%'}}
+          placeholder={"ping response"}
+          defaultValue={JSON.stringify(pingResponse)}
+        />
+    </Grid>
+    <br/>
+    <Grid item xs={12} lg={12}>
+      <TextField id="outlined-basic" label="Login server URl" variant="outlined" value={loginUrl}
+          onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+            setLoginUrl(event.target.value);
+          }}
+      />
+      <Button variant="contained" color="primary" disabled={false} onClick={async () => {await login()}}>Verify Login</Button>
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      <Typography variant='h6'>Request</Typography>
+      <textarea
+          id="login-post"
+          rows={5}
+          style={{width: '30%', height: '100%'}}
+          placeholder={"login post"}
+          defaultValue={JSON.stringify(loginPost)}
+        />
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      <Typography variant='h6'>Response</Typography>
+      <textarea
+          id="login-response"
+          rows={5}
+          style={{width: '30%', height: '100%'}}
+          placeholder={"login response"}
+          defaultValue={JSON.stringify(loginResponse)}
+        />
+    </Grid>
+  </Grid>
+  )
+}
+
+const SignifyComponent: React.FC<TextComponentProps> = () => {
   // alert("Selected id is " + selectedId)
   return (
   <Grid container spacing={1} class="welcome">
+    <Grid item xs={12} lg={12}>
+      <br/>
+      <Divider/>
+    </Grid>
+    <Grid item xs={12} lg={12}>
+      <Typography variant='h6'>Signify information:</Typography>
+    </Grid>
     <Grid item xs={12} lg={12}>
       <Typography variant="body2">AID: {selectedId}</Typography>
     </Grid>
@@ -345,18 +442,15 @@ const VerifyComponent: React.FC<TextComponentProps> = () => {
     <Grid item xs={8} lg={8}>
       <textarea
           id="message"
-          rows={15}
+          rows={8}
           className="signify-data"
           placeholder={sigData}
-          value={JSON.stringify(sigJson, null, 2)}
+          defaultValue={JSON.stringify(sigJson, null, 2)}
         />
     </Grid>
-    <Grid item xs={12} lg={12}>
-      <Button variant="contained" color="primary" disabled={false} onClick={async () => {(devMode) ? loginFake() : await loginReal()}}>Verify Login</Button>
-    </Grid>
   </Grid>
-)
-  }
+  )
+}
 
 const DragAndDropUploader = ({ }) => {
 
@@ -698,7 +792,7 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
         aria-label="add"
         style={{ position: 'fixed', bottom: '20px', right: '20px' }}
         onClick={async () => {
-          setData(_fakedata);
+          setData(fakeCheckStatus[selectedAid]);
 
         }}
       >
@@ -734,16 +828,8 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
               }
             }}
           >
-            <Typography variant="h6">
-              Menu
-            </Typography>
           </Box>
           <Box>
-            <Typography>
-              <Circle sx={{
-                color: status === 'Connected' ? 'green' : (status === 'Connecting' ? 'orange' : 'red')
-              }}/> {status}
-            </Typography>
             <Button
               sx={{
                 marginLeft: 'auto', backgroundColor: 'lightblue', color: 'black', '&:hover': {
@@ -788,12 +874,14 @@ const MyTable = ({ setSelectedComponent, selectedAid, selectedAcdc }) => {
 
       </Drawer>
       <Grid container spacing={1} class="welcome">
-        {selectedComponent === 'Welcome' && <LandingComponent />}
+        {selectedComponent === 'Welcome' && <LandingComponent text=""/>}
+        {selectedComponent === 'Welcome' && <ExtensionComponent text=""/>}
         {selectedComponent === 'Welcome' && extensionInstalled === null && vendorConf === '' && <Typography variant="h5">Please connect to the extension</Typography>}
         {selectedComponent === 'Welcome' && extensionInstalled !== null && <Button variant="contained" color="error" onClick={removeData}>Clear</Button>}
-        {selectedComponent === 'Welcome' && extensionInstalled !== null && vendorConf === '' && !devMode && <Button variant="contained" color="success" onClick={async () => await handleSettingVendorUrl(ROOTSID_CONF_URL)}>Configure Extension</Button>}
+        {selectedComponent === 'Welcome' && extensionInstalled !== null && vendorConf === '' && !devMode && <Button variant="contained" color="success" onClick={async () => await handleSettingVendorUrl(extConf)}>Configure Extension</Button>}
         {selectedComponent === 'Welcome' && ((extensionInstalled !== null && vendorConf !== '' && sigData === '') || devMode) && <Button variant="contained" color="success" onClick={(devMode ? () => handleSignifyData(fakeSigData) : (requestCredential))}>Sign-in w/ Credential</Button>}
-        {selectedComponent === 'Welcome' && ((extensionInstalled !== null && vendorConf !== '') || devMode) && sigData !== '' && <VerifyComponent text='Verify signin' />}
+        {selectedComponent === 'Welcome' && ((extensionInstalled !== null && vendorConf !== '') || devMode) && sigData !== '' && <SignifyComponent text='Signin info' />}
+        {selectedComponent === 'Welcome' && ((extensionInstalled !== null && vendorConf !== '') || devMode) && sigData !== '' && <RegServerComponent text=""/>}
       </Grid>
       {selectedComponent === 'Check Status' && <MyTable
         setSelectedComponent={setSelectedComponent}
