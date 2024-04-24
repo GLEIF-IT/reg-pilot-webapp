@@ -164,7 +164,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
       </Box>
     </Grid>
     <Grid item xs={12}>
-      {error !== "" && (
+      {error && (
         <Alert severity={error?.includes("agent") ? "error" : "warning"}>
           <Typography variant="body2">{error}</Typography>
         </Alert>

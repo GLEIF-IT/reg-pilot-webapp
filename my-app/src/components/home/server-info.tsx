@@ -4,7 +4,6 @@ import {
   Button,
   Box,
   Grid,
-  Divider,
   TextField,
 } from "@mui/material";
 
@@ -37,10 +36,6 @@ const ServerInfo: React.FC<IServerInfo> = ({
 }) => {
   return (
     <Grid container spacing={1}>
-      <Grid item xs={12} lg={12}>
-        <br />
-        <Divider />
-      </Grid>
       <Grid item xs={12} lg={12}>
         <Typography variant="h6" fontWeight="bold">
           Verification Server Config

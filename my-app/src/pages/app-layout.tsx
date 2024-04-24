@@ -12,12 +12,13 @@ import {
   Box,
   ListItemIcon,
 } from "@mui/material";
-import { Circle, FileUpload, Menu, GridView, Rule } from "@mui/icons-material";
+import { Circle, FileUpload, Settings, Menu, GridView, Rule } from "@mui/icons-material";
 
 const SIDEBAR = [
   { path: "/", title: "Home", icon: <GridView /> },
   { path: "/status", title: "Status", icon: <Rule /> },
   { path: "/reports", title: "Reports", icon: <FileUpload /> },
+  { path: "/settings", title: "Settings", icon: <Settings /> },
 ];
 
 const AppLayout = ({ devMode, toggleDevMode }) => {

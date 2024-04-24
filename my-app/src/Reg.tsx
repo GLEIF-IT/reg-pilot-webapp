@@ -18,6 +18,7 @@ import AppLayout from "./pages/app-layout.tsx";
 import HomePage from "./pages/home.tsx";
 import ReportsPage from "./pages/reports.tsx";
 import StatusPage from "./pages/status.tsx";
+import SettingsPage from "./pages/settings.tsx";
 
 const statusPath = "/status";
 
@@ -27,10 +28,20 @@ const RegComponent = () => {
   const [extensionInstalled, setExtensionInstalled] = useState<null | boolean>(
     null
   );
+  
   const [cstatus, setCstatus] = useState("Signed out");
   const [selectedId, setSelectedId] = useState(""); // Step 2 Selection
   const [selectedAcdc, setSelectedAcdc] = useState(null); // Step 3 Selection
   const [serverUrl, setServerUrl] = useState("http://localhost:8000");
+
+  const [pingUrl, setPingUrl] = useState("");
+  const [loginUrl, setLoginUrl] = useState("");
+  
+  useEffect(() => {
+    setPingUrl(serverUrl + "/ping");
+    setLoginUrl(serverUrl + "/login");
+  }, [serverUrl]);
+  
 
   const handleSignifyData = (data) => {
     localStorage.setItem("signify-data", JSON.stringify(data, null, 2));
@@ -102,6 +113,7 @@ const RegComponent = () => {
                 signatureData={signatureData}
                 extensionInstalled={extensionInstalled}
                 serverUrl={serverUrl}
+                loginUrl={loginUrl}
                 setServerUrl={setServerUrl}
               />
             }
@@ -126,6 +138,24 @@ const RegComponent = () => {
                 serverUrl={serverUrl}
                 selectedId={selectedId}
                 selectedAcdc={selectedAcdc}
+              />
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <SettingsPage
+                devMode={devMode}
+                selectedId={selectedId}
+                selectedAcdc={selectedAcdc}
+                signatureData={signatureData}
+                extensionInstalled={extensionInstalled}
+                serverUrl={serverUrl}
+                setServerUrl={setServerUrl}
+                pingUrl={pingUrl}
+                setPingUrl={setPingUrl}
+                loginUrl={loginUrl}
+                setLoginUrl={setLoginUrl}
               />
             }
           />
