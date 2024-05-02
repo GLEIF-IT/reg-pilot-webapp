@@ -1,3 +1,5 @@
+import { signifyFetch } from "signify-polaris-web";
+
 const RegServer = () => {
   /**
    *
@@ -16,17 +18,45 @@ const RegServer = () => {
     }
   };
 
-  const postLogin = async (
-    url: string,
-    request: any,
-  ): Promise<any> => {
-    
+  const postLogin = async (url: string, request: any): Promise<any> => {
     const response = await fetch(url, request);
-    const responseData = await response.text();
-    return responseData;
+    const { error, ...rest } = await response.json();
+
+    if (error) throw error;
+
+    return rest;
   };
 
-  return { ping, postLogin };
+  const postReport = async (
+    url: string,
+    request: any,
+    signin,
+    fetchHeaders: boolean
+  ): Promise<any> => {
+    const response_signed = await signifyFetch(
+      url,
+      request,
+      fetchHeaders,
+      signin?.identifier?.name ?? signin.credential?.issueeName
+    );
+    const response_signed_data = await response_signed.json();
+    return response_signed_data;
+  };
+
+  const getStatus = async (url: string, request: any, signin, fetchHeaders: boolean): Promise<any> => {
+    const resp = await signifyFetch(
+      url,
+      request,
+      fetchHeaders,
+      signin?.identifier?.name ?? signin?.credential?.issueeName
+    );
+    const { error, ...rest } = await resp.json();
+    if (error) throw error;
+
+    return rest;
+  };
+
+  return { ping, postLogin, postReport, getStatus };
 };
 
 export const regService = RegServer();

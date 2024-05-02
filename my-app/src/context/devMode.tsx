@@ -11,15 +11,19 @@ interface IDevModeContext {
 }
 
 const DevModeContext = createContext<IDevModeContext | null>(null);
+const DEV_MODE = "dev-mode";
 
 export const DevModeProvider = ({
   children,
 }: IDevModeProvider): JSX.Element => {
-  const [devMode, setDevMode] = useState<boolean>(false);
+  const [devMode, setDevMode] = useState<boolean>(
+    localStorage.getItem(DEV_MODE) === "true"
+  );
   const { openSnackbar } = useSnackbar();
 
   const toggleDevMode = () => {
     const toggledDevMode = !devMode;
+    localStorage.setItem(DEV_MODE, String(toggledDevMode));
     setDevMode(toggledDevMode);
     openSnackbar(
       toggledDevMode ? "Dev Mode turned on" : "Dev Mode turned off",

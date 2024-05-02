@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { requestAidORCred } from "signify-polaris-web";
 import {
   Alert,
   Paper,
@@ -23,72 +24,69 @@ import {
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import AddIcon from "@mui/icons-material/Add";
+import CollapseAlert from "../components/collapse-alert.tsx";
+import { regService } from "../services/reg-server.ts";
 import fakeCheckStatus from "../test/fakeCheckStatus.json";
 import { useSnackbar } from "../context/snackbar.tsx";
 
 const StatusPage = ({
   selectedAid,
-  selectedAcdc,
   devMode,
   serverUrl,
   statusPath,
+  signatureData,
 }) => {
   const navigate = useNavigate();
   const { openSnackbar } = useSnackbar();
   const [data, setData] = useState<Array<any>>();
   const [loading, setLoading] = useState(false);
+  const [currentSignatureData, setCurrentSignatureData] =
+    useState<any>(signatureData);
 
-  useEffect(() => {
-    // Simulating fetch request
-    const tblData = async () => {
-      try {
-        // Replace this with your actual fetch URL
-        setLoading(true);
-        // alert("Selected aid is " + selectedAid)
-        // alert("Selected aid name is " + JSON.stringify(selectedAcdc.sad.a.personLegalName))
-        let newData = await checkUpload(
-          selectedAid,
-          selectedAcdc.sad.a.personLegalName
-        );
-        console.log(
-          "New data converted type and data",
-          typeof newData,
-          newData
-        );
-        setData(newData ?? []);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching data: ", error);
-      }
-    };
+  const [hasError, setHasError] = useState("");
 
-    if (!selectedAcdc || !selectedAid) {
-      openSnackbar("No credential selected! redirecting to Home...", "warning");
-      navigate("/");
-    } else {
-      tblData();
-    }
-  }, []);
+  const handleCurrentSignatureData = (data) => {
+    openSnackbar("Success! Credential selected.", "success")
+    setCurrentSignatureData(data);
+    setHasError("");
+  };
 
   // Function to perform the upload request
-  async function checkUpload(aid, name): Promise<any> {
+  async function getStatus(_signatureData): Promise<any> {
     // Send signed request
     if (!devMode) {
       try {
-        const response_signed = await client.signedFetch(
-          serverUrl,
-          `${statusPath}/${aid}`,
-          "GET",
-          null,
-          name
+        const lRequest = {
+          method: "GET",
+          headers: {},
+        };
+        const statusResp = await regService.getStatus(
+          `${serverUrl}${statusPath}`,
+          lRequest,
+          _signatureData,
+          _signatureData?.autoSignin
         );
-        const response_signed_data = await response_signed.json();
-        console.log(response_signed_data);
-        return response_signed_data;
+
+        if (statusResp.success) {
+          console.log(statusResp.data);
+          setHasError("");
+          return statusResp?.data?.map((ele) => JSON.parse(ele)) ?? [];
+        }
       } catch (error) {
-        openSnackbar("Unable to connect with server", "error");
+        if (typeof error?.message === "string") {
+          setHasError(error);
+          const resp = await requestAidORCred();
+          if (resp) {
+            handleCurrentSignatureData(resp);
+            getReportStatus({ ...resp, autoSignin: true });
+          }
+        } else {
+          openSnackbar("Unable to connect with server", "error");
+          setHasError({ message: "Unable to connect with server" });
+        }
       }
     } else {
+      const aid = "ECJLhLl1-xtrgi9SktH-8_Qc5yz2B24fT6fhdO9o3BdQ";
       if (Object.keys(fakeCheckStatus).includes(aid)) {
         const fakeStatueAid = fakeCheckStatus[aid] ?? [];
         return fakeStatueAid.map((ele) => JSON.parse(ele));
@@ -97,6 +95,40 @@ const StatusPage = ({
       }
     }
   }
+
+  const getReportStatus = async (data) => {
+    try {
+      // Replace this with your actual fetch URL
+      setLoading(true);
+      let newData = await getStatus(data);
+      setData(newData ?? []);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.error("Error fetching data: ", error);
+    }
+  };
+
+  // Simulating fetch request
+  const populateReportStatus = async () => {
+    if (currentSignatureData) {
+      getReportStatus(currentSignatureData);
+    } else {
+      setHasError({
+        message: "Select Credential to Proceed",
+        details: "Select a credential from extension to fetch report status",
+      });
+      const resp = await requestAidORCred();
+      if (resp) {
+        handleCurrentSignatureData(resp);
+        getReportStatus({ ...resp, autoSignin: true });
+      }
+    }
+  };
+
+  useEffect(() => {
+    populateReportStatus();
+  }, []);
 
   return (
     <Grid container spacing={1} style={{ padding: "32px" }}>
@@ -112,7 +144,17 @@ const StatusPage = ({
           />
         </Grid>
       )}
-      {(!data || data.length === 0) && !loading && (
+      {hasError && (
+        <Grid item xs={12}>
+          <CollapseAlert
+            message={
+              typeof hasError === "string" ? hasError : hasError?.message
+            }
+            details={hasError?.details}
+          />
+        </Grid>
+      )}
+      {!hasError && (!data || data.length === 0) && !loading && (
         <Grid item xs={12}>
           <Alert
             severity="info"
