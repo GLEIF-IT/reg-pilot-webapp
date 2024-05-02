@@ -37,6 +37,10 @@ const RegComponent = () => {
   const [pingUrl, setPingUrl] = useState("");
   const [loginUrl, setLoginUrl] = useState("");
 
+  const [aidLoading, setAidLoading] = useState(false);
+  const [credLoading, setCredLoading] = useState(false);
+  const [autoCredLoading, setAutoCredLoading] = useState(false);
+
   useEffect(() => {
     setPingUrl(serverUrl + "/ping");
     setLoginUrl(serverUrl + "/login");
@@ -72,11 +76,17 @@ const RegComponent = () => {
     setSignatureData("");
   };
 
-  const handleAutoSignin = () => {
+  const handleAutoSignin = async () => {
     if (devMode) {
       handleSignifyData(fakeSigData);
     } else {
-      handleRequestAutoSignin();
+      setAutoCredLoading(true);
+      const resp = await requestAutoSignin();
+      console.log("data received", resp);
+      if (resp) {
+        handleSignifyData(resp);
+      }
+      setAutoCredLoading(false);
     }
   };
 
@@ -84,7 +94,9 @@ const RegComponent = () => {
     if (devMode) {
       handleSignifyData(fakeSigData);
     } else {
+      setCredLoading(true);
       const resp = await requestCredential();
+      setCredLoading(false);
       console.log("promised resp from requestCredential", resp);
       handleSignifyData(resp);
     }
@@ -94,16 +106,10 @@ const RegComponent = () => {
     if (devMode) {
       handleSignifyData(fakeSigData);
     } else {
+      setAidLoading(true);
       const resp = await requestAid();
+      setAidLoading(false);
       console.log("promised resp from requestAid", resp);
-      handleSignifyData(resp);
-    }
-  };
-
-  const handleRequestAutoSignin = async () => {
-    const resp = await requestAutoSignin();
-    console.log("data received", resp);
-    if (resp) {
       handleSignifyData(resp);
     }
   };
@@ -140,11 +146,12 @@ const RegComponent = () => {
                 handleCredSignin={handleCredSignin}
                 handleAutoSignin={handleAutoSignin}
                 handleAidSignin={handleAidSignin}
+                aidLoading={aidLoading}
+                credLoading={credLoading}
+                autoCredLoading={autoCredLoading}
                 removeData={removeData}
                 signatureData={signatureData}
-                serverUrl={serverUrl}
                 loginUrl={loginUrl}
-                setServerUrl={setServerUrl}
                 handleSettingVendorUrl={handleSettingVendorUrl}
                 vendorConf={vendorConf}
               />
@@ -160,8 +167,6 @@ const RegComponent = () => {
                 serverUrl={serverUrl}
                 statusPath={statusPath}
                 signatureData={signatureData}
-                handleAidSignin={handleAidSignin}
-                handleCredSignin={handleCredSignin}
               />
             }
           />

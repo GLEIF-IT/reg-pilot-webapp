@@ -18,6 +18,9 @@ const HomePage = ({
   loginUrl,
   handleSettingVendorUrl,
   vendorConf,
+  aidLoading,
+  credLoading,
+  autoCredLoading,
 }) => {
   return (
     <Grid container spacing={1} style={{ padding: "32px" }}>
@@ -35,6 +38,9 @@ const HomePage = ({
           handleAidSignin={handleAidSignin}
           signatureData={signatureData}
           handleConfigExt={() => handleSettingVendorUrl(extConf)}
+          aidLoading={aidLoading}
+          credLoading={credLoading}
+          autoCredLoading={autoCredLoading}
         />
       </Grid>
       <Grid item xs={8}>

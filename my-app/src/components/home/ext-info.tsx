@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   CardContent,
+  CircularProgress,
 } from "@mui/material";
 import { CheckCircleOutline, CancelOutlined } from "@mui/icons-material";
 
@@ -21,6 +22,9 @@ interface IExtensionInfo {
   handleAidSignin: () => void;
   signatureData: any;
   handleConfigExt: () => void;
+  aidLoading?: boolean;
+  credLoading?: boolean;
+  autoCredLoading?: boolean;
 }
 
 const ExtensionInfo: React.FC<IExtensionInfo> = ({
@@ -34,6 +38,9 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
   handleAidSignin,
   signatureData,
   handleConfigExt,
+  aidLoading,
+  credLoading,
+  autoCredLoading,
 }) => (
   <Grid
     container
@@ -82,7 +89,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
         </CardContent>
       </Card>
     </Grid>
-    <Grid
+    {/* <Grid
       item
       xs={12}
       style={{
@@ -105,7 +112,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
           </Typography>
         </CardContent>
       </Card>
-    </Grid>
+    </Grid> */}
     <Grid item xs={12}>
       <Box
         sx={{
@@ -131,8 +138,12 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
             variant="contained"
             color="success"
             onClick={handleAidSignin}
+            sx={{ display: "flex", flexDirection: "row", columnGap: "8px" }}
           >
-            Select AID
+            <Typography variant="body2" fontWeight="bold">
+              Select AID
+            </Typography>
+            {aidLoading && <CircularProgress color="inherit" size="12px" />}
           </Button>
         )}
         {(!signatureData || devMode) && (
@@ -141,8 +152,13 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
             variant="contained"
             color="success"
             onClick={handleCredSignin}
+            sx={{ display: "flex", flexDirection: "row", columnGap: "8px" }}
           >
-            Select Credential
+            <Typography variant="body2" fontWeight="bold">
+              Select Credential
+            </Typography>
+
+            {credLoading && <CircularProgress color="inherit" size="12px" />}
           </Button>
         )}
         {(!signatureData || devMode) && (
@@ -151,8 +167,14 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
             variant="contained"
             color="success"
             onClick={handleAutoSignin}
+            sx={{ display: "flex", flexDirection: "row", columnGap: "8px" }}
           >
-            Auto Sign-in Credential
+            <Typography variant="body2" fontWeight="bold">
+              Auto Sign-in Credential
+            </Typography>
+            {autoCredLoading && (
+              <CircularProgress color="inherit" size="12px" />
+            )}
           </Button>
         )}
         {signatureData && (
