@@ -11,25 +11,27 @@ import {
 import { CheckCircleOutline, CancelOutlined } from "@mui/icons-material";
 
 interface IExtensionInfo {
-  installed: boolean;
   vendorConfigued: boolean;
   signedDataReceived: boolean;
   error?: string;
   removeData: () => void;
   devMode: boolean;
   handleCredSignin: () => void;
+  handleAutoSignin: () => void;
+  handleAidSignin: () => void;
   signatureData: any;
   handleConfigExt: () => void;
 }
 
 const ExtensionInfo: React.FC<IExtensionInfo> = ({
-  installed,
   vendorConfigued,
   signedDataReceived,
   error,
   removeData,
   devMode,
   handleCredSignin,
+  handleAutoSignin,
+  handleAidSignin,
   signatureData,
   handleConfigExt,
 }) => (
@@ -38,15 +40,6 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
     spacing={2}
     sx={{ borderRight: "1px solid grey", padding: "8px" }}
   >
-    {installed === false && !vendorConfigued && (
-      <Grid item xs={12} lg={12}>
-        <Alert severity="error" variant="filled">
-          <Typography variant="body2">
-            Download / Install extension to connect
-          </Typography>
-        </Alert>
-      </Grid>
-    )}
     <Grid item xs={12}>
       <Typography variant="body1" fontWeight="bold">
         Please start by signing in with a secure extension.
@@ -63,17 +56,6 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
         <CardContent>
           <Typography variant="body1" fontWeight="bold">
             Extension Config
-          </Typography>
-          <Typography
-            variant="body2"
-            style={{ display: "flex", columnGap: "8px" }}
-          >
-            Extension installed:{" "}
-            {installed ? (
-              <CheckCircleOutline color="success" fontSize="small" />
-            ) : (
-              <CancelOutlined color="error" fontSize="small" />
-            )}
           </Typography>
           <Typography
             variant="body2"
@@ -128,12 +110,12 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
       <Box
         sx={{
           display: "flex",
-          flexDirection: "row",
-          columnGap: "8px",
+          flexDirection: "column",
+          rowGap: "8px",
           justifyContent: "flex-end",
         }}
       >
-        {!vendorConfigued && !devMode && (
+        {!devMode && !signatureData && (
           <Button
             size="small"
             variant="contained"
@@ -143,24 +125,46 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
             Configure Extension
           </Button>
         )}
-        {((vendorConfigued && !signatureData) || devMode) && (
+        {(!signatureData || devMode) && (
+          <Button
+            size="small"
+            variant="contained"
+            color="success"
+            onClick={handleAidSignin}
+          >
+            Select AID
+          </Button>
+        )}
+        {(!signatureData || devMode) && (
           <Button
             size="small"
             variant="contained"
             color="success"
             onClick={handleCredSignin}
           >
-            Sign-in w/ Credential
+            Select Credential
           </Button>
         )}
-        <Button
-          size="small"
-          variant="contained"
-          color="error"
-          onClick={removeData}
-        >
-          Clear
-        </Button>
+        {(!signatureData || devMode) && (
+          <Button
+            size="small"
+            variant="contained"
+            color="success"
+            onClick={handleAutoSignin}
+          >
+            Auto Sign-in Credential
+          </Button>
+        )}
+        {signatureData && (
+          <Button
+            size="small"
+            variant="contained"
+            color="error"
+            onClick={removeData}
+          >
+            Clear
+          </Button>
+        )}
       </Box>
     </Grid>
     <Grid item xs={12}>

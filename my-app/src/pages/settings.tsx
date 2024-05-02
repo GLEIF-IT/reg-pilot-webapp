@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Box, Grid } from "@mui/material";
 import { useSnackbar } from "../context/snackbar.tsx";
 import fakeLoginResponse from "../test/fakeLoginResponse.json";
@@ -16,7 +16,7 @@ const SettingsPage = ({
   pingUrl,
   setPingUrl,
   loginUrl,
-  setLoginUrl
+  setLoginUrl,
 }) => {
   const { openSnackbar } = useSnackbar();
 
@@ -25,8 +25,6 @@ const SettingsPage = ({
 
   const [loginResponse, setLoginResponse] = useState<any>("");
   const [loginRequest, setLoginRequest] = useState<any>("");
-
-  
 
   async function handlePing() {
     if (devMode) {
@@ -65,28 +63,28 @@ const SettingsPage = ({
     if (devMode) {
       setLoginResponse(fakeLoginResponse);
       openSnackbar("<Devmode> Response received!", "success");
-    } else {
-      try {
-        const response = await regService.postLogin(loginUrl, {
-          ...lRequest,
-          body: JSON.stringify(requestBody, null, 2),
-        });
-        setLoginResponse(response);
-        console.log("logged in result", response);
-        if (!response) return;
+      return;
+    }
 
-        if (response.aid === signatureData?.headers["signify-resource"]) {
-        } else if (JSON.stringify(response).includes("Exception")) {
-          openSnackbar(
-            "Login Failed. Please pick different credential",
-            "error"
-          );
-        } else {
-          openSnackbar("Waiting for verificaiton", "warning");
-        }
-      } catch (error) {
-        openSnackbar(`Unable to connect with server at ${loginUrl}`, "error");
+    try {
+      const response = await regService.postLogin(loginUrl, {
+        ...lRequest,
+        body: JSON.stringify(requestBody, null, 2),
+      });
+      setLoginResponse(response);
+      console.log("logged in result", response);
+      if (!response) return;
+
+      if (
+        response?.aid !== signatureData?.headers["signify-resource"] ||
+        JSON.stringify(response).includes("Exception")
+      ) {
+        openSnackbar("Login Failed. Please pick different credential", "error");
+      } else {
+        openSnackbar("Credential verified!", "success");
       }
+    } catch (error) {
+      openSnackbar(`Unable to connect with server at ${loginUrl}`, "error");
     }
   };
 

@@ -1,39 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert, Typography, Button, Box, Grid } from "@mui/material";
 import { UploadFile } from "@mui/icons-material";
-
+import { regService } from "../services/reg-server.ts";
+import { useSnackbar } from "../context/snackbar.tsx";
 import fakeFileUpload from "../test/fakeFileUpload.json";
 
 const uploadPath = "/upload";
+const acceptedTypes = [
+  "application/zip",
+  "application/x-zip-compressed",
+  "multipart/x-zip",
+  "application/zip-compressed",
+  "application/octet-stream",
+];
 
-const ReportsPage = ({ devMode, serverUrl, selectedId, selectedAcdc }) => {
+type TSubmitStatus = "loading" | "success" | "error" | "";
+
+const getFakeFileResponse = async () => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(fakeFileUpload);
+    }, 3000);
+  });
+};
+
+const ReportsPage = ({
+  devMode,
+  serverUrl,
+  selectedAid,
+  selectedAcdc,
+  signatureData,
+}) => {
   const navigate = useNavigate();
+  const { openSnackbar } = useSnackbar();
 
   const [selectedFile, setSelectedFile] = useState(null);
-  const [errorUpload, setErrorUpload] = useState("");
-  const [submitResult, setSubmitResult] = useState("");
-  const setFile = (file: any) => {
-    const acceptedTypes = [
-      "application/zip",
-      "application/x-zip-compressed",
-      "multipart/x-zip",
-      "application/zip-compressed",
-      "application/octet-stream",
-    ];
+  const [error, setError] = useState("");
+  const [filename, setFilename] = useState("");
+  const [submitStatus, setSubmitStatus] = useState<TSubmitStatus>("");
 
+  useEffect(() => {
+    if (!selectedAid) {
+      openSnackbar("No credential selected! redirecting to Home...", "warning");
+      navigate("/");
+    }
+  }, []);
+  const setFile = (file: any) => {
     if (!acceptedTypes.includes(file.type)) {
       setSelectedFile(null);
-      setErrorUpload(
-        `${file.name} is not a zip file. \n Please select a zip file.`
-      );
-      setSubmitResult("");
-      alert("file is not a zip file");
+      setError(`${file.name} is not a zip file. \n Please select a zip file.`);
       return;
     }
-    setErrorUpload("");
-    setSubmitResult("");
+    setError("");
+    setSubmitStatus("");
     setSelectedFile(file);
+    setFilename(file.name);
   };
 
   const handleFileSelect = (event: any) => {
@@ -61,44 +83,44 @@ const ReportsPage = ({ devMode, serverUrl, selectedId, selectedAcdc }) => {
     const formData = new FormData();
     formData.append("upload", report);
 
-    // // Send signed request
     console.log("Form data is", formData.get("upload"));
 
     if (!devMode) {
-      const response_signed = await client.signedFetch(
-        serverUrl,
-        `${uploadPath}/${aid}/${said}`,
-        "POST",
-        formData,
-        name
-      );
-      const response_signed_data = await response_signed.json();
-      console.log("upload response", response_signed_data);
-
-      // Return the response data
-      return response_signed_data;
+      try {
+        const lRequest = {
+          method: "POST",
+          headers: {},
+          body: formData,
+        };
+        const response_signed_data = await regService.postReport(
+          `${serverUrl}${uploadPath}/${aid}/${said}`,
+          lRequest,
+          signatureData,
+          signatureData?.autoSignin
+        );
+        console.log("upload response", response_signed_data);
+        setSubmitStatus("success");
+        return response_signed_data;
+      } catch (error) {
+        setSubmitStatus("error");
+        setSelectedFile(null);
+      }
     } else {
-      return fakeFileUpload;
+      const fakeFile = await getFakeFileResponse();
+      setSubmitStatus("success");
+      return fakeFile;
     }
   }
 
   const handleSubmit = async () => {
-    // alert("handling report submit")
-    // Add your upload logic her
-    setSubmitResult("uploading");
-    //wait 2 seconds
-    //await new Promise(r => setTimeout(r, 2000));
+    setSubmitStatus("loading");
+
     await upload(
-      selectedId,
-      selectedAcdc.sad.a.personLegalName,
+      selectedAid,
+      selectedAcdc?.sad?.a?.personLegalName,
       selectedAcdc.anchor.pre,
       selectedFile
     );
-
-    setSubmitResult(`done|${selectedFile?.name}`);
-    // await new Promise(r => setTimeout(r, 2000));
-    // setSubmitResult(`fail|${selectedFile.name}` )
-    setSelectedFile(null);
   };
 
   return (
@@ -106,12 +128,12 @@ const ReportsPage = ({ devMode, serverUrl, selectedId, selectedAcdc }) => {
       <Grid item xs={12}>
         <Typography variant="h3">Upload your report</Typography>
       </Grid>
-      {errorUpload !== "" && (
+      {error && (
         <Grid item xs={12}>
-          <Alert severity="error">{errorUpload}</Alert>
+          <Alert severity="error">{error}</Alert>
         </Grid>
       )}
-      {submitResult.split("|")[0] === "fail" && (
+      {submitStatus === "error" && (
         <Grid item xs={12}>
           <Alert
             severity="error"
@@ -120,7 +142,6 @@ const ReportsPage = ({ devMode, serverUrl, selectedId, selectedAcdc }) => {
                 color="inherit"
                 size="small"
                 onClick={() => {
-                  setSubmitResult("");
                   navigate("/status");
                 }}
               >
@@ -128,11 +149,11 @@ const ReportsPage = ({ devMode, serverUrl, selectedId, selectedAcdc }) => {
               </Button>
             }
           >
-            Failed submitted the report {submitResult.split("|")[1]}
+            Failed submitted the report {filename}
           </Alert>
         </Grid>
       )}
-      {submitResult.split("|")[0] === "done" && (
+      {submitStatus === "success" && (
         <Grid item xs={12}>
           <Alert
             severity="success"
@@ -141,7 +162,6 @@ const ReportsPage = ({ devMode, serverUrl, selectedId, selectedAcdc }) => {
                 color="inherit"
                 size="small"
                 onClick={() => {
-                  setSubmitResult("");
                   navigate("/status");
                 }}
               >
@@ -149,19 +169,19 @@ const ReportsPage = ({ devMode, serverUrl, selectedId, selectedAcdc }) => {
               </Button>
             }
           >
-            Successfuly submitted the report {submitResult.split("|")[1]}
+            Successfuly submitted the report {filename}
           </Alert>
         </Grid>
       )}
-      {submitResult === "uploading" && (
+      {submitStatus === "loading" && (
         <Grid item xs={12}>
           <Alert severity="info">Uploading {selectedFile.name}</Alert>
         </Grid>
       )}
-      {errorUpload === "" && selectedFile !== null && submitResult === "" && (
+      {!error && selectedFile && !submitStatus && (
         <Grid item xs={12}>
           <Alert severity="success">
-            Succesfully loaded report {selectedFile.name}
+            Succesfully loaded report {filename}
             {<br />}
             Submit your report next.
           </Alert>
@@ -214,9 +234,7 @@ const ReportsPage = ({ devMode, serverUrl, selectedId, selectedAcdc }) => {
             variant="contained"
             color="primary"
             size="small"
-            onClick={async () => {
-              await handleSubmit();
-            }}
+            onClick={handleSubmit}
             disabled={!selectedFile}
           >
             Submit Report

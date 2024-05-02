@@ -37,38 +37,45 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({
 
     const requestBody = {
       aid: selectedId,
-      said: selectedAcdc?.sad.a.personLegalName,
+      said: selectedAcdc?.sad?.a?.personLegalName,
       vlei: vlei_cesr,
     };
 
     const lRequest = {
       method: "POST",
-      headers: signatureData?.headers,
       body: requestBody,
     };
 
     if (devMode) {
       openSnackbar("<Devmode> Response received: Verified", "success");
-    } else {
-      try {
-        const response = await regService.postLogin(loginUrl, {
-          ...lRequest,
-          body: JSON.stringify(requestBody, null, 2),
-        });
-        if (!response) return;
+      return;
+    }
 
-        if (response.aid === signatureData?.headers["signify-resource"]) {
-        } else if (JSON.stringify(response).includes("Exception")) {
-          openSnackbar(
-            "Login Failed. Please pick different credential",
-            "error"
-          );
-        } else {
-          openSnackbar("Waiting for verificaiton", "warning");
-        }
-      } catch (error) {
-        openSnackbar(`Unable to connect with server at ${loginUrl}`, "error");
+    try {
+      const response = await regService.postLogin(`${loginUrl}/${selectedId}`, {
+        ...lRequest,
+        body: JSON.stringify(requestBody, null, 2),
+      });
+      console.log("response", response);
+      if (!response) return;
+
+      if (response.success) {
+        openSnackbar("Credential verified!", "success");
+      } else {
+        openSnackbar("Login Failed. Please pick different credential", "error");
       }
+      // if (
+      //   response !== signatureData?.headers["signify-resource"] ||
+      //   JSON.stringify(response).includes("Exception")
+      // ) {
+      //   openSnackbar("Login Failed. Please pick different credential", "error");
+      // } else {
+      //   openSnackbar("Credential verified!", "success");
+      // }
+    } catch (error) {
+      if (typeof error?.message === "string") openSnackbar(error?.message, "error");
+      else
+        openSnackbar(`Unable to connect with server at ${loginUrl}`, "error");
     }
   };
   return (
