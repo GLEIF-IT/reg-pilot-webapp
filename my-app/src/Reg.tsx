@@ -8,7 +8,7 @@ import {
   requestAid,
   requestCredential,
   trySettingVendorUrl,
-} from "./temp-signify-polaris-web";
+} from "signify-polaris-web";
 import fakeSigData from "./test/fakeSigData.json";
 import { useDevMode } from "./context/devMode.tsx";
 import { useSnackbar } from "./context/snackbar.tsx";

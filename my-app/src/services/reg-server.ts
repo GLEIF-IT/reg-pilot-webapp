@@ -1,4 +1,4 @@
-import { signifyFetch } from "../temp-signify-polaris-web";
+import { signifyFetch } from "signify-polaris-web";
 
 const RegServer = () => {
   /**

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { requestAidORCred } from "signify-polaris-web";
 import {
   Alert,
   Paper,
@@ -27,7 +28,6 @@ import CollapseAlert from "../components/collapse-alert.tsx";
 import { regService } from "../services/reg-server.ts";
 import fakeCheckStatus from "../test/fakeCheckStatus.json";
 import { useSnackbar } from "../context/snackbar.tsx";
-import { requestAidORCred } from "../temp-signify-polaris-web";
 
 const StatusPage = ({
   selectedAid,
@@ -78,7 +78,7 @@ const StatusPage = ({
           const resp = await requestAidORCred();
           if (resp) {
             handleCurrentSignatureData(resp);
-            await getReportStatus({ ...resp, autoSignin: true });
+            getReportStatus({ ...resp, autoSignin: true });
           }
         } else {
           openSnackbar("Unable to connect with server", "error");
@@ -112,7 +112,7 @@ const StatusPage = ({
   // Simulating fetch request
   const populateReportStatus = async () => {
     if (currentSignatureData) {
-      await getReportStatus(currentSignatureData);
+      getReportStatus(currentSignatureData);
     } else {
       setHasError({
         message: "Select Credential to Proceed",
@@ -121,7 +121,7 @@ const StatusPage = ({
       const resp = await requestAidORCred();
       if (resp) {
         handleCurrentSignatureData(resp);
-        await getReportStatus({ ...resp, autoSignin: true });
+        getReportStatus({ ...resp, autoSignin: true });
       }
     }
   };
