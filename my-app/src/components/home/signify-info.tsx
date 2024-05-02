@@ -7,15 +7,17 @@ import {
   CardContent,
   Switch,
   Button,
+  Tooltip,
+  Alert,
 } from "@mui/material";
-import { Beenhere } from "@mui/icons-material";
+import { Beenhere, LockOpenRounded } from "@mui/icons-material";
 import { regService } from "../../services/reg-server.ts";
 import { useSnackbar } from "../../context/snackbar.tsx";
 
 interface ISignifyInfo {
   selectedId: string;
   selectedAcdc: any;
-  signatureData: string;
+  signatureData: any;
   loginUrl: string;
   devMode: boolean;
 }
@@ -30,6 +32,8 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({
   const sigString = JSON.stringify(signatureData, null, 2);
   const { openSnackbar } = useSnackbar();
   const [showRaw, setShowRaw] = useState(false);
+  const [showAlert, setShowAlert] = useState(true);
+
   const { credential } = signatureData ?? {};
 
   const handleLogin = async () => {
@@ -73,7 +77,8 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({
       //   openSnackbar("Credential verified!", "success");
       // }
     } catch (error) {
-      if (typeof error?.message === "string") openSnackbar(error?.message, "error");
+      if (typeof error?.message === "string")
+        openSnackbar(error?.message, "error");
       else
         openSnackbar(`Unable to connect with server at ${loginUrl}`, "error");
     }
@@ -90,6 +95,25 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({
           <strong>AID:</strong> {selectedId}
         </Typography>
       </Grid>
+      {showAlert && signatureData?.autoSignin ? (
+        <Grid item xs={6}>
+          <Alert
+            severity="info"
+            icon={<LockOpenRounded />}
+            onClose={() => setShowAlert(false)}
+          >
+            <Typography variant="subtitle1" fontWeight="bold">
+              What does auto signin mean?
+            </Typography>
+            <Typography variant="subtitle2">
+              A credential will be used to sign subsequent network requests if
+              it is designated as <strong>auto signin</strong>.
+            </Typography>
+          </Alert>
+        </Grid>
+      ) : (
+        <></>
+      )}
       <Grid item xs={12}>
         <Box
           sx={{
@@ -143,9 +167,26 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({
                     <Typography variant="caption">
                       <strong>{credential?.schema?.title}</strong>
                     </Typography>
-                    {credential?.status?.et === "iss" && (
-                      <Beenhere color="success" />
-                    )}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                        columnGap: "8px",
+                      }}
+                    >
+                      {signatureData?.autoSignin ? (
+                        <Tooltip title="this credential is marked as auto signin">
+                          <LockOpenRounded color="success" />
+                        </Tooltip>
+                      ) : (
+                        <></>
+                      )}
+                      {credential?.status?.et === "iss" && (
+                        <Tooltip title="credential is valid">
+                          <Beenhere color="success" />
+                        </Tooltip>
+                      )}
+                    </Box>
                   </Box>
                   <Typography variant="caption">
                     <strong>AID:</strong> {selectedId}

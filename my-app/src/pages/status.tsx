@@ -46,6 +46,7 @@ const StatusPage = ({
   const [hasError, setHasError] = useState("");
 
   const handleCurrentSignatureData = (data) => {
+    openSnackbar("Success! Credential selected.", "success")
     setCurrentSignatureData(data);
     setHasError("");
   };
@@ -113,7 +114,10 @@ const StatusPage = ({
     if (currentSignatureData) {
       await getReportStatus(currentSignatureData);
     } else {
-      setHasError({ message: "Select Credential to Proceed" });
+      setHasError({
+        message: "Select Credential to Proceed",
+        details: "Select a credential from extension to fetch report status",
+      });
       const resp = await requestAidORCred();
       if (resp) {
         handleCurrentSignatureData(resp);

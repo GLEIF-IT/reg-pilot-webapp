@@ -129,7 +129,9 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
             color="success"
             onClick={handleConfigExt}
           >
-            Configure Extension
+            <Typography variant="body2" fontWeight="bold">
+              Configure Extension
+            </Typography>
           </Button>
         )}
         {(!signatureData || devMode) && (

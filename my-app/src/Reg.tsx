@@ -11,6 +11,7 @@ import {
 } from "./temp-signify-polaris-web";
 import fakeSigData from "./test/fakeSigData.json";
 import { useDevMode } from "./context/devMode.tsx";
+import { useSnackbar } from "./context/snackbar.tsx";
 
 import ExtNotFound from "./components/ext-not-found.tsx";
 import AppLayout from "./pages/app-layout.tsx";
@@ -23,6 +24,7 @@ const statusPath = "/status";
 
 const RegComponent = () => {
   const { devMode, toggleDevMode } = useDevMode();
+  const { openSnackbar } = useSnackbar();
   const [signatureData, setSignatureData] = useState<any>();
   const [extensionInstalled, setExtensionInstalled] = useState<null | boolean>(
     null
@@ -58,6 +60,11 @@ const RegComponent = () => {
       setSignatureData(data);
       setSelectedId(data.headers["signify-resource"]);
       setSelectedAcdc(data.credential);
+      openSnackbar(
+        data?.autoSignin
+          ? "Success! Auto Signin Credential selected."
+          : "Success! Credential selected.", "success"
+      );
     } else {
       alert("Could not set signify data");
     }

@@ -40,12 +40,6 @@ const ReportsPage = ({
   const [filename, setFilename] = useState("");
   const [submitStatus, setSubmitStatus] = useState<TSubmitStatus>("");
 
-  useEffect(() => {
-    if (!selectedAid) {
-      openSnackbar("No credential selected! redirecting to Home...", "warning");
-      navigate("/");
-    }
-  }, []);
   const setFile = (file: any) => {
     if (!acceptedTypes.includes(file.type)) {
       setSelectedFile(null);
