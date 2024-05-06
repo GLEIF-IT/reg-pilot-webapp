@@ -68,14 +68,6 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({
       } else {
         openSnackbar("Login Failed. Please pick different credential", "error");
       }
-      // if (
-      //   response !== signatureData?.headers["signify-resource"] ||
-      //   JSON.stringify(response).includes("Exception")
-      // ) {
-      //   openSnackbar("Login Failed. Please pick different credential", "error");
-      // } else {
-      //   openSnackbar("Credential verified!", "success");
-      // }
     } catch (error) {
       if (typeof error?.message === "string")
         openSnackbar(error?.message, "error");
@@ -142,6 +134,7 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({
               <textarea
                 id="message"
                 rows={12}
+                cols={80}
                 className="textarea-data"
                 placeholder={sigString}
                 defaultValue={sigString}

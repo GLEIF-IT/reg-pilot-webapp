@@ -46,7 +46,7 @@
 }
 
 .textarea-data {
-  width: 100%;
+  /* width: 100%; */
   display: block;
   padding: 0.625rem;
   color: black;
