@@ -27,6 +27,18 @@ const SettingsPage = ({
   setPingUrl,
   loginUrl,
   setLoginUrl,
+}: {
+  devMode: boolean,
+  selectedId: any,
+  selectedAcdc: any,
+  signatureData: any,
+  extensionInstalled: any,
+  serverUrl: any,
+  setServerUrl: any,
+  pingUrl: any,
+  setPingUrl: any,
+  loginUrl: any,
+  setLoginUrl: any,
 }) => {
   const { openSnackbar } = useSnackbar();
 
@@ -53,23 +65,16 @@ const SettingsPage = ({
   }, [])
 
   const handleSetRequests = () => {
-    let vlei_cesr = signatureData?.credential;
+    let vlei_cesr = signatureData?.credential.cesr;
     console.log("vlei cesr", vlei_cesr);
     console.log("signatureData", signatureData);
     console.log("Login url is", loginUrl);
-    // Create the request body object
-    const requestBody = {
-      aid: selectedId,
-      said: selectedAcdc?.sad.a.personLegalName,
-      vlei: vlei_cesr,
-    };
 
-    const lRequest = {
-      method: "POST",
-      headers: signatureData?.headers,
-      body: requestBody,
-    };
-    setLoginRequest(lRequest);
+    // Create the request body object
+    let heads = new Headers();
+    heads.set('Content-Type', 'application/json');
+    setLoginRequest({headers: heads, method: 'POST', body: JSON.stringify({"said": selectedAcdc?.sad?.d, "vlei": vlei_cesr})});
+
     setVerifyRequest({method: "GET", headers: signatureData?.headers});
     setStatusRequest({method: "GET", headers: signatureData?.headers});
     setReportRequest({method: "POST", headers: signatureData?.headers});
@@ -99,24 +104,20 @@ const SettingsPage = ({
     }
 
     try {
-      const response = await regService.postLogin(loginUrl, {
+      const response = await regService.postLogin(`${loginUrl}`, {
         ...loginRequest,
-        body: JSON.stringify(loginRequest.body, null, 2),
       });
       setLoginResponse(response);
       console.log("logged in result", response);
-      if (!response) return;
-
-      if (
-        response?.aid !== signatureData?.headers["signify-resource"] ||
-        JSON.stringify(response).includes("Exception")
-      ) {
+      if (!response) 
+      {
         openSnackbar("Login Failed. Please pick different credential", "error");
       } else {
         openSnackbar("Credential verified!", "success");
       }
     } catch (error) {
       openSnackbar(`Unable to connect with server at ${loginUrl}`, "error");
+      console.error("Error in login", error);
     }
   };
 
