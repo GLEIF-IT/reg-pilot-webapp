@@ -1,0 +1,12 @@
+{
+    "include": ["./"],
+    "extends": "./tsconfig.node.json",
+    "compilerOptions": {
+        "noEmit": true,
+        "jsx": "react",
+        "paths": {
+            "signify-ts": ["../src"]
+        },
+        "allowImportingTsExtensions": true
+    }
+}
