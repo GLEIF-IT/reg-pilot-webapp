@@ -1,6 +1,6 @@
 import { strict as assert } from "assert";
 import { getOrCreateClients } from "./utils/test-setup";
-import { Cigar, SignifyClient, b } from "signify-ts";
+import { Cigar, HEADER_SIG_INPUT, HEADER_SIG_TIME, SaltyKeeper } from "signify-ts";
 import { getGrantedCredential } from "./singlesig-vlei-issuance.test";
 
 const ECR_SCHEMA_SAID = "EEy9PkikFcANV1l7EHukCeXqrzT1hNZjGlUk7wuMO5jw";
@@ -56,6 +56,44 @@ test("vlei-server", async function run() {
     let body = await resp.json();
     assert.equal(body["aid"], `${ecrAid.prefix}`);
     assert.equal(body["said"], `${ecrCred.sad.d}`);
+
+    heads = new Headers();
+    heads.set("Content-Type", "application/json");
+    let reqInit3 = { headers: heads, method: "GET", body: null };
+    resp = await roleClient.signedFetch(
+        aidName,
+        `http://localhost:8000`,
+        `/status/${ecrAid.prefix}`,
+        reqInit3
+    );
+    assert.equal(200, resp.status);
+    body = await resp.text();
+    assert.equal(JSON.parse(body)[ecrAid.prefix].length, 0); // empty upload list
+
+    // const keeper = roleClient.manager!.get(ecrAid) as SaltyKeeper;
+    // const signer = keeper.signers[0];
+    // const created = lastHeaders
+    //     .get(HEADER_SIG_INPUT)
+    //     ?.split(';created=')[1]
+    //     .split(';keyid=')[0];
+    // const data = `"@method": POST\n"@path": /test\n"signify-resource": ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK\n"signify-timestamp": ${lastHeaders.get(
+    //     HEADER_SIG_TIME
+    // )}\n"@signature-params: (@method @path signify-resource signify-timestamp);created=${created};keyid=BPmhSfdhCPxr3EqjxzEtF8TVy0YX7ATo0Uc8oo2cnmY9;alg=ed25519"`;
+
+    // if (data) {
+    //     const raw = new TextEncoder().encode(data);
+    //     const sig = signer.sign(raw, null) as Cigar;
+    //     assert.equal(
+    //         sig.qb64,
+    //         lastHeaders
+    //             .get('signature')
+    //             ?.split('signify="')[1]
+    //             .split('"')[0]
+    //     );
+    // } else {
+    //     fail(`${HEADER_SIG_INPUT} is empty`);
+    // }
+
   } catch (e) {
     console.log(e);
     fail(e);
