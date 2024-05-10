@@ -2,6 +2,8 @@ import { strict as assert } from "assert";
 import { getOrCreateClients } from "./utils/test-setup";
 import { Cigar, HEADER_SIG_INPUT, HEADER_SIG_TIME, SaltyKeeper } from "signify-ts";
 import { getGrantedCredential } from "./singlesig-vlei-issuance.test";
+import fs from 'fs';
+import FormData from 'form-data';
 
 const ECR_SCHEMA_SAID = "EEy9PkikFcANV1l7EHukCeXqrzT1hNZjGlUk7wuMO5jw";
 
@@ -12,13 +14,13 @@ test("vlei-server", async function run() {
   const bran = "Cqmi-2wL78XQl4_GNtLhP"; //taken from SIGNIFY_SECRETS output during singlesig-vlei-issuance.test.ts
   const aidName = "role";
   const [roleClient] = await getOrCreateClients(1, [bran]);
-  try {
-    let resp = await fetch("http://127.0.0.1:8000/ping", {
-      method: "GET",
-      body: null,
+
+    let resp1 = await fetch("http://127.0.0.1:8000/ping", {
+        method: "GET",
+        body: null,
     });
-    assert.equal(resp.status, 200);
-    let pong = await resp.text();
+    assert.equal(resp1.status, 200);
+    let pong = await resp1.text();
     assert.equal(pong, "Pong");
 
     let ecrCreds = await roleClient.credentials().list();
@@ -32,70 +34,67 @@ test("vlei-server", async function run() {
     assert(ecrCredHolder.atc !== undefined);
     let ecrCredCesr = await roleClient.credentials().get(ecrCred.sad.d, true);
 
-    let heads = new Headers();
-    heads.set("Content-Type", "application/json");
-    let reqInit1 = {
-      headers: heads,
+    let heads2 = new Headers();
+    heads2.set("Content-Type", "application/json");
+    let reqInit2 = {
+      headers: heads2,
       method: "POST",
       body: JSON.stringify({ said: ecrCred.sad.d, vlei: ecrCredCesr }),
     };
-    resp = await fetch("http://localhost:8000/login", reqInit1);
-    assert.equal(resp.status, 202);
+    let resp2 = await fetch("http://localhost:8000/login", reqInit2);
+    assert.equal(resp2.status, 202);
 
     let ecrAid = await roleClient.identifiers().get(aidName);
-    heads = new Headers();
-    heads.set("Content-Type", "application/json");
-    let reqInit2 = { headers: heads, method: "GET", body: null };
-    resp = await roleClient.signedFetch(
+    let heads3 = new Headers();
+    heads3.set("Content-Type", "application/json");
+    let reqInit3 = { headers: heads3, method: "GET", body: null };
+    let resp3 = await roleClient.signedFetch(
       aidName,
       "http://localhost:8000",
       `/checklogin/${ecrAid.prefix}`,
-      reqInit2
+      reqInit3
     );
-    assert.equal(200, resp.status);
-    let body = await resp.json();
+    assert.equal(200, resp3.status);
+    let body = await resp3.json();
     assert.equal(body["aid"], `${ecrAid.prefix}`);
     assert.equal(body["said"], `${ecrCred.sad.d}`);
 
-    heads = new Headers();
-    heads.set("Content-Type", "application/json");
-    let reqInit3 = { headers: heads, method: "GET", body: null };
-    resp = await roleClient.signedFetch(
+    let heads4 = new Headers();
+    heads4.set("Content-Type", "application/json");
+    let reqInit4 = { headers: heads4, method: "GET", body: null };
+    let resp4 = await roleClient.signedFetch(
         aidName,
         `http://localhost:8000`,
         `/status/${ecrAid.prefix}`,
-        reqInit3
+        reqInit4
     );
-    assert.equal(200, resp.status);
-    body = await resp.text();
-    assert.equal(JSON.parse(body)[ecrAid.prefix].length, 0); // empty upload list
+    assert.equal(resp4.status,200);
+    let body4 = await resp4.json();
+    let parsedBody4 = JSON.parse(body4[0]);
+    assert.equal('msg' in parsedBody4, true);
 
-    // const keeper = roleClient.manager!.get(ecrAid) as SaltyKeeper;
-    // const signer = keeper.signers[0];
-    // const created = lastHeaders
-    //     .get(HEADER_SIG_INPUT)
-    //     ?.split(';created=')[1]
-    //     .split(';keyid=')[0];
-    // const data = `"@method": POST\n"@path": /test\n"signify-resource": ELUvZ8aJEHAQE-0nsevyYTP98rBbGJUrTj5an-pCmwrK\n"signify-timestamp": ${lastHeaders.get(
-    //     HEADER_SIG_TIME
-    // )}\n"@signature-params: (@method @path signify-resource signify-timestamp);created=${created};keyid=BPmhSfdhCPxr3EqjxzEtF8TVy0YX7ATo0Uc8oo2cnmY9;alg=ed25519"`;
-
-    // if (data) {
-    //     const raw = new TextEncoder().encode(data);
-    //     const sig = signer.sign(raw, null) as Cigar;
-    //     assert.equal(
-    //         sig.qb64,
-    //         lastHeaders
-    //             .get('signature')
-    //             ?.split('signify="')[1]
-    //             .split('"')[0]
-    //     );
-    // } else {
-    //     fail(`${HEADER_SIG_INPUT} is empty`);
-    // }
-
-  } catch (e) {
-    console.log(e);
-    fail(e);
-  }
+    // try uploading a report that is signed by an unknown aid
+    let unknown_report_zip = fs.readFileSync('../data/report.zip');
+    let formData = new FormData();
+    formData.append('upload', unknown_report_zip, { filename: 'report.zip', contentType: 'application/zip' });
+    let formBuffer = formData.getBuffer();
+    let reqInit5: RequestInit = {
+        method: 'POST',
+        body: formBuffer,
+        headers: {
+            ...formData.getHeaders(),
+            'Content-Length': formBuffer.length.toString()
+        }
+    };
+    let resp5 = await roleClient.signedFetch(
+        aidName,
+        `http://localhost:8000`,
+        `/upload/${ecrAid.prefix}/${ecrCred.sad.d}`,
+        reqInit5
+    );
+    assert.equal(resp5.status,202);
+    let body5 = await resp5.json();
+    let parsedBody5 = body5;
+    assert.equal('msg' in parsedBody5, true);
+    assert.equal(parsedBody5['msg'], `Upload ${ecrCred.sad.d} received from ${ecrAid.prefix}`);
 });

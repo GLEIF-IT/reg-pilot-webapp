@@ -2,9 +2,10 @@
   "type": "module",
   "private": true,
   "dependencies": {
-    "signify-ts": "file:../../signify-ts",
     "bip39": "^3.1.0",
-    "bip39-light": "^1.0.7"
+    "bip39-light": "^1.0.7",
+    "form-data": "^4.0.0",
+    "signify-ts": "file:../../signify-ts"
   },
   "scripts": {
     "test:integration": "jest ./ --runInBand --bail"
