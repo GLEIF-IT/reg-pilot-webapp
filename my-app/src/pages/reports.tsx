@@ -70,7 +70,6 @@ const ReportsPage = ({
   // Function to perform the upload request
   async function upload(
     aid: string,
-    name: string,
     said: string,
     report: string
   ): Promise<any> {
@@ -96,6 +95,7 @@ const ReportsPage = ({
         setSubmitStatus("success");
         return response_signed_data;
       } catch (error) {
+        console.error("Error uploading report", error);
         setSubmitStatus("error");
         setSelectedFile(null);
       }
@@ -111,9 +111,8 @@ const ReportsPage = ({
 
     await upload(
       selectedAid,
-      selectedAcdc?.sad?.a?.personLegalName,
-      selectedAcdc.anchor.pre,
-      selectedFile
+      selectedAcdc,
+      selectedFile!
     );
   };
 
@@ -143,7 +142,7 @@ const ReportsPage = ({
               </Button>
             }
           >
-            Failed submitted the report {filename}
+            Failed to submit the report {filename}
           </Alert>
         </Grid>
       )}
