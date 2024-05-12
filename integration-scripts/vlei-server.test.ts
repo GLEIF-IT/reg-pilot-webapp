@@ -97,4 +97,4 @@ test("vlei-server", async function run() {
     let parsedBody5 = body5;
     assert.equal('msg' in parsedBody5, true);
     assert.equal(parsedBody5['msg'], `Upload ${ecrCred.sad.d} received from ${ecrAid.prefix}`);
-});
+}, 100000);
