@@ -1,7 +1,7 @@
 This is the regulatory customer pilot webapp.
 It requires a signify extension to provide signed headers.
 When run in developer mode it uses hardcoded data.
-Otherwise it should be run with the reg-pilot-server and reg-pilot-verifier (see the docker-compose)
+Otherwise it should be run with the reg-pilot-api and vlei-verifier (see the docker-compose)
 
 # Local development
 ## Build
