@@ -70,7 +70,7 @@ test("vlei-server", async function run() {
     );
     assert.equal(resp4.status,200);
     let body4 = await resp4.json();
-    let parsedBody4 = JSON.parse(body4[0]);
+    let parsedBody4 = body4[0];
     assert.equal('msg' in parsedBody4, true);
 
     // try uploading a report that is signed by an unknown aid
