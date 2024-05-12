@@ -18,13 +18,9 @@ const RegServer = () => {
     }
   };
 
-  const postLogin = async (url: string, request: any): Promise<any> => {
+  const postLogin = async (url: string, request: any): Promise<string> => {
     const response = await fetch(url, request);
-    const { error, ...rest } = await response.json();
-
-    if (error) throw error;
-
-    return rest;
+    return response.statusText;
   };
 
   const postReport = async (
