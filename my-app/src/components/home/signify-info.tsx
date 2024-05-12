@@ -37,17 +37,20 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({
   const { credential } = signatureData ?? {};
 
   const handleLogin = async () => {
-    let vlei_cesr = signatureData?.credential;
+    let vlei_cesr = signatureData?.credential.cesr;
 
     const requestBody = {
-      aid: selectedId,
-      said: selectedAcdc?.sad?.a?.personLegalName,
+      said: selectedAcdc?.sad?.d,
       vlei: vlei_cesr,
     };
 
+    const lhead = new Headers();
+    lhead.set("Content-Type", "application/json")
+
     const lRequest = {
+      headers: lhead,
       method: "POST",
-      body: requestBody,
+      body: JSON.stringify(requestBody),
     };
 
     if (devMode) {
@@ -56,9 +59,8 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({
     }
 
     try {
-      const response = await regService.postLogin(`${loginUrl}/${selectedId}`, {
+      const response = await regService.postLogin(`${loginUrl}`, {
         ...lRequest,
-        body: JSON.stringify(requestBody, null, 2),
       });
       console.log("response", response);
       if (!response) return;
