@@ -51,17 +51,20 @@ const StatusPage = ({
     setHasError("");
   };
 
-  // Function to perform the upload request
+  // Function to perform the upload status request
   async function getStatus(_signatureData): Promise<any> {
     // Send signed request
     if (!devMode) {
       try {
+        let sheads = new Headers();
+        sheads.set("Content-Type", "application/json");
         const lRequest = {
+          headers: sheads,
           method: "GET",
-          headers: {},
+          body: null,
         };
         const statusResp = await regService.getStatus(
-          `${serverUrl}${statusPath}`,
+          `${serverUrl}${statusPath}/${selectedAid}`,
           lRequest,
           _signatureData,
           _signatureData?.autoSignin

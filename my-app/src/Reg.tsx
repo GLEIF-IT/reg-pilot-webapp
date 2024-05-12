@@ -168,8 +168,7 @@ const RegComponent = () => {
             path="/status"
             element={
               <StatusPage
-                selectedAid={selectedId}
-                selectedAcdc={selectedAcdc}
+                selectedAid={signatureData?.credential?.sad?.a?.i}
                 devMode={devMode}
                 serverUrl={serverUrl}
                 statusPath={statusPath}
@@ -183,8 +182,8 @@ const RegComponent = () => {
               <ReportsPage
                 devMode={devMode}
                 serverUrl={serverUrl}
-                selectedAid={selectedId}
-                selectedAcdc={selectedAcdc}
+                selectedAid={signatureData?.credential?.sad?.a?.i}
+                selectedAcdc={signatureData?.credential?.sad?.d}
                 signatureData={signatureData}
               />
             }
