@@ -1,7 +1,7 @@
 This is the regulatory customer pilot webapp.
-It requires a signify extension to provide signed headers.
-When run in developer mode it uses hardcoded data.
-Otherwise it should be run with the reg-pilot-api and vlei-verifier (see the docker-compose)
+It requires a signify enabled browser extension, like [this open source one](https://github.com/WebOfTrust/signify-browser-extension), to provide signed headers.
+When run in developer mode it uses hardcoded data to test the UI.
+Otherwise it should configured to point to the [reg-pilot-api](https://github.com/GLEIF-IT/reg-pilot-api) which uses the (vlei-verifier)[https://github.com/2byrds/vlei-verifier] service.
 
 # Local development
 ## Build
@@ -19,9 +19,27 @@ from the my-app directory:
 ```docker-compose up deps```
 
 ## Seed test data
-```cd data/signify```
+The browser extension must be configured to point to a KERIA instance.
+To seed that instance with a test-identity you can run the singlesig-vlei-issuance.test.ts in the integration-scripts.
+
+From the root project directory make sure you have:
 ```npm install```
-```SIGNIFY_SECRETS="CIsYzCGKpY6FcA1dSnjEje,AHfiDXoQ1zy_UyLhwisFwX,DB5HHvV1HJU7cJWgMUJMnU,CGbMVe0SzH_aor_TmUweIN" npx jest singlesig-vlei-issuance.test.ts```
+
+From the my-app directory make sure you have:
+```npm install```
+
+From the integration-scripts directory make sure you have:
+```npm install```
+
+Then from your IDE or the command line you can run the singlesig-vlei-issuance.test.ts
+```npm run:integration integration-scripts/singlesig-vlei-issuance.test.ts```
+
+You will want to look for the output:
+```SIGNIFY_SECRETS="CIsYzCGKpY6FcA1dSnjEje,AHfiDXoQ1zy_UyLhwisFwX,DB5HHvV1HJU7cJWgMUJMnU,CGbMVe0SzH_aor_TmUweIN```
+
+The last secret in that comma-separated list is the role AID secret that you will use for your KERIA instance.
+If you already know the secrets you want to use then you can do:
+```SIGNIFY_SECRETS="CIsYzCGKpY6FcA1dSnjEje,AHfiDXoQ1zy_UyLhwisFwX,DB5HHvV1HJU7cJWgMUJMnU,CGbMVe0SzH_aor_TmUweIN npx jest singlesig-vlei-issuance.test.ts```
 
 ## Configure the extension for docker
 * agent url is `http://localhost:3901`
