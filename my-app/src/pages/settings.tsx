@@ -28,17 +28,17 @@ const SettingsPage = ({
   loginUrl,
   setLoginUrl,
 }: {
-  devMode: boolean,
-  selectedId: any,
-  selectedAcdc: any,
-  signatureData: any,
-  extensionInstalled: any,
-  serverUrl: any,
-  setServerUrl: any,
-  pingUrl: any,
-  setPingUrl: any,
-  loginUrl: any,
-  setLoginUrl: any,
+  devMode: boolean;
+  selectedId: any;
+  selectedAcdc: any;
+  signatureData: any;
+  extensionInstalled: any;
+  serverUrl: any;
+  setServerUrl: any;
+  pingUrl: any;
+  setPingUrl: any;
+  loginUrl: any;
+  setLoginUrl: any;
 }) => {
   const { openSnackbar } = useSnackbar();
 
@@ -52,17 +52,29 @@ const SettingsPage = ({
   const [verifyRequest, setVerifyRequest] = useState<any>("");
   const [verifyResponse, setVerifyResponse] = useState<any>("");
 
-  const [statusUrl, setStatusUrl] = useState(`${serverUrl}/status/${selectedId}`);
+  const [statusUrl, setStatusUrl] = useState(
+    `${serverUrl}/status/${selectedId}`
+  );
   const [statusRequest, setStatusRequest] = useState<any>("");
   const [statusResponse, setStatusResponse] = useState<any>("");
 
-  const [reportUrl, setReportUrl] = useState(`${serverUrl}/upload/${selectedId}/${selectedAcdc?.anchor?.pre}`);
+  const [reportUrl, setReportUrl] = useState(
+    `${serverUrl}/upload/${selectedId}/${selectedAcdc?.anchor?.pre}`
+  );
   const [reportRequest, setReportRequest] = useState<any>("");
   const [reportResponse, setReportResponse] = useState<any>("");
-  
+
   useEffect(() => {
     handleSetRequests();
-  }, [])
+  }, []);
+
+  useEffect(() => {
+    setVerifyUrl(`${serverUrl}/verify/headers`);
+    setStatusUrl(`${serverUrl}/status/${selectedId}`);
+    setReportUrl(
+      `${serverUrl}/upload/${selectedId}/${selectedAcdc?.anchor?.pre}`
+    );
+  }, [serverUrl]);
 
   const handleSetRequests = () => {
     let vlei_cesr = signatureData?.credential.cesr;
@@ -72,12 +84,16 @@ const SettingsPage = ({
 
     // Create the request body object
     let heads = new Headers();
-    heads.set('Content-Type', 'application/json');
-    setLoginRequest({headers: heads, method: 'POST', body: JSON.stringify({"said": selectedAcdc?.sad?.d, "vlei": vlei_cesr})});
+    heads.set("Content-Type", "application/json");
+    setLoginRequest({
+      headers: heads,
+      method: "POST",
+      body: JSON.stringify({ said: selectedAcdc?.sad?.d, vlei: vlei_cesr }),
+    });
 
-    setVerifyRequest({method: "GET", headers: signatureData?.headers});
-    setStatusRequest({method: "GET", headers: signatureData?.headers});
-    setReportRequest({method: "POST", headers: signatureData?.headers});
+    setVerifyRequest({ method: "GET", headers: signatureData?.headers });
+    setStatusRequest({ method: "GET", headers: signatureData?.headers });
+    setReportRequest({ method: "POST", headers: signatureData?.headers });
   };
 
   async function handlePing() {
@@ -107,16 +123,15 @@ const SettingsPage = ({
       const response = await regService.postLogin(`${loginUrl}`, {
         ...loginRequest,
       });
-      setLoginResponse(response);
-      console.log("logged in result", response);
-      if (!response) 
-      {
-        openSnackbar("Login Failed. Please pick different credential", "error");
-      } else {
-        openSnackbar("Credential verified!", "success");
+      const data = await response.json();
+      setLoginResponse(data);
+
+      if (response.status >= 400) {
+        throw new Error(data.title);
       }
+      openSnackbar("Credential verified!", "success");
     } catch (error) {
-      openSnackbar(`Unable to connect with server at ${loginUrl}`, "error");
+      openSnackbar(error?.message, "error");
       console.error("Error in login", error);
     }
   };
@@ -128,26 +143,22 @@ const SettingsPage = ({
       return;
     }
 
-    // try {
-    //   const response = await regService.postLogin(loginUrl, {
-    //     ...loginRequest,
-    //     body: JSON.stringify(loginRequest.body, null, 2),
-    //   });
-    //   setLoginResponse(response);
-    //   console.log("logged in result", response);
-    //   if (!response) return;
-
-    //   if (
-    //     response?.aid !== signatureData?.headers["signify-resource"] ||
-    //     JSON.stringify(response).includes("Exception")
-    //   ) {
-    //     openSnackbar("Login Failed. Please pick different credential", "error");
-    //   } else {
-    //     openSnackbar("Credential verified!", "success");
-    //   }
-    // } catch (error) {
-    //   openSnackbar(`Unable to connect with server at ${loginUrl}`, "error");
-    // }
+    try {
+      const response = await regService.verify(
+        verifyUrl,
+        verifyRequest,
+        signatureData,
+        signatureData?.autoSignin
+      );
+      const response_signed_data = await response.json();
+      setVerifyResponse(response_signed_data);
+      if (!response) return;
+      if (response.status >= 400) {
+        throw new Error(response_signed_data?.title);
+      }
+    } catch (error) {
+      openSnackbar(error?.message, "error");
+    }
   };
 
   const handleStatus = async () => {
@@ -163,54 +174,59 @@ const SettingsPage = ({
       return;
     }
 
-    // try {
-    //   const response = await regService.postLogin(loginUrl, {
-    //     ...loginRequest,
-    //     body: JSON.stringify(loginRequest.body, null, 2),
-    //   });
-    //   setLoginResponse(response);
-    //   console.log("logged in result", response);
-    //   if (!response) return;
-
-    //   if (
-    //     response?.aid !== signatureData?.headers["signify-resource"] ||
-    //     JSON.stringify(response).includes("Exception")
-    //   ) {
-    //     openSnackbar("Login Failed. Please pick different credential", "error");
-    //   } else {
-    //     openSnackbar("Credential verified!", "success");
-    //   }
-    // } catch (error) {
-    //   openSnackbar(`Unable to connect with server at ${loginUrl}`, "error");
-    // }
+    try {
+      const response = await regService.getStatus(
+        statusUrl,
+        statusRequest,
+        signatureData,
+        signatureData?.autoSignin
+      );
+      const response_signed_data = await response.json();
+      setStatusResponse(response_signed_data);
+      if (!response) return;
+      if (response.status >= 400) {
+        throw new Error(
+          `${response_signed_data?.title} \n ${response_signed_data?.description}`
+        );
+      }
+    } catch (error) {
+      openSnackbar(error?.message, "error");
+    }
   };
 
-  const handleReportUpload = async () => {
+  const handleReportUpload = async (report) => {
     if (devMode) {
       const fakeFile = await getFakeFileResponse();
       setReportResponse(fakeFile);
+      return;
     }
 
-    // try {
-    //   const response = await regService.postLogin(loginUrl, {
-    //     ...loginRequest,
-    //     body: JSON.stringify(loginRequest.body, null, 2),
-    //   });
-    //   setLoginResponse(response);
-    //   console.log("logged in result", response);
-    //   if (!response) return;
-
-    //   if (
-    //     response?.aid !== signatureData?.headers["signify-resource"] ||
-    //     JSON.stringify(response).includes("Exception")
-    //   ) {
-    //     openSnackbar("Login Failed. Please pick different credential", "error");
-    //   } else {
-    //     openSnackbar("Credential verified!", "success");
-    //   }
-    // } catch (error) {
-    //   openSnackbar(`Unable to connect with server at ${loginUrl}`, "error");
-    // }
+    try {
+      const formData = new FormData();
+      formData.append("upload", report);
+      const lRequest = {
+        ...reportRequest,
+        body: formData,
+      };
+      const response = await regService.postReport(
+        reportUrl,
+        lRequest,
+        signatureData,
+        signatureData?.autoSignin
+      );
+      const response_signed_data = await response.json();
+      console.log("upload response", response_signed_data);
+      setReportResponse(response_signed_data);
+      if (response.status >= 400) {
+        throw new Error(
+          `${response_signed_data?.msg ?? response_signed_data?.title}`
+        );
+      }
+      return response_signed_data;
+    } catch (error) {
+      console.error("Error uploading report", error);
+      openSnackbar(error?.message, "error");
+    }
   };
 
   return (

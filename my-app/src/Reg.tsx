@@ -32,7 +32,7 @@ const RegComponent = () => {
 
   const [selectedId, setSelectedId] = useState(""); // Step 2 Selection
   const [selectedAcdc, setSelectedAcdc] = useState(null); // Step 3 Selection
-  const [serverUrl, setServerUrl] = useState("http://localhost:8000");
+  const [serverUrl, setServerUrl] = useState("http://reg-po-publi-mx2isoslcwcx-420196310.us-east-1.elb.amazonaws.com");
 
   const [vendorConf, setVendorConf] = useState(false);
 
@@ -42,6 +42,12 @@ const RegComponent = () => {
   const [aidLoading, setAidLoading] = useState(false);
   const [credLoading, setCredLoading] = useState(false);
   const [autoCredLoading, setAutoCredLoading] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem("signify-data")) {
+      handleSignifyData(JSON.parse(localStorage.getItem("signify-data")));
+    }
+  }, []);
 
   useEffect(() => {
     setPingUrl(serverUrl + "/ping");
@@ -55,7 +61,7 @@ const RegComponent = () => {
 
   const handleSignifyData = (data) => {
     console.log("signify-data", data);
-    localStorage.setItem("signify-data", JSON.stringify(data, null, 2));
+    localStorage.setItem("signify-data", JSON.stringify(data));
     if (data) {
       setSignatureData(data);
       setSelectedId(data.headers["signify-resource"]);
@@ -63,7 +69,8 @@ const RegComponent = () => {
       openSnackbar(
         data?.autoSignin
           ? "Success! Auto Signin Credential selected."
-          : "Success! Credential selected.", "success"
+          : "Success! Credential selected.",
+        "success"
       );
     } else {
       alert("Could not set signify data");
@@ -88,10 +95,14 @@ const RegComponent = () => {
       handleSignifyData(fakeSigData);
     } else {
       setAutoCredLoading(true);
-      const resp = await requestAutoSignin();
-      console.log("data received", resp);
-      if (resp) {
-        handleSignifyData(resp);
+      try {
+        const resp = await requestAutoSignin();
+        console.log("data received", resp);
+        if (resp) {
+          handleSignifyData(resp);
+        }
+      } catch (error) {
+        openSnackbar(error?.message, "error");
       }
       setAutoCredLoading(false);
     }
@@ -173,6 +184,7 @@ const RegComponent = () => {
                 serverUrl={serverUrl}
                 statusPath={statusPath}
                 signatureData={signatureData}
+                handleSignifyData={handleSignifyData}
               />
             }
           />
