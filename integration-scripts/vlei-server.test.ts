@@ -1,6 +1,5 @@
 import { strict as assert } from "assert";
 import { getOrCreateClients } from "./utils/test-setup";
-import { Cigar, HEADER_SIG_INPUT, HEADER_SIG_TIME, SaltyKeeper } from "signify-ts";
 import { getGrantedCredential } from "./singlesig-vlei-issuance.test";
 import fs from 'fs';
 import FormData from 'form-data';
@@ -11,7 +10,8 @@ const ECR_SCHEMA_SAID = "EEy9PkikFcANV1l7EHukCeXqrzT1hNZjGlUk7wuMO5jw";
 // role identifiers and Credentials.
 test("vlei-server", async function run() {
   // these come from a previous test (ex. singlesig-vlei-issuance.test.ts)
-  const bran = "Cqmi-2wL78XQl4_GNtLhP"; //taken from SIGNIFY_SECRETS output during singlesig-vlei-issuance.test.ts
+  //SIGNIFY_SECRETS="Ae6m20iZduCZCjXiFyCu9,CO6j9UadMNwU63ZMTD29J,CnWNFJHWaUzQHWPffL1UL,CzbbO_ew6kZjwAJzztkca"
+  const bran = "CzbbO_ew6kZjwAJzztkca"; //taken from SIGNIFY_SECRETS output during singlesig-vlei-issuance.test.ts
   const aidName = "role";
   const [roleClient] = await getOrCreateClients(1, [bran]);
 
@@ -48,28 +48,28 @@ test("vlei-server", async function run() {
     let heads3 = new Headers();
     heads3.set("Content-Type", "application/json");
     let reqInit3 = { headers: heads3, method: "GET", body: null };
-    let resp3 = await roleClient.signedFetch(
+    let chreq = await roleClient.createSignedRequest(
       aidName,
-      "http://localhost:8000",
-      `/checklogin/${ecrAid.prefix}`,
+      `http://localhost:8000/checklogin/${ecrAid.prefix}`,
       reqInit3
     );
-    assert.equal(200, resp3.status);
-    let body = await resp3.json();
+    let chres = await fetch(chreq);
+    assert.equal(200, chres.status);
+    let body = await chres.json();
     assert.equal(body["aid"], `${ecrAid.prefix}`);
     assert.equal(body["said"], `${ecrCred.sad.d}`);
 
     let heads4 = new Headers();
     heads4.set("Content-Type", "application/json");
     let reqInit4 = { headers: heads4, method: "GET", body: null };
-    let resp4 = await roleClient.signedFetch(
+    let sreq = await roleClient.createSignedRequest(
         aidName,
-        `http://localhost:8000`,
-        `/status/${ecrAid.prefix}`,
+        `http://localhost:8000/status/${ecrAid.prefix}`,
         reqInit4
     );
-    assert.equal(resp4.status,200);
-    let body4 = await resp4.json();
+    let sres = await fetch(sreq);
+    assert.equal(sres.status,200);
+    let body4 = await sres.json();
     let parsedBody4 = body4[0];
     assert.equal('msg' in parsedBody4, true);
 
@@ -86,14 +86,14 @@ test("vlei-server", async function run() {
             'Content-Length': formBuffer.length.toString()
         }
     };
-    let resp5 = await roleClient.signedFetch(
+    let ureq = await roleClient.createSignedRequest(
         aidName,
-        `http://localhost:8000`,
-        `/upload/${ecrAid.prefix}/${ecrCred.sad.d}`,
+        `http://localhost:8000/upload/${ecrAid.prefix}/${ecrCred.sad.d}`,
         reqInit5
     );
-    assert.equal(resp5.status,202);
-    let body5 = await resp5.json();
+    let ures = await fetch(ureq);
+    assert.equal(ures.status,202);
+    let body5 = await ures.json();
     let parsedBody5 = body5;
     assert.equal('msg' in parsedBody5, true);
     assert.equal(parsedBody5['msg'], `Upload ${ecrCred.sad.d} received from ${ecrAid.prefix}`);

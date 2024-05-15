@@ -1,4 +1,4 @@
-import { signifyFetch } from "signify-polaris-web";
+import { signifyHeaders } from "signify-polaris-web";
 
 const RegServer = () => {
   /**
@@ -28,7 +28,7 @@ const RegServer = () => {
     signin,
     fetchHeaders: boolean
   ): Promise<any> => {
-    return signifyFetch(
+    return signifyHeaders(
       url,
       request,
       fetchHeaders,
@@ -42,12 +42,13 @@ const RegServer = () => {
     signin,
     fetchHeaders: boolean
   ): Promise<any> => {
-    return signifyFetch(
+    const vreq = signifyHeaders(
       url,
       request,
       fetchHeaders,
       signin?.identifier?.name ?? signin.credential?.issueeName
-    );
+    ) as unknown as Request;
+    return await fetch(vreq);
   };
 
   const getStatus = async (
@@ -56,12 +57,13 @@ const RegServer = () => {
     signin,
     fetchHeaders: boolean
   ): Promise<any> => {
-    return signifyFetch(
+    const req = signifyHeaders(
       url,
       request,
       fetchHeaders,
       signin?.identifier?.name ?? signin?.credential?.issueeName
-    );
+    ) as unknown as Request;
+    return fetch(req);
   };
 
   return { ping, verify, postLogin, postReport, getStatus };
