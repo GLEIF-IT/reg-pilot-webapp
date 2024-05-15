@@ -35,6 +35,7 @@ const StatusPage = ({
   serverUrl,
   statusPath,
   signatureData,
+  handleSignifyData,
 }) => {
   const navigate = useNavigate();
   const { openSnackbar } = useSnackbar();
@@ -69,6 +70,11 @@ const StatusPage = ({
           _signatureData,
           _signatureData?.autoSignin
         );
+        
+        const response_signed_data = await statusResp.json();
+        if(statusResp.status >= 400){
+          throw new Error(`${response_signed_data?.msg ?? response_signed_data?.title}`);
+        }
 
         if (statusResp.success) {
           console.log(statusResp.data);
@@ -81,7 +87,10 @@ const StatusPage = ({
           const resp = await requestAidORCred();
           if (resp) {
             handleCurrentSignatureData(resp);
-            getReportStatus({ ...resp, autoSignin: true });
+            if(resp.autoSignin){
+              handleSignifyData(resp);
+            }
+            getReportStatus({ ...resp });
           }
         } else {
           openSnackbar("Unable to connect with server", "error");
@@ -124,7 +133,10 @@ const StatusPage = ({
       const resp = await requestAidORCred();
       if (resp) {
         handleCurrentSignatureData(resp);
-        getReportStatus({ ...resp, autoSignin: true });
+        if(resp.autoSignin){
+          handleSignifyData(resp);
+        }
+        getReportStatus({ ...resp});
       }
     }
   };

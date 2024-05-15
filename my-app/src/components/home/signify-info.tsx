@@ -45,7 +45,7 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({
     };
 
     const lhead = new Headers();
-    lhead.set("Content-Type", "application/json")
+    lhead.set("Content-Type", "application/json");
 
     const lRequest = {
       headers: lhead,
@@ -62,13 +62,15 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({
       const response = await regService.postLogin(`${loginUrl}`, {
         ...lRequest,
       });
-      console.log("response", response);
+      const responseData = await response.json();
+
+      if (response.status >= 400) {
+        throw new Error(responseData.title);
+      }
       if (!response) return;
 
-      if (response.success) {
-        openSnackbar("Credential verified!", "success");
-      } else {
-        openSnackbar("Login Failed. Please pick different credential", "error");
+      if (response.msg) {
+        openSnackbar(response.msg, "success");
       }
     } catch (error) {
       if (typeof error?.message === "string")
