@@ -85,17 +85,23 @@ const ReportsPage = ({
           headers: {},
           body: formData,
         };
-        const response_signed_data = await regService.postReport(
+        const response = await regService.postReport(
           `${serverUrl}${uploadPath}/${aid}/${said}`,
           lRequest,
           signatureData,
           signatureData?.autoSignin
         );
+        const response_signed_data = await response.json();
         console.log("upload response", response_signed_data);
+        
+        if(response.status >= 400){
+          throw new Error(`${response_signed_data?.msg ?? response_signed_data?.title}`);
+        }
         setSubmitStatus("success");
         return response_signed_data;
       } catch (error) {
         console.error("Error uploading report", error);
+        openSnackbar(error?.message, "error")
         setSubmitStatus("error");
         setSelectedFile(null);
       }

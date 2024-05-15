@@ -18,9 +18,8 @@ const RegServer = () => {
     }
   };
 
-  const postLogin = async (url: string, request: any): Promise<string> => {
-    const response = await fetch(url, request);
-    return response.statusText;
+  const postLogin = async (url: string, request: any) => {
+    return fetch(url, request);
   };
 
   const postReport = async (
@@ -29,30 +28,43 @@ const RegServer = () => {
     signin,
     fetchHeaders: boolean
   ): Promise<any> => {
-    const response_signed = await signifyFetch(
+    return signifyFetch(
       url,
       request,
       fetchHeaders,
       signin?.identifier?.name ?? signin.credential?.issueeName
     );
-    const response_signed_data = await response_signed.json();
-    return response_signed_data;
   };
 
-  const getStatus = async (url: string, request: any, signin, fetchHeaders: boolean): Promise<any> => {
-    const resp = await signifyFetch(
+  const verify = async (
+    url: string,
+    request: any,
+    signin,
+    fetchHeaders: boolean
+  ): Promise<any> => {
+    return signifyFetch(
+      url,
+      request,
+      fetchHeaders,
+      signin?.identifier?.name ?? signin.credential?.issueeName
+    );
+  };
+
+  const getStatus = async (
+    url: string,
+    request: any,
+    signin,
+    fetchHeaders: boolean
+  ): Promise<any> => {
+    return signifyFetch(
       url,
       request,
       fetchHeaders,
       signin?.identifier?.name ?? signin?.credential?.issueeName
     );
-    const { error, ...rest } = await resp.json();
-    if (error) throw error;
-
-    return rest;
   };
 
-  return { ping, postLogin, postReport, getStatus };
+  return { ping, verify, postLogin, postReport, getStatus };
 };
 
 export const regService = RegServer();

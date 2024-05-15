@@ -8,7 +8,7 @@ import {
   Collapse,
   IconButton,
 } from "@mui/material";
-import { KeyboardArrowUp, KeyboardArrowDown } from "@mui/icons-material";
+import { KeyboardArrowUp, KeyboardArrowDown, UploadFile } from "@mui/icons-material";
 
 interface IServerInfo {
   serverUrl: string;
@@ -65,6 +65,14 @@ const ApiWidget = ({ title, children }) => {
   );
 };
 
+const acceptedTypes = [
+  "application/zip",
+  "application/x-zip-compressed",
+  "multipart/x-zip",
+  "application/zip-compressed",
+  "application/octet-stream",
+];
+
 const ServerInfo: React.FC<IServerInfo> = ({
   serverUrl,
   setServerUrl,
@@ -93,6 +101,37 @@ const ServerInfo: React.FC<IServerInfo> = ({
   reportResponse,
   handleReportUpload,
 }) => {
+
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [error, setError] = useState("");
+  const [filename, setFilename] = useState("");
+
+  const setFile = (file: any) => {
+    if (!acceptedTypes.includes(file.type)) {
+      setSelectedFile(null);
+      setError(`${file.name} is not a zip file. \n Please select a zip file.`);
+      return;
+    }
+    setError("");
+    setSelectedFile(file);
+    setFilename(file.name);
+  };
+
+  const handleFileSelect = (event: any) => {
+    let file = event.target.files[0];
+    setFile(file);
+  };
+
+  const handleDrop = (event: any) => {
+    event.preventDefault();
+    let file = event.dataTransfer.files[0];
+    setFile(file);
+  };
+
+  const handleDragOver = (event: any) => {
+    event.preventDefault();
+  };
+
   return (
     <Grid container spacing={1}>
       <Grid item xs={12} lg={12}>
@@ -205,7 +244,6 @@ const ServerInfo: React.FC<IServerInfo> = ({
                     variant="contained"
                     color="primary"
                     size="small"
-                    disabled={false}
                     onClick={handleVerify}
                   >
                     Verify
@@ -277,7 +315,6 @@ const ServerInfo: React.FC<IServerInfo> = ({
                     variant="contained"
                     color="primary"
                     size="small"
-                    disabled={false}
                     onClick={handleLogin}
                   >
                     Login
@@ -349,7 +386,6 @@ const ServerInfo: React.FC<IServerInfo> = ({
                     variant="contained"
                     color="primary"
                     size="small"
-                    disabled={false}
                     onClick={handleStatus}
                   >
                     Send
@@ -421,12 +457,53 @@ const ServerInfo: React.FC<IServerInfo> = ({
                     variant="contained"
                     color="primary"
                     size="small"
-                    disabled={false}
-                    onClick={handleReportUpload}
+                    onClick={() => handleReportUpload(selectedFile)}
                   >
                     Send
                   </Button>
                 </Box>
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  width: "80%",
+                  height: "200px",
+                  border: "2px dashed gray",
+                  borderRadius: "4px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  flexDirection: "column",
+                  p: 1,
+                }}
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+              >
+                {selectedFile ? (
+                  <>
+                    <UploadFile /> <p>Selected File: {selectedFile.name}</p>
+                  </>
+                ) : (
+                  <>
+                    <UploadFile />
+                    <p>
+                      Drag and drop a file here or <br /> click the button to
+                      select a file.
+                    </p>
+                  </>
+                )}
+                <input
+                  type="file"
+                  id="file-input"
+                  style={{ display: "none" }}
+                  onChange={handleFileSelect}
+                />
+                <label htmlFor="file-input">
+                  <Button size="small" variant="contained" component="span">
+                    Select File
+                  </Button>
+                </label>
               </Box>
             </Grid>
             <Grid item xs={12}>
