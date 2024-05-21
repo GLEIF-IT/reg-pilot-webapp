@@ -127,7 +127,7 @@ const SettingsPage = ({
       setLoginResponse(data);
 
       if (response.status >= 400) {
-        throw new Error(data.title);
+        throw new Error(data.msg);
       }
       openSnackbar("Credential verified!", "success");
     } catch (error) {
@@ -148,7 +148,6 @@ const SettingsPage = ({
         verifyUrl,
         verifyRequest,
         signatureData,
-        signatureData?.autoSignin
       );
       const response_signed_data = await response.json();
       setVerifyResponse(response_signed_data);
@@ -178,15 +177,14 @@ const SettingsPage = ({
       const response = await regService.getStatus(
         statusUrl,
         statusRequest,
-        signatureData,
-        signatureData?.autoSignin
+        signatureData
       );
       const response_signed_data = await response.json();
       setStatusResponse(response_signed_data);
       if (!response) return;
       if (response.status >= 400) {
         throw new Error(
-          `${response_signed_data?.title} \n ${response_signed_data?.description}`
+          `${response_signed_data?.msg}`
         );
       }
     } catch (error) {
@@ -212,7 +210,6 @@ const SettingsPage = ({
         reportUrl,
         lRequest,
         signatureData,
-        signatureData?.autoSignin
       );
       const response_signed_data = await response.json();
       console.log("upload response", response_signed_data);
