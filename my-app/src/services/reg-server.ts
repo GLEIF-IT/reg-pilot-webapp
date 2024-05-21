@@ -1,14 +1,14 @@
-import { signifyFetch } from "signify-polaris-web";
+import { signifyHeaders } from "signify-polaris-web";
 
 const RegServer = () => {
   /**
    *
-   * @param url e.g http://localhost:8081/ping
+   * @param rurl e.g http://localhost:8081/ping
    * @returns text response e.g Pong
    */
-  const ping = async (url: string) => {
+  const ping = async (rurl: string) => {
     try {
-      const response = await fetch(url);
+      const response = await fetch(rurl);
       if (response) {
         const responseStr = await response.text();
         return responseStr;
@@ -18,50 +18,39 @@ const RegServer = () => {
     }
   };
 
-  const postLogin = async (url: string, request: any) => {
-    return fetch(url, request);
+  const postLogin = async (rurl: string, request: any) => {
+    return fetch(rurl, request);
   };
 
   const postReport = async (
-    url: string,
+    rurl: string,
     request: any,
-    signin,
-    fetchHeaders: boolean
+    signin
   ): Promise<any> => {
-    return signifyFetch(
-      url,
+    const headers = await signifyHeaders(
+      rurl,
       request,
-      fetchHeaders,
       signin?.identifier?.name ?? signin.credential?.issueeName
     );
+    return fetch(rurl, { ...request, headers });
   };
 
-  const verify = async (
-    url: string,
-    request: any,
-    signin,
-    fetchHeaders: boolean
-  ): Promise<any> => {
-    return signifyFetch(
-      url,
+  const verify = async (rurl: string, request: any, signin): Promise<any> => {
+    const headers = await signifyHeaders(
+      rurl,
       request,
-      fetchHeaders,
       signin?.identifier?.name ?? signin.credential?.issueeName
     );
+    return fetch(rurl, { ...request, headers });
   };
 
-  const getStatus = async (
-    url: string,
-    request: any,
-    signin,
-    fetchHeaders: boolean
-  ): Promise<any> => {
-    return signifyFetch(
-      url,
+  const getStatus = async (rurl: string, request: any, signin): Promise<any> => {
+    const headers = await signifyHeaders(
+      rurl,
       request,
-      fetchHeaders,
       signin?.identifier?.name ?? signin?.credential?.issueeName
     );
+    return fetch(rurl, { ...request, headers });
   };
 
   return { ping, verify, postLogin, postReport, getStatus };

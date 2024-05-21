@@ -30,55 +30,55 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({
   loginUrl,
 }) => {
   const sigString = JSON.stringify(signatureData, null, 2);
-  const { openSnackbar } = useSnackbar();
+  // const { openSnackbar } = useSnackbar();
   const [showRaw, setShowRaw] = useState(false);
   const [showAlert, setShowAlert] = useState(true);
 
   const { credential } = signatureData ?? {};
 
-  const handleLogin = async () => {
-    let vlei_cesr = signatureData?.credential.cesr;
+  // const handleLogin = async () => {
+  //   let vlei_cesr = signatureData?.credential.cesr;
 
-    const requestBody = {
-      said: selectedAcdc?.sad?.d,
-      vlei: vlei_cesr,
-    };
+  //   const requestBody = {
+  //     said: selectedAcdc?.sad?.d,
+  //     vlei: vlei_cesr,
+  //   };
 
-    const lhead = new Headers();
-    lhead.set("Content-Type", "application/json");
+  //   const lhead = new Headers();
+  //   lhead.set("Content-Type", "application/json");
 
-    const lRequest = {
-      headers: lhead,
-      method: "POST",
-      body: JSON.stringify(requestBody),
-    };
+  //   const lRequest = {
+  //     headers: lhead,
+  //     method: "POST",
+  //     body: JSON.stringify(requestBody),
+  //   };
 
-    if (devMode) {
-      openSnackbar("<Devmode> Response received: Verified", "success");
-      return;
-    }
+  //   if (devMode) {
+  //     openSnackbar("<Devmode> Response received: Verified", "success");
+  //     return;
+  //   }
 
-    try {
-      const response = await regService.postLogin(`${loginUrl}`, {
-        ...lRequest,
-      });
-      const responseData = await response.json();
+  //   try {
+  //     const response = await regService.postLogin(loginUrl, {
+  //       ...lRequest,
+  //     });
+  //     const responseData = await response.json();
 
-      if (response.status >= 400) {
-        throw new Error(responseData.title);
-      }
-      if (!response) return;
+  //     if (response.status >= 400) {
+  //       throw new Error(responseData.msg);
+  //     }
+  //     if (!response) return;
 
-      if (response.msg) {
-        openSnackbar(response.msg, "success");
-      }
-    } catch (error) {
-      if (typeof error?.message === "string")
-        openSnackbar(error?.message, "error");
-      else
-        openSnackbar(`Unable to connect with server at ${loginUrl}`, "error");
-    }
-  };
+  //     if (response.msg) {
+  //       openSnackbar(response.msg, "success");
+  //     }
+  //   } catch (error) {
+  //     if (typeof error?.message === "string")
+  //       openSnackbar(error?.message, "error");
+  //     else
+  //       openSnackbar(`Unable to connect with server at ${loginUrl}`, "error");
+  //   }
+  // };
   return (
     <Grid container spacing={1}>
       <Grid item xs={12}>
@@ -194,14 +194,14 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({
                   <Typography variant="caption">
                     {credential?.schema?.description}
                   </Typography>
-                  <Button
+                  {/* <Button
                     variant="contained"
                     color="primary"
                     size="small"
                     onClick={handleLogin}
                   >
                     Verify
-                  </Button>
+                  </Button> */}
                 </CardContent>
               </Card>
             </Grid>
