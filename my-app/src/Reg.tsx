@@ -34,7 +34,7 @@ const RegComponent = () => {
   const [selectedId, setSelectedId] = useState(""); // Step 2 Selection
   const [selectedAcdc, setSelectedAcdc] = useState(null); // Step 3 Selection
   const [serverUrl, setServerUrl] = useState(
-    "http://localhost:8000"
+    "http://reg-po-publi-mx2isoslcwcx-420196310.us-east-1.elb.amazonaws.com"
   );
 
   const [vendorConf, setVendorConf] = useState(false);
