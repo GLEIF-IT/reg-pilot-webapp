@@ -8,17 +8,17 @@ const ECR_SCHEMA_SAID = "EEy9PkikFcANV1l7EHukCeXqrzT1hNZjGlUk7wuMO5jw";
 // role identifiers and Credentials.
 test("vlei-verification", async function run() {
   // these come from a previous test (ex. singlesig-vlei-issuance.test.ts)
-  const bran = "A95gBBq1N8P65bkSKmbYy"; //taken from SIGNIFY_SECRETS
+  const bran = "CzbbO_ew6kZjwAJzztkca"; //taken from SIGNIFY_SECRETS
   const aidName = "role";
   const [roleClient] = await getOrCreateClients(1, [bran]);
   try {
-    let resp = await roleClient.signedFetch(
+    let hreq = await roleClient.createSignedRequest(
       aidName,
-      "http://127.0.0.1:7676",
-      "/health",
+      "http://127.0.0.1:7676/health",
       { method: "GET", body: null }
     );
-    assert.equal(200, resp.status);
+    let hres = await fetch(hreq);
+    assert.equal(200, hres.status);
 
     let ecrCreds = await roleClient.credentials().list();
     let ecrCred = ecrCreds.find((cred: any) => cred.sad.s === ECR_SCHEMA_SAID);
@@ -33,11 +33,11 @@ test("vlei-verification", async function run() {
     let heads = new Headers();
     heads.set("Content-Type", "application/json+cesr");
     let reqInit = { headers: heads, method: "PUT", body: ecrCredCesr };
-    resp = await fetch(
+    let pres = await fetch(
       `http://localhost:7676/presentations/${ecrCred.sad.d}`,
       reqInit
     );
-    assert.equal(202, resp.status);
+    assert.equal(202, pres.status);
 
     let data = "this is the raw data";
     let raw = new TextEncoder().encode(data);
@@ -54,22 +54,22 @@ test("vlei-verification", async function run() {
     heads = new Headers();
     heads.set("method", "POST");
     reqInit = { headers: heads, method: "POST", body: null };
-    resp = await fetch(
+    let vresp = await fetch(
       `http://localhost:7676/request/verify/${ecrAid.prefix}?${params}`,
       reqInit
     );
-    assert.equal(202, resp.status);
+    assert.equal(202, vresp.status);
 
     heads.set("Content-Type", "application/json");
     reqInit = { headers: heads, method: "GET", body: null };
-    resp = await roleClient.signedFetch(
+    let areq = await roleClient.createSignedRequest(
       aidName,
-      "http://localhost:7676",
-      `/authorizations/${ecrAid.prefix}`,
+      `http://localhost:7676/authorizations/${ecrAid.prefix}`,
       reqInit
     );
-    assert.equal(200, resp.status);
-    let body = await resp.json();
+    let aresp = await fetch(areq);
+    assert.equal(200, aresp.status);
+    let body = await aresp.json();
     assert.equal(body["aid"], `${ecrAid.prefix}`);
     assert.equal(body["said"], `${ecrCred.sad.d}`);
   } catch (e) {
