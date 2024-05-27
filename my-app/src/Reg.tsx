@@ -9,6 +9,7 @@ import {
   requestCredential,
   trySettingVendorUrl,
 } from "signify-polaris-web";
+import { regService } from "./services/reg-server.ts";
 import fakeSigData from "./test/fakeSigData.json";
 import { useDevMode } from "./context/devMode.tsx";
 import { useSnackbar } from "./context/snackbar.tsx";
@@ -32,7 +33,9 @@ const RegComponent = () => {
 
   const [selectedId, setSelectedId] = useState(""); // Step 2 Selection
   const [selectedAcdc, setSelectedAcdc] = useState(null); // Step 3 Selection
-  const [serverUrl, setServerUrl] = useState("http://reg-po-publi-mx2isoslcwcx-420196310.us-east-1.elb.amazonaws.com");
+  const [serverUrl, setServerUrl] = useState(
+    "http://localhost:8000"
+  );
 
   const [vendorConf, setVendorConf] = useState(false);
 
@@ -59,10 +62,50 @@ const RegComponent = () => {
     setVendorConf(true);
   };
 
-  const handleSignifyData = (data) => {
-    console.log("signify-data", data);
-    localStorage.setItem("signify-data", JSON.stringify(data));
-    if (data) {
+  const handleVerifyLogin = async (data) => {
+    let vlei_cesr = data?.credential.cesr;
+    const requestBody = {
+      // aid: data.headers["signify-resource"],
+      said: data.credential?.sad?.d,
+      vlei: vlei_cesr,
+    };
+    const lhead = new Headers();
+    lhead.set("Content-Type", "application/json");
+    const lRequest = {
+      headers: lhead,
+      method: "POST",
+      body: JSON.stringify(requestBody),
+    };
+    // loginUrl
+    const response = await regService.postLogin(loginUrl, lRequest);
+    const responseData = await response.json();
+
+    if (response.status >= 400) {
+      throw new Error(responseData.msg);
+    }
+    if (!response) return;
+
+    if (responseData.msg) {
+      openSnackbar(responseData.msg, "success");
+    }
+  };
+
+  const handleSignifyData = async (data) => {
+    console.log(devMode ? "fake signify-data" : "signify-data", data);
+
+    if (!data) {
+      alert("Could not set signify data");
+      return;
+    }
+
+    try {
+      if (devMode) {
+        openSnackbar("<Devmode> Response received: Verified", "success");
+      } else {
+        await handleVerifyLogin(data);
+      }
+
+      localStorage.setItem("signify-data", JSON.stringify(data));
       setSignatureData(data);
       setSelectedId(data.headers["signify-resource"]);
       setSelectedAcdc(data.credential);
@@ -72,8 +115,11 @@ const RegComponent = () => {
           : "Success! Credential selected.",
         "success"
       );
-    } else {
-      alert("Could not set signify data");
+    } catch (error) {
+      if (typeof error?.message === "string")
+        openSnackbar(error?.message, "error");
+      else
+        openSnackbar(`Unable to connect with server at ${loginUrl}`, "error");
     }
   };
 
@@ -96,7 +142,7 @@ const RegComponent = () => {
     } else {
       setAutoCredLoading(true);
       try {
-        const resp = await requestAutoSignin();
+        const resp = await requestAutoSignin(loginUrl);
         console.log("data received", resp);
         if (resp) {
           handleSignifyData(resp);
@@ -113,7 +159,7 @@ const RegComponent = () => {
       handleSignifyData(fakeSigData);
     } else {
       setCredLoading(true);
-      const resp = await requestCredential();
+      const resp = await requestCredential(loginUrl);
       setCredLoading(false);
       console.log("promised resp from requestCredential", resp);
       handleSignifyData(resp);
@@ -125,7 +171,7 @@ const RegComponent = () => {
       handleSignifyData(fakeSigData);
     } else {
       setAidLoading(true);
-      const resp = await requestAid();
+      const resp = await requestAid(loginUrl);
       setAidLoading(false);
       console.log("promised resp from requestAid", resp);
       handleSignifyData(resp);

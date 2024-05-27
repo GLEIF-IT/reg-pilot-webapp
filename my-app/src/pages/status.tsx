@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { requestAidORCred } from "signify-polaris-web";
+import { requestCredential } from "signify-polaris-web";
 import {
   Alert,
   Paper,
@@ -67,8 +67,7 @@ const StatusPage = ({
         const statusResp = await regService.getStatus(
           `${serverUrl}${statusPath}/${selectedAid}`,
           lRequest,
-          _signatureData,
-          _signatureData?.autoSignin
+          _signatureData
         );
         
         const response_signed_data = await statusResp.json();
@@ -84,7 +83,7 @@ const StatusPage = ({
       } catch (error) {
         if (typeof error?.message === "string") {
           setHasError(error);
-          const resp = await requestAidORCred();
+          const resp = await requestCredential(`${serverUrl}${statusPath}/${selectedAid}`);
           if (resp) {
             handleCurrentSignatureData(resp);
             if(resp.autoSignin){
@@ -130,7 +129,7 @@ const StatusPage = ({
         message: "Select Credential to Proceed",
         details: "Select a credential from extension to fetch report status",
       });
-      const resp = await requestAidORCred();
+      const resp = await requestCredential(`${serverUrl}${statusPath}/${selectedAid}`);
       if (resp) {
         handleCurrentSignatureData(resp);
         if(resp.autoSignin){

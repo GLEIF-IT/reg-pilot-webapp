@@ -89,7 +89,6 @@ const ReportsPage = ({
           `${serverUrl}${uploadPath}/${aid}/${said}`,
           lRequest,
           signatureData,
-          signatureData?.autoSignin
         );
         const response_signed_data = await response.json();
         console.log("upload response", response_signed_data);

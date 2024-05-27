@@ -134,7 +134,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
             </Typography>
           </Button>
         )}
-        {(!signatureData || devMode) && (
+        {/* {(!signatureData || devMode) && (
           <Button
             size="small"
             variant="contained"
@@ -147,7 +147,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
             </Typography>
             {aidLoading && <CircularProgress color="inherit" size="12px" />}
           </Button>
-        )}
+        )} */}
         {(!signatureData || devMode) && (
           <Button
             size="small"

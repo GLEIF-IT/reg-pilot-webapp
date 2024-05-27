@@ -10,8 +10,8 @@ const ECR_SCHEMA_SAID = "EEy9PkikFcANV1l7EHukCeXqrzT1hNZjGlUk7wuMO5jw";
 // role identifiers and Credentials.
 test("vlei-server", async function run() {
   // these come from a previous test (ex. singlesig-vlei-issuance.test.ts)
-  //SIGNIFY_SECRETS="Ae6m20iZduCZCjXiFyCu9,CO6j9UadMNwU63ZMTD29J,CnWNFJHWaUzQHWPffL1UL,CzbbO_ew6kZjwAJzztkca"
-  const bran = "CzbbO_ew6kZjwAJzztkca"; //taken from SIGNIFY_SECRETS output during singlesig-vlei-issuance.test.ts
+  //SIGNIFY_SECRETS="DhIHlQNue4aNzoCeRsNYe,Akfzi1vVCVDQOMk8RwGdQ,AJx9ZGQrD_U_pPIy5RMLY,Ap31Xt-FGcNXpkxmBYMQn"
+  const bran = "Ap31Xt-FGcNXpkxmBYMQn"; //taken from SIGNIFY_SECRETS output during singlesig-vlei-issuance.test.ts
   const aidName = "role";
   const [roleClient] = await getOrCreateClients(1, [bran]);
 
