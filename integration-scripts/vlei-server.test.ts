@@ -14,8 +14,9 @@ test("vlei-server", async function run() {
   const bran = "Ap31Xt-FGcNXpkxmBYMQn"; //taken from SIGNIFY_SECRETS output during singlesig-vlei-issuance.test.ts
   const aidName = "role";
   const [roleClient] = await getOrCreateClients(1, [bran]);
+  const url = "https://reg-api.rootsid.cloud"
 
-    let resp1 = await fetch("http://127.0.0.1:8000/ping", {
+    let resp1 = await fetch(`${url}/ping`, {
         method: "GET",
         body: null,
     });
@@ -41,7 +42,7 @@ test("vlei-server", async function run() {
       method: "POST",
       body: JSON.stringify({ said: ecrCred.sad.d, vlei: ecrCredCesr }),
     };
-    let resp2 = await fetch("http://localhost:8000/login", reqInit2);
+    let resp2 = await fetch(`${url}/login`, reqInit2);
     assert.equal(resp2.status, 202);
 
     let ecrAid = await roleClient.identifiers().get(aidName);
@@ -50,7 +51,7 @@ test("vlei-server", async function run() {
     let reqInit3 = { headers: heads3, method: "GET", body: null };
     let chreq = await roleClient.createSignedRequest(
       aidName,
-      `http://localhost:8000/checklogin/${ecrAid.prefix}`,
+      `${url}/checklogin/${ecrAid.prefix}`,
       reqInit3
     );
     let chres = await fetch(chreq);
@@ -64,7 +65,7 @@ test("vlei-server", async function run() {
     let reqInit4 = { headers: heads4, method: "GET", body: null };
     let sreq = await roleClient.createSignedRequest(
         aidName,
-        `http://localhost:8000/status/${ecrAid.prefix}`,
+        `${url}/status/${ecrAid.prefix}`,
         reqInit4
     );
     let sres = await fetch(sreq);
@@ -88,7 +89,7 @@ test("vlei-server", async function run() {
     };
     let ureq = await roleClient.createSignedRequest(
         aidName,
-        `http://localhost:8000/upload/${ecrAid.prefix}/${ecrCred.sad.d}`,
+        `${url}/upload/${ecrAid.prefix}/${ecrCred.sad.d}`,
         reqInit5
     );
     let ures = await fetch(ureq);
