@@ -35,22 +35,12 @@ const StatusPage = ({
   serverUrl,
   statusPath,
   signatureData,
-  handleSignifyData,
 }) => {
   const navigate = useNavigate();
   const { openSnackbar } = useSnackbar();
   const [data, setData] = useState<Array<any>>();
   const [loading, setLoading] = useState(false);
-  const [currentSignatureData, setCurrentSignatureData] =
-    useState<any>(signatureData);
-
   const [hasError, setHasError] = useState("");
-
-  const handleCurrentSignatureData = (data) => {
-    openSnackbar("Success! Credential selected.", "success");
-    setCurrentSignatureData(data);
-    setHasError("");
-  };
 
   // Function to perform the upload status request
   async function getStatus(_signatureData): Promise<any> {
@@ -81,16 +71,13 @@ const StatusPage = ({
       } catch (error) {
         if (typeof error?.message === "string") {
           setHasError(error);
-          const resp = await requestCredential(
-            `${serverUrl}${statusPath}/${selectedAid}`
-          );
-          if (resp) {
-            handleCurrentSignatureData(resp);
-            if (resp.autoSignin) {
-              handleSignifyData(resp);
-            }
-            getReportStatus({ ...resp });
-          }
+          // const resp = await requestCredential(
+          //   `${serverUrl}${statusPath}/${selectedAid}`
+          // );
+          // if (resp) {
+          //   handleSignifyData(resp);
+          //   getReportStatus({ ...resp });
+          // }
         } else {
           openSnackbar("Unable to connect with server", "error");
           setHasError({ message: "Unable to connect with server" });
@@ -114,6 +101,7 @@ const StatusPage = ({
       let newData = await getStatus(data);
       setData(newData ?? []);
       setLoading(false);
+      setHasError("");
     } catch (error) {
       setLoading(false);
       console.error("Error fetching data: ", error);
@@ -122,29 +110,27 @@ const StatusPage = ({
 
   // Simulating fetch request
   const populateReportStatus = async () => {
-    if (currentSignatureData) {
-      getReportStatus(currentSignatureData);
+    if (signatureData) {
+      getReportStatus(signatureData);
     } else {
       setHasError({
         message: "Select Credential to Proceed",
         details: "Select a credential from extension to fetch report status",
       });
-      const resp = await requestCredential(
-        `${serverUrl}${statusPath}/${selectedAid}`
-      );
-      if (resp) {
-        handleCurrentSignatureData(resp);
-        if (resp.autoSignin) {
-          handleSignifyData(resp);
-        }
-        getReportStatus({ ...resp });
-      }
+      // const resp = await requestCredential(
+      //   `${serverUrl}${statusPath}/${selectedAid}`
+      // );
+      // if (resp) {
+      //   console.log("resp is ", resp);
+      //   handleSignifyData(resp);
+      //   getReportStatus({ ...resp });
+      // }
     }
   };
 
   useEffect(() => {
     populateReportStatus();
-  }, []);
+  }, [signatureData]);
 
   return (
     <Grid container spacing={1} style={{ padding: "32px" }}>
