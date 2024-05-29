@@ -14,7 +14,9 @@ test("vlei-server", async function run() {
   const bran = "Ap31Xt-FGcNXpkxmBYMQn"; //taken from SIGNIFY_SECRETS output during singlesig-vlei-issuance.test.ts
   const aidName = "role";
   const [roleClient] = await getOrCreateClients(1, [bran]);
+
   const url = "https://reg-api.rootsid.cloud"
+//   const url = "http://localhost:8000"
 
     let resp1 = await fetch(`${url}/ping`, {
         method: "GET",
@@ -43,6 +45,7 @@ test("vlei-server", async function run() {
       body: JSON.stringify({ said: ecrCred.sad.d, vlei: ecrCredCesr }),
     };
     let resp2 = await fetch(`${url}/login`, reqInit2);
+
     assert.equal(resp2.status, 202);
 
     let ecrAid = await roleClient.identifiers().get(aidName);
@@ -71,13 +74,22 @@ test("vlei-server", async function run() {
     let sres = await fetch(sreq);
     assert.equal(sres.status,200);
     let body4 = await sres.json();
-    let parsedBody4 = body4[0];
-    assert.equal('msg' in parsedBody4, true);
+    let parsedBody4 = JSON.stringify(body4[0]);
+    assert.equal(parsedBody4, JSON.stringify({
+            submitter: `${ecrAid.prefix}`,
+            filename: "",
+            status: "",
+            contentType: "",
+            size: 0,
+            message: "No Reports Uploaded",
+          }));
 
     // try uploading a report that is signed by an unknown aid
-    let unknown_report_zip = fs.readFileSync('../data/report.zip');
+    let filename = `report.zip`;
+    let ctype = "application/zip"
+    let unknown_report_zip = fs.readFileSync(`../data/${filename}`);
     let formData = new FormData();
-    formData.append('upload', unknown_report_zip, { filename: 'report.zip', contentType: 'application/zip' });
+    formData.append('upload', unknown_report_zip, { filename: `${filename}`, contentType: `${ctype}` });
     let formBuffer = formData.getBuffer();
     let reqInit5: RequestInit = {
         method: 'POST',
@@ -93,9 +105,52 @@ test("vlei-server", async function run() {
         reqInit5
     );
     let ures = await fetch(ureq);
-    assert.equal(ures.status,202);
+    assert(resp2.status < 300);
     let body5 = await ures.json();
-    let parsedBody5 = body5;
-    assert.equal('msg' in parsedBody5, true);
-    assert.equal(parsedBody5['msg'], `Upload ${ecrCred.sad.d} received from ${ecrAid.prefix}`);
+    let parsedBody5 = JSON.stringify(body5);
+    assert.equal(parsedBody5, JSON.stringify({
+            submitter: `${ecrAid.prefix}`,
+            filename: `${filename}`,
+            status: "failed",
+            contentType: `${ctype}`,
+            size: 3535,
+            message: "signature from unknown AID EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk",
+          }));
+
+
+    let ushead = new Headers();
+    ushead.set("Content-Type", "application/json");
+    let usReqInit = { headers: ushead, method: "GET", body: null };
+    let usReq = await roleClient.createSignedRequest(
+        aidName,
+        `${url}/upload/${ecrAid.prefix}/${ecrCred.sad.d}`,
+        usReqInit
+    );
+    let usres = await fetch(usReq);
+    assert.equal(usres.status,202);
+    let usJson = await usres.json();
+    let usBody = JSON.stringify(usJson);
+    assert.equal(usBody, JSON.stringify({"msg":"Signature Valid"}));
+
+    let cuhead = new Headers();
+    cuhead.set("Content-Type", "application/json");
+    let cuReqInit = { headers: cuhead, method: "GET", body: null };
+    let cuReq = await roleClient.createSignedRequest(
+        aidName,
+        `${url}/status/${ecrAid.prefix}`,
+        cuReqInit
+    );
+    let cures = await fetch(cuReq);
+    assert.equal(cures.status,200);
+    let cubody = await cures.json();
+    let parsedCuBody = JSON.stringify(cubody[0]);
+    assert.equal(parsedCuBody, JSON.stringify({
+        submitter: `${ecrAid.prefix}`,
+        filename: `${filename}`,
+        status: "failed",
+        contentType: `${ctype}`,
+        size: 3535,
+        message: "signature from unknown AID EBcIURLpxmVwahksgrsGW6_dUw0zBhyEHYFk17eWrZfk",
+      }));
+
 }, 100000);
