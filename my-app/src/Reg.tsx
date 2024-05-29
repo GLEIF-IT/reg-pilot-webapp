@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
 import "./App.css";
 import {
@@ -24,9 +24,11 @@ import SettingsPage from "./pages/settings.tsx";
 const statusPath = "/status";
 
 const RegComponent = () => {
+  const location = useLocation();
   const { devMode, toggleDevMode } = useDevMode();
   const { openSnackbar } = useSnackbar();
   const [signatureData, setSignatureData] = useState<any>();
+  const [isLoadingInitial, setIsLoadingInitial] = useState(false);
   const [extensionInstalled, setExtensionInstalled] = useState<null | boolean>(
     null
   );
@@ -45,15 +47,15 @@ const RegComponent = () => {
   const [autoCredLoading, setAutoCredLoading] = useState(false);
 
   useEffect(() => {
-    if (localStorage.getItem("signify-data")) {
-      handleSignifyData(JSON.parse(localStorage.getItem("signify-data")));
-    }
-  }, []);
-
-  useEffect(() => {
     setPingUrl(serverUrl + "/ping");
     setLoginUrl(serverUrl + "/login");
   }, [serverUrl]);
+
+  const handleInitialSignatureLoad = async () => {
+    setIsLoadingInitial(true);
+    await handleSignifyData(JSON.parse(localStorage.getItem("signify-data")));
+    setIsLoadingInitial(false);
+  };
 
   const handleSettingVendorUrl = async (url) => {
     await trySettingVendorUrl(url);
@@ -123,6 +125,13 @@ const RegComponent = () => {
   const populateExtensionStatus = async () => {
     const extensionId = await isExtensionInstalled();
     setExtensionInstalled(Boolean(extensionId));
+    if (extensionId) {
+      if (localStorage.getItem("signify-data")) {
+        handleInitialSignatureLoad();
+      } else if (location.pathname !== "/") {
+        handleCredSignin();
+      }
+    }
   };
   useEffect(() => {
     populateExtensionStatus();
@@ -175,7 +184,7 @@ const RegComponent = () => {
     }
   };
 
-  if (extensionInstalled === null) {
+  if (extensionInstalled === null || isLoadingInitial) {
     return (
       <Box
         display="flex"
