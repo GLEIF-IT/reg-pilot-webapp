@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
 import "./App.css";
@@ -24,8 +24,6 @@ import SettingsPage from "./pages/settings.tsx";
 const statusPath = "/status";
 
 const RegComponent = () => {
-  const isMounted = useRef(false);
-
   const { devMode, toggleDevMode } = useDevMode();
   const { openSnackbar } = useSnackbar();
   const [signatureData, setSignatureData] = useState<any>();
@@ -47,13 +45,9 @@ const RegComponent = () => {
   const [autoCredLoading, setAutoCredLoading] = useState(false);
 
   useEffect(() => {
-    if (isMounted.current) {
-      if (localStorage.getItem("signify-data")) {
-        handleSignifyData(JSON.parse(localStorage.getItem("signify-data")));
-      }
+    if (localStorage.getItem("signify-data")) {
+      handleSignifyData(JSON.parse(localStorage.getItem("signify-data")));
     }
-
-    isMounted.current = true;
   }, []);
 
   useEffect(() => {
