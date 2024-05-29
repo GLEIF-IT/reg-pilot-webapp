@@ -35,12 +35,16 @@ const ReportsPage = ({
   const navigate = useNavigate();
   const { openSnackbar } = useSnackbar();
 
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [filename, setFilename] = useState("");
   const [submitStatus, setSubmitStatus] = useState<TSubmitStatus>("");
 
-  const setFile = (file: any) => {
+  const setFile = (file: File) => {
+    if (!file) {
+      setSelectedFile(null);
+      return;
+    }
     if (!acceptedTypes.includes(file.type)) {
       setSelectedFile(null);
       setError(`${file.name} is not a zip file. \n Please select a zip file.`);
@@ -68,39 +72,38 @@ const ReportsPage = ({
   };
 
   // Function to perform the upload request
-  async function upload(
-    aid: string,
-    said: string,
-    report: string
-  ): Promise<any> {
+  async function upload(aid: string, said: string, report: File): Promise<any> {
     const formData = new FormData();
-    formData.append("upload", report);
-
-    console.log("Form data is", formData.get("upload"));
+    formData.append("upload", report, report.name);
 
     if (!devMode) {
       try {
         const lRequest = {
           method: "POST",
-          headers: {},
           body: formData,
         };
         const response = await regService.postReport(
           `${serverUrl}${uploadPath}/${aid}/${said}`,
           lRequest,
-          signatureData,
+          signatureData
         );
         const response_signed_data = await response.json();
         console.log("upload response", response_signed_data);
-        
-        if(response.status >= 400){
-          throw new Error(`${response_signed_data?.msg ?? response_signed_data?.title}`);
+
+        if (response.status >= 400) {
+          throw new Error(
+            `${response_signed_data?.msg ?? response_signed_data?.title}`
+          );
         }
+        openSnackbar(
+          response_signed_data?.message,
+          response_signed_data?.status === "failed" ? "warning" : "success"
+        );
         setSubmitStatus("success");
         return response_signed_data;
       } catch (error) {
         console.error("Error uploading report", error);
-        openSnackbar(error?.message, "error")
+        openSnackbar(error?.message, "error");
         setSubmitStatus("error");
         setSelectedFile(null);
       }
@@ -114,11 +117,7 @@ const ReportsPage = ({
   const handleSubmit = async () => {
     setSubmitStatus("loading");
 
-    await upload(
-      selectedAid,
-      selectedAcdc,
-      selectedFile!
-    );
+    await upload(selectedAid, selectedAcdc, selectedFile!);
   };
 
   return (
