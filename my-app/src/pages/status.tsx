@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { requestCredential } from "signify-polaris-web";
 import {
@@ -37,7 +37,6 @@ const StatusPage = ({
   signatureData,
   handleSignifyData,
 }) => {
-  const isMounted = useRef(false);
   const navigate = useNavigate();
   const { openSnackbar } = useSnackbar();
   const [data, setData] = useState<Array<any>>();
@@ -144,11 +143,7 @@ const StatusPage = ({
   };
 
   useEffect(() => {
-    if (isMounted.current) {
-      populateReportStatus();
-    }
-
-    isMounted.current = true;
+    populateReportStatus();
   }, []);
 
   return (
