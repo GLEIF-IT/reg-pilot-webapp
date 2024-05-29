@@ -32,6 +32,21 @@ const RegServer = () => {
       request,
       signin?.identifier?.name ?? signin.credential?.issueeName
     );
+    delete request.headers["content-type"];
+    delete headers["content-type"];
+    return fetch(rurl, { ...request, headers });
+  };
+
+  const checkReport = async (
+    rurl: string,
+    request: any,
+    signin
+  ): Promise<any> => {
+    const headers = await signifyHeaders(
+      rurl,
+      request,
+      signin?.identifier?.name ?? signin.credential?.issueeName
+    );
     return fetch(rurl, { ...request, headers });
   };
 
@@ -44,7 +59,11 @@ const RegServer = () => {
     return fetch(rurl, { ...request, headers });
   };
 
-  const getStatus = async (rurl: string, request: any, signin): Promise<any> => {
+  const getStatus = async (
+    rurl: string,
+    request: any,
+    signin
+  ): Promise<any> => {
     const headers = await signifyHeaders(
       rurl,
       request,
@@ -53,7 +72,7 @@ const RegServer = () => {
     return fetch(rurl, { ...request, headers });
   };
 
-  return { ping, verify, postLogin, postReport, getStatus };
+  return { ping, verify, postLogin, postReport, checkReport, getStatus };
 };
 
 export const regService = RegServer();
