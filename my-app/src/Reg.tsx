@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
 import "./App.css";
@@ -24,6 +24,8 @@ import SettingsPage from "./pages/settings.tsx";
 const statusPath = "/status";
 
 const RegComponent = () => {
+  const isMounted = useRef(false);
+
   const { devMode, toggleDevMode } = useDevMode();
   const { openSnackbar } = useSnackbar();
   const [signatureData, setSignatureData] = useState<any>();
@@ -33,23 +35,25 @@ const RegComponent = () => {
 
   const [selectedId, setSelectedId] = useState(""); // Step 2 Selection
   const [selectedAcdc, setSelectedAcdc] = useState(null); // Step 3 Selection
-  const [serverUrl, setServerUrl] = useState(
-    "http://reg-po-publi-mx2isoslcwcx-420196310.us-east-1.elb.amazonaws.com"
-  );
+  const [serverUrl, setServerUrl] = useState("https://reg-api.rootsid.cloud");
 
   const [vendorConf, setVendorConf] = useState(false);
 
-  const [pingUrl, setPingUrl] = useState("");
-  const [loginUrl, setLoginUrl] = useState("");
+  const [pingUrl, setPingUrl] = useState(serverUrl + "/ping");
+  const [loginUrl, setLoginUrl] = useState(serverUrl + "/login");
 
   const [aidLoading, setAidLoading] = useState(false);
   const [credLoading, setCredLoading] = useState(false);
   const [autoCredLoading, setAutoCredLoading] = useState(false);
 
   useEffect(() => {
-    if (localStorage.getItem("signify-data")) {
-      handleSignifyData(JSON.parse(localStorage.getItem("signify-data")));
+    if (isMounted.current) {
+      if (localStorage.getItem("signify-data")) {
+        handleSignifyData(JSON.parse(localStorage.getItem("signify-data")));
+      }
     }
+
+    isMounted.current = true;
   }, []);
 
   useEffect(() => {
@@ -65,7 +69,6 @@ const RegComponent = () => {
   const handleVerifyLogin = async (data) => {
     let vlei_cesr = data?.credential.cesr;
     const requestBody = {
-      // aid: data.headers["signify-resource"],
       said: data.credential?.sad?.d,
       vlei: vlei_cesr,
     };

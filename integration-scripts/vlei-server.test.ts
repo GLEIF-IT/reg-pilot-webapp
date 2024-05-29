@@ -14,8 +14,9 @@ test("vlei-server", async function run() {
   const bran = "Ap31Xt-FGcNXpkxmBYMQn"; //taken from SIGNIFY_SECRETS output during singlesig-vlei-issuance.test.ts
   const aidName = "role";
   const [roleClient] = await getOrCreateClients(1, [bran]);
-//   const url = "https://reg-api.rootsid.cloud"
-  const url = "http://localhost:8000"
+
+  const url = "https://reg-api.rootsid.cloud"
+//   const url = "http://localhost:8000"
 
     let resp1 = await fetch(`${url}/ping`, {
         method: "GET",
@@ -44,7 +45,8 @@ test("vlei-server", async function run() {
       body: JSON.stringify({ said: ecrCred.sad.d, vlei: ecrCredCesr }),
     };
     let resp2 = await fetch(`${url}/login`, reqInit2);
-    assert(resp2.status == 202);
+
+    assert.equal(resp2.status, 202);
 
     let ecrAid = await roleClient.identifiers().get(aidName);
     let heads3 = new Headers();

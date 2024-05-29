@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { requestCredential } from "signify-polaris-web";
 import {
@@ -37,6 +37,7 @@ const StatusPage = ({
   signatureData,
   handleSignifyData,
 }) => {
+  const isMounted = useRef(false);
   const navigate = useNavigate();
   const { openSnackbar } = useSnackbar();
   const [data, setData] = useState<Array<any>>();
@@ -47,7 +48,7 @@ const StatusPage = ({
   const [hasError, setHasError] = useState("");
 
   const handleCurrentSignatureData = (data) => {
-    openSnackbar("Success! Credential selected.", "success")
+    openSnackbar("Success! Credential selected.", "success");
     setCurrentSignatureData(data);
     setHasError("");
   };
@@ -69,24 +70,24 @@ const StatusPage = ({
           lRequest,
           _signatureData
         );
-        
-        const response_signed_data = await statusResp.json();
-        if(statusResp.status >= 400){
-          throw new Error(`${response_signed_data?.msg ?? response_signed_data?.title}`);
-        }
 
-        if (statusResp.success) {
-          console.log(statusResp.data);
-          setHasError("");
-          return statusResp?.data?.map((ele) => JSON.parse(ele)) ?? [];
+        const response_signed_data = await statusResp.json();
+        if (statusResp.status >= 400) {
+          throw new Error(
+            `${response_signed_data?.msg ?? response_signed_data?.title}`
+          );
         }
+        console.log("response_signed_data", response_signed_data);
+        return response_signed_data;
       } catch (error) {
         if (typeof error?.message === "string") {
           setHasError(error);
-          const resp = await requestCredential(`${serverUrl}${statusPath}/${selectedAid}`);
+          const resp = await requestCredential(
+            `${serverUrl}${statusPath}/${selectedAid}`
+          );
           if (resp) {
             handleCurrentSignatureData(resp);
-            if(resp.autoSignin){
+            if (resp.autoSignin) {
               handleSignifyData(resp);
             }
             getReportStatus({ ...resp });
@@ -129,19 +130,25 @@ const StatusPage = ({
         message: "Select Credential to Proceed",
         details: "Select a credential from extension to fetch report status",
       });
-      const resp = await requestCredential(`${serverUrl}${statusPath}/${selectedAid}`);
+      const resp = await requestCredential(
+        `${serverUrl}${statusPath}/${selectedAid}`
+      );
       if (resp) {
         handleCurrentSignatureData(resp);
-        if(resp.autoSignin){
+        if (resp.autoSignin) {
           handleSignifyData(resp);
         }
-        getReportStatus({ ...resp});
+        getReportStatus({ ...resp });
       }
     }
   };
 
   useEffect(() => {
-    populateReportStatus();
+    if (isMounted.current) {
+      populateReportStatus();
+    }
+
+    isMounted.current = true;
   }, []);
 
   return (
@@ -203,8 +210,8 @@ const StatusPage = ({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {data.map((item: any) => (
-                    <Row key={item.filename} row={item} />
+                  {data.map((item: any, index) => (
+                    <Row key={`${item.filename}-${index}`} row={item} />
                   ))}
                 </TableBody>
               </Table>
@@ -288,6 +295,9 @@ function Row(props: { row: any }) {
                 </Typography>
                 <Typography variant="body2" gutterBottom>
                   <strong>Message:</strong> {row["message"]}
+                </Typography>
+                <Typography variant="body2" gutterBottom>
+                  <strong>Submitted by:</strong> {row["submitter"]}
                 </Typography>
               </CardContent>
             </Card>

@@ -147,7 +147,7 @@ const SettingsPage = ({
       const response = await regService.verify(
         verifyUrl,
         verifyRequest,
-        signatureData,
+        signatureData
       );
       const response_signed_data = await response.json();
       setVerifyResponse(response_signed_data);
@@ -183,9 +183,7 @@ const SettingsPage = ({
       setStatusResponse(response_signed_data);
       if (!response) return;
       if (response.status >= 400) {
-        throw new Error(
-          `${response_signed_data?.msg}`
-        );
+        throw new Error(`${response_signed_data?.msg}`);
       }
     } catch (error) {
       openSnackbar(error?.message, "error");
@@ -209,7 +207,7 @@ const SettingsPage = ({
       const response = await regService.postReport(
         reportUrl,
         lRequest,
-        signatureData,
+        signatureData
       );
       const response_signed_data = await response.json();
       console.log("upload response", response_signed_data);
@@ -232,36 +230,34 @@ const SettingsPage = ({
         <Box sx={{ maxHeight: "500px", overflow: "scroll", paddingX: "32px" }}>
           {extensionInstalled ? (
             <>
-              {signatureData && (
-                <ServerInfo
-                  serverUrl={serverUrl}
-                  pingUrl={pingUrl}
-                  handlePing={handlePing}
-                  pingResponse={pingResponse}
-                  loginUrl={loginUrl}
-                  handleLogin={handleLogin}
-                  loginRequest={loginRequest}
-                  loginResponse={loginResponse}
-                  setServerUrl={setServerUrl}
-                  setPingUrl={setPingUrl}
-                  setLoginUrl={setLoginUrl}
-                  verifyUrl={verifyUrl}
-                  setVerifyUrl={setVerifyUrl}
-                  verifyRequest={verifyRequest}
-                  verifyResponse={verifyResponse}
-                  handleVerify={handleVerify}
-                  statusUrl={statusUrl}
-                  setStatusUrl={setStatusUrl}
-                  statusRequest={statusRequest}
-                  statusResponse={statusResponse}
-                  handleStatus={handleStatus}
-                  reportUrl={reportUrl}
-                  setReportUrl={setReportUrl}
-                  reportRequest={reportRequest}
-                  reportResponse={reportResponse}
-                  handleReportUpload={handleReportUpload}
-                />
-              )}
+              <ServerInfo
+                serverUrl={serverUrl}
+                pingUrl={pingUrl}
+                handlePing={handlePing}
+                pingResponse={pingResponse}
+                loginUrl={loginUrl}
+                handleLogin={handleLogin}
+                loginRequest={loginRequest}
+                loginResponse={loginResponse}
+                setServerUrl={setServerUrl}
+                setPingUrl={setPingUrl}
+                setLoginUrl={setLoginUrl}
+                verifyUrl={verifyUrl}
+                setVerifyUrl={setVerifyUrl}
+                verifyRequest={verifyRequest}
+                verifyResponse={verifyResponse}
+                handleVerify={handleVerify}
+                statusUrl={statusUrl}
+                setStatusUrl={setStatusUrl}
+                statusRequest={statusRequest}
+                statusResponse={statusResponse}
+                handleStatus={handleStatus}
+                reportUrl={reportUrl}
+                setReportUrl={setReportUrl}
+                reportRequest={reportRequest}
+                reportResponse={reportResponse}
+                handleReportUpload={handleReportUpload}
+              />
             </>
           ) : (
             <></>
