@@ -89,20 +89,16 @@ const ReportsPage = ({
         );
         const response_signed_data = await response.json();
         console.log("upload response", response_signed_data);
-        
+
         if (response.status >= 400) {
           throw new Error(
             `${response_signed_data?.msg ?? response_signed_data?.title}`
           );
         }
-        const responseCheckReport = await regService.checkReport(
-          `${serverUrl}${uploadPath}/${aid}/${said}`,
-          { method: "GET" },
-          signatureData
+        openSnackbar(
+          response_signed_data?.message,
+          response_signed_data?.status === "failed" ? "warning" : "success"
         );
-        const response_check_report_data = await responseCheckReport.json();
-        console.log("response_check_report_data", response_check_report_data);
-        openSnackbar(response_signed_data?.msg, "success");
         setSubmitStatus("success");
         return response_signed_data;
       } catch (error) {
