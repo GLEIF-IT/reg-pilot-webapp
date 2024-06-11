@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { requestCredential } from "signify-polaris-web";
 import {
   Alert,
   Paper,
@@ -50,14 +49,14 @@ const StatusPage = ({
         let sheads = new Headers();
         sheads.set("Content-Type", "application/json");
         const lRequest = {
-          headers: sheads,
+          // headers: sheads,
           method: "GET",
           body: null,
         };
         const statusResp = await regService.getStatus(
           `${serverUrl}${statusPath}/${selectedAid}`,
           lRequest,
-          _signatureData
+          signatureData?.sessionId
         );
 
         const response_signed_data = await statusResp.json();
@@ -71,13 +70,6 @@ const StatusPage = ({
       } catch (error) {
         if (typeof error?.message === "string") {
           setHasError(error);
-          // const resp = await requestCredential(
-          //   `${serverUrl}${statusPath}/${selectedAid}`
-          // );
-          // if (resp) {
-          //   handleSignifyData(resp);
-          //   getReportStatus({ ...resp });
-          // }
         } else {
           openSnackbar("Unable to connect with server", "error");
           setHasError({ message: "Unable to connect with server" });
@@ -117,14 +109,6 @@ const StatusPage = ({
         message: "Select Credential to Proceed",
         details: "Select a credential from extension to fetch report status",
       });
-      // const resp = await requestCredential(
-      //   `${serverUrl}${statusPath}/${selectedAid}`
-      // );
-      // if (resp) {
-      //   console.log("resp is ", resp);
-      //   handleSignifyData(resp);
-      //   getReportStatus({ ...resp });
-      // }
     }
   };
 

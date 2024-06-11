@@ -22,63 +22,13 @@ interface ISignifyInfo {
   devMode: boolean;
 }
 
-const SignifyInfo: React.FC<ISignifyInfo> = ({
-  devMode,
-  selectedId,
-  selectedAcdc,
-  signatureData,
-  loginUrl,
-}) => {
+const SignifyInfo: React.FC<ISignifyInfo> = ({ selectedId, signatureData }) => {
   const sigString = JSON.stringify(signatureData, null, 2);
-  // const { openSnackbar } = useSnackbar();
   const [showRaw, setShowRaw] = useState(false);
   const [showAlert, setShowAlert] = useState(true);
 
   const { credential } = signatureData ?? {};
 
-  // const handleLogin = async () => {
-  //   let vlei_cesr = signatureData?.credential.cesr;
-
-  //   const requestBody = {
-  //     said: selectedAcdc?.sad?.d,
-  //     vlei: vlei_cesr,
-  //   };
-
-  //   const lhead = new Headers();
-  //   lhead.set("Content-Type", "application/json");
-
-  //   const lRequest = {
-  //     headers: lhead,
-  //     method: "POST",
-  //     body: JSON.stringify(requestBody),
-  //   };
-
-  //   if (devMode) {
-  //     openSnackbar("<Devmode> Response received: Verified", "success");
-  //     return;
-  //   }
-
-  //   try {
-  //     const response = await regService.postLogin(loginUrl, {
-  //       ...lRequest,
-  //     });
-  //     const responseData = await response.json();
-
-  //     if (response.status >= 400) {
-  //       throw new Error(responseData.msg);
-  //     }
-  //     if (!response) return;
-
-  //     if (response.msg) {
-  //       openSnackbar(response.msg, "success");
-  //     }
-  //   } catch (error) {
-  //     if (typeof error?.message === "string")
-  //       openSnackbar(error?.message, "error");
-  //     else
-  //       openSnackbar(`Unable to connect with server at ${loginUrl}`, "error");
-  //   }
-  // };
   return (
     <Grid container spacing={1}>
       <Grid item xs={12}>
@@ -162,7 +112,7 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({
                     }}
                   >
                     <Typography variant="caption">
-                      <strong>{credential?.schema?.title}</strong>
+                      <strong>{credential?.raw?.schema?.title}</strong>
                     </Typography>
                     <Box
                       sx={{
@@ -178,7 +128,7 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({
                       ) : (
                         <></>
                       )}
-                      {credential?.status?.et === "iss" && (
+                      {credential?.raw?.status?.et === "iss" && (
                         <Tooltip title="credential is valid">
                           <Beenhere color="success" />
                         </Tooltip>
@@ -189,10 +139,10 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({
                     <strong>AID:</strong> {selectedId}
                   </Typography>
                   <Typography variant="caption">
-                    {credential?.schema?.credentialType}
+                    {credential?.raw?.schema?.credentialType}
                   </Typography>
                   <Typography variant="caption">
-                    {credential?.schema?.description}
+                    {credential?.raw?.schema?.description}
                   </Typography>
                   {/* <Button
                     variant="contained"

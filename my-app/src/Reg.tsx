@@ -2,13 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
 import "./App.css";
-import {
-  isExtensionInstalled,
-  requestAutoSignin,
-  requestAid,
-  requestCredential,
-  trySettingVendorUrl,
-} from "signify-polaris-web";
+import { createClient } from "signify-polaris-web";
 import { regService } from "./services/reg-server.ts";
 import fakeSigData from "./test/fakeSigData.json";
 import { useDevMode } from "./context/devMode.tsx";
@@ -22,6 +16,8 @@ import StatusPage from "./pages/status.tsx";
 import SettingsPage from "./pages/settings.tsx";
 
 const statusPath = "/status";
+
+const signifyClient = createClient();
 
 const RegComponent = () => {
   const location = useLocation();
@@ -58,14 +54,14 @@ const RegComponent = () => {
   };
 
   const handleSettingVendorUrl = async (url) => {
-    await trySettingVendorUrl(url);
+    await signifyClient.provideConfigUrl(url);
     setVendorConf(true);
   };
 
   const handleVerifyLogin = async (data) => {
     let vlei_cesr = data?.credential.cesr;
     const requestBody = {
-      said: data.credential?.sad?.d,
+      said: data.credential?.raw?.sad?.d,
       vlei: vlei_cesr,
     };
     const lhead = new Headers();
@@ -106,8 +102,8 @@ const RegComponent = () => {
 
       localStorage.setItem("signify-data", JSON.stringify(data));
       setSignatureData(data);
-      setSelectedId(data.headers["signify-resource"]);
-      setSelectedAcdc(data.credential);
+      setSelectedId(data?.headers?.["signify-resource"]);
+      setSelectedAcdc(data.credential?.raw);
       openSnackbar(
         data?.autoSignin
           ? "Success! Auto Signin Credential selected."
@@ -123,7 +119,7 @@ const RegComponent = () => {
   };
 
   const populateExtensionStatus = async () => {
-    const extensionId = await isExtensionInstalled();
+    const extensionId = await signifyClient.isExtensionInstalled();
     setExtensionInstalled(Boolean(extensionId));
     if (extensionId) {
       if (localStorage.getItem("signify-data")) {
@@ -148,7 +144,7 @@ const RegComponent = () => {
     } else {
       setAutoCredLoading(true);
       try {
-        const resp = await requestAutoSignin(loginUrl);
+        const resp = await signifyClient.authorizeAutoSignin();
         console.log("data received", resp);
         if (resp) {
           handleSignifyData(resp);
@@ -165,9 +161,9 @@ const RegComponent = () => {
       handleSignifyData(fakeSigData);
     } else {
       setCredLoading(true);
-      const resp = await requestCredential(loginUrl);
+      const resp = await signifyClient.authorize();
       setCredLoading(false);
-      console.log("promised resp from requestCredential", resp);
+      console.log("promised resp from signifyClient.authorize()", resp);
       handleSignifyData(resp);
     }
   };
@@ -177,9 +173,9 @@ const RegComponent = () => {
       handleSignifyData(fakeSigData);
     } else {
       setAidLoading(true);
-      const resp = await requestAid(loginUrl);
+      const resp = await signifyClient.authorizeAid();
       setAidLoading(false);
-      console.log("promised resp from requestAid", resp);
+      console.log("promised resp from signifyClient.authorizeAid()", resp);
       handleSignifyData(resp);
     }
   };
@@ -231,7 +227,7 @@ const RegComponent = () => {
             path="/status"
             element={
               <StatusPage
-                selectedAid={signatureData?.credential?.sad?.a?.i}
+                selectedAid={signatureData?.credential?.raw?.sad?.a?.i}
                 devMode={devMode}
                 serverUrl={serverUrl}
                 statusPath={statusPath}
@@ -246,8 +242,8 @@ const RegComponent = () => {
               <ReportsPage
                 devMode={devMode}
                 serverUrl={serverUrl}
-                selectedAid={signatureData?.credential?.sad?.a?.i}
-                selectedAcdc={signatureData?.credential?.sad?.d}
+                selectedAid={signatureData?.credential?.raw?.sad?.a?.i}
+                selectedAcdc={signatureData?.credential?.raw?.sad?.d}
                 signatureData={signatureData}
               />
             }

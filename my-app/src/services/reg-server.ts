@@ -1,5 +1,6 @@
-import { signifyHeaders } from "signify-polaris-web";
+import { createClient } from "signify-polaris-web";
 
+const signifyClient = createClient();
 const RegServer = () => {
   /**
    *
@@ -25,51 +26,61 @@ const RegServer = () => {
   const postReport = async (
     rurl: string,
     request: any,
-    signin
+    sessionId: string
   ): Promise<any> => {
-    const headers = await signifyHeaders(
-      rurl,
-      request,
-      signin?.identifier?.name ?? signin.credential?.issueeName
-    );
-    delete request.headers["content-type"];
-    delete headers["content-type"];
-    return fetch(rurl, { ...request, headers });
+    const resp = await signifyClient.signRequest({
+      url: rurl,
+      method: request.method,
+      sessionId,
+      headers: request.headers,
+    });
+    if (request.headers) {
+      delete request.headers["content-type"];
+    }
+    delete resp.headers["content-type"];
+    return fetch(rurl, { ...request, headers: resp.headers });
   };
 
   const checkReport = async (
     rurl: string,
     request: any,
-    signin
+    sessionId: string
   ): Promise<any> => {
-    const headers = await signifyHeaders(
-      rurl,
-      request,
-      signin?.identifier?.name ?? signin.credential?.issueeName
-    );
+    const headers = await signifyClient.signRequest({
+      url: rurl,
+      method: request.method,
+      sessionId,
+      headers: request.headers,
+    });
     return fetch(rurl, { ...request, headers });
   };
 
-  const verify = async (rurl: string, request: any, signin): Promise<any> => {
-    const headers = await signifyHeaders(
-      rurl,
-      request,
-      signin?.identifier?.name ?? signin.credential?.issueeName
-    );
+  const verify = async (
+    rurl: string,
+    request: any,
+    sessionId: string
+  ): Promise<any> => {
+    const headers = await signifyClient.signRequest({
+      url: rurl,
+      sessionId,
+      method: request.method,
+      headers: request.headers,
+    });
     return fetch(rurl, { ...request, headers });
   };
 
   const getStatus = async (
     rurl: string,
     request: any,
-    signin
+    sessionId: string
   ): Promise<any> => {
-    const headers = await signifyHeaders(
-      rurl,
-      request,
-      signin?.identifier?.name ?? signin?.credential?.issueeName
-    );
-    return fetch(rurl, { ...request, headers });
+    const resp = await signifyClient.signRequest({
+      url: rurl,
+      sessionId,
+      method: request.method,
+      headers: request.headers,
+    });
+    return fetch(rurl, { ...request, headers: resp.headers });
   };
 
   return { ping, verify, postLogin, postReport, checkReport, getStatus };
