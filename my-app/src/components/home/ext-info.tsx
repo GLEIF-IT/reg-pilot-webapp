@@ -122,7 +122,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
           justifyContent: "flex-end",
         }}
       >
-        {!devMode && !signatureData && (
+        {/* {!devMode && !signatureData && (
           <Button
             size="small"
             variant="contained"
@@ -133,7 +133,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
               Configure Extension
             </Typography>
           </Button>
-        )}
+        )} */}
         {/* {(!signatureData || devMode) && (
           <Button
             size="small"
@@ -163,7 +163,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
             {credLoading && <CircularProgress color="inherit" size="12px" />}
           </Button>
         )}
-        {(!signatureData || devMode) && (
+        {/* {(!signatureData || devMode) && (
           <Button
             size="small"
             variant="contained"
@@ -178,7 +178,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
               <CircularProgress color="inherit" size="12px" />
             )}
           </Button>
-        )}
+        )} */}
         {signatureData && (
           <Button
             size="small"

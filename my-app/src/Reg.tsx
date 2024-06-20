@@ -54,7 +54,7 @@ const RegComponent = () => {
   };
 
   const handleSettingVendorUrl = async (url) => {
-    await signifyClient.provideConfigUrl(url);
+    // await signifyClient.provideConfigUrl(url);
     setVendorConf(true);
   };
 
@@ -142,17 +142,17 @@ const RegComponent = () => {
     if (devMode) {
       handleSignifyData(fakeSigData);
     } else {
-      setAutoCredLoading(true);
-      try {
-        const resp = await signifyClient.authorizeAutoSignin();
-        console.log("data received", resp);
-        if (resp) {
-          handleSignifyData(resp);
-        }
-      } catch (error) {
-        openSnackbar(error?.message, "error");
-      }
-      setAutoCredLoading(false);
+      // setAutoCredLoading(true);
+      // try {
+      //   const resp = await signifyClient.authorizeAutoSignin();
+      //   console.log("data received", resp);
+      //   if (resp) {
+      //     handleSignifyData(resp);
+      //   }
+      // } catch (error) {
+      //   openSnackbar(error?.message, "error");
+      // }
+      // setAutoCredLoading(false);
     }
   };
 
@@ -172,11 +172,11 @@ const RegComponent = () => {
     if (devMode) {
       handleSignifyData(fakeSigData);
     } else {
-      setAidLoading(true);
-      const resp = await signifyClient.authorizeAid();
-      setAidLoading(false);
-      console.log("promised resp from signifyClient.authorizeAid()", resp);
-      handleSignifyData(resp);
+      // setAidLoading(true);
+      // const resp = await signifyClient.authorizeAid();
+      // setAidLoading(false);
+      // console.log("promised resp from signifyClient.authorizeAid()", resp);
+      // handleSignifyData(resp);
     }
   };
 
