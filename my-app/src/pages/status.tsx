@@ -93,7 +93,6 @@ const StatusPage = ({
       let newData = await getStatus(data);
       setData(newData ?? []);
       setLoading(false);
-      setHasError("");
     } catch (error) {
       setLoading(false);
       console.error("Error fetching data: ", error);
