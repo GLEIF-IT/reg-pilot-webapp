@@ -122,7 +122,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
           justifyContent: "flex-end",
         }}
       >
-        {/* {!devMode && !signatureData && (
+        {!devMode && !signatureData && (
           <Button
             size="small"
             variant="contained"
@@ -133,7 +133,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
               Configure Extension
             </Typography>
           </Button>
-        )} */}
+        )}
         {/* {(!signatureData || devMode) && (
           <Button
             size="small"

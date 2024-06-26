@@ -49,12 +49,12 @@ const RegComponent = () => {
 
   const handleInitialSignatureLoad = async () => {
     setIsLoadingInitial(true);
-    await handleSignifyData(JSON.parse(localStorage.getItem("signify-data")));
+    // await handleSignifyData(JSON.parse(localStorage.getItem("signify-data")));
     setIsLoadingInitial(false);
   };
 
-  const handleSettingVendorUrl = async (url) => {
-    // await signifyClient.provideConfigUrl(url);
+  const handleSettingVendorUrl = async (url: string) => {
+    await signifyClient.configureVendor({ url });
     setVendorConf(true);
   };
 
@@ -161,9 +161,9 @@ const RegComponent = () => {
       handleSignifyData(fakeSigData);
     } else {
       setCredLoading(true);
-      const resp = await signifyClient.authorize();
+      const resp = await signifyClient.authorizeCred();
       setCredLoading(false);
-      console.log("promised resp from signifyClient.authorize()", resp);
+      console.log("promised resp from signifyClient.authorizeCred()", resp);
       handleSignifyData(resp);
     }
   };
