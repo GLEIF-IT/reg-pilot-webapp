@@ -84,8 +84,7 @@ const ReportsPage = ({
         };
         const response = await regService.postReport(
           `${serverUrl}${uploadPath}/${aid}/${said}`,
-          lRequest,
-          signatureData?.sessionId
+          lRequest
         );
         const response_signed_data = await response.json();
         console.log("upload response", response_signed_data);

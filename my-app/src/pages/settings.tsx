@@ -88,7 +88,10 @@ const SettingsPage = ({
     setLoginRequest({
       headers: heads,
       method: "POST",
-      body: JSON.stringify({ said: selectedAcdc?.raw?.sad?.d, vlei: vlei_cesr }),
+      body: JSON.stringify({
+        said: selectedAcdc?.raw?.sad?.d,
+        vlei: vlei_cesr,
+      }),
     });
 
     setVerifyRequest({ method: "GET", headers: signatureData?.headers });
@@ -144,11 +147,7 @@ const SettingsPage = ({
     }
 
     try {
-      const response = await regService.verify(
-        verifyUrl,
-        verifyRequest,
-        signatureData?.sessionId
-      );
+      const response = await regService.verify(verifyUrl, verifyRequest);
       const response_signed_data = await response.json();
       setVerifyResponse(response_signed_data);
       if (!response) return;
@@ -174,11 +173,7 @@ const SettingsPage = ({
     }
 
     try {
-      const response = await regService.getStatus(
-        statusUrl,
-        statusRequest,
-        signatureData?.sessionId
-      );
+      const response = await regService.getStatus(statusUrl, statusRequest);
       const response_signed_data = await response.json();
       setStatusResponse(response_signed_data);
       if (!response) return;
@@ -204,11 +199,7 @@ const SettingsPage = ({
         ...reportRequest,
         body: formData,
       };
-      const response = await regService.postReport(
-        reportUrl,
-        lRequest,
-        signatureData?.sessionId
-      );
+      const response = await regService.postReport(reportUrl, lRequest);
       const response_signed_data = await response.json();
       console.log("upload response", response_signed_data);
       setReportResponse(response_signed_data);

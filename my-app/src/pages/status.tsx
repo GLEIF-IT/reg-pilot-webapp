@@ -55,8 +55,7 @@ const StatusPage = ({
         };
         const statusResp = await regService.getStatus(
           `${serverUrl}${statusPath}/${selectedAid}`,
-          lRequest,
-          signatureData?.sessionId
+          lRequest
         );
 
         const response_signed_data = await statusResp.json();

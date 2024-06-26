@@ -23,15 +23,10 @@ const RegServer = () => {
     return fetch(rurl, request);
   };
 
-  const postReport = async (
-    rurl: string,
-    request: any,
-    sessionId: string
-  ): Promise<any> => {
+  const postReport = async (rurl: string, request: any): Promise<any> => {
     const resp = await signifyClient.signRequest({
       url: rurl,
       method: request.method,
-      sessionId,
       headers: request.headers,
     });
     if (request.headers) {
@@ -41,42 +36,27 @@ const RegServer = () => {
     return fetch(rurl, { ...request, headers: resp.headers });
   };
 
-  const checkReport = async (
-    rurl: string,
-    request: any,
-    sessionId: string
-  ): Promise<any> => {
+  const checkReport = async (rurl: string, request: any): Promise<any> => {
     const headers = await signifyClient.signRequest({
       url: rurl,
-      method: request.method,
-      sessionId,
-      headers: request.headers,
-    });
-    return fetch(rurl, { ...request, headers });
-  };
-
-  const verify = async (
-    rurl: string,
-    request: any,
-    sessionId: string
-  ): Promise<any> => {
-    const headers = await signifyClient.signRequest({
-      url: rurl,
-      sessionId,
       method: request.method,
       headers: request.headers,
     });
     return fetch(rurl, { ...request, headers });
   };
 
-  const getStatus = async (
-    rurl: string,
-    request: any,
-    sessionId: string
-  ): Promise<any> => {
+  const verify = async (rurl: string, request: any): Promise<any> => {
+    const headers = await signifyClient.signRequest({
+      url: rurl,
+      method: request.method,
+      headers: request.headers,
+    });
+    return fetch(rurl, { ...request, headers });
+  };
+
+  const getStatus = async (rurl: string, request: any): Promise<any> => {
     const resp = await signifyClient.signRequest({
       url: rurl,
-      sessionId,
       method: request.method,
       headers: request.headers,
     });
