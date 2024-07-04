@@ -47,6 +47,8 @@ const RegComponent = () => {
     setLoginUrl(serverUrl + "/login");
   }, [serverUrl]);
 
+window.signifyClient = signifyClient;
+
   const handleInitialSignatureLoad = async () => {
     setIsLoadingInitial(true);
     // await handleSignifyData(JSON.parse(localStorage.getItem("signify-data")));

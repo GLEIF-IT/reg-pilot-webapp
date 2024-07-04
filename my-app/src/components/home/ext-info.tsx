@@ -150,6 +150,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
         )} */}
         {(!signatureData || devMode) && (
           <Button
+            id="select-credential-btn"
             size="small"
             variant="contained"
             color="success"

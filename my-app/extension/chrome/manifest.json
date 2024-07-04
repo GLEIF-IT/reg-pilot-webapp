@@ -1,0 +1,62 @@
+{
+  "manifest_version": 3,
+  "name": "Polaris",
+  "version": "0.0.1",
+  "background": {
+    "service_worker": "service-worker-loader.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "src/pages/popup/index.html",
+    "default_icon": {
+      "32": "public/32_keri_logo.png",
+      "128": "public/128_keri_logo.png"
+    }
+  },
+  "icons": {
+    "32": "public/32_keri_logo.png",
+    "128": "public/128_keri_logo.png"
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "alarms"
+  ],
+  "content_scripts": [
+    {
+      "js": [
+        "assets/index.tsx-loader-6a07ccfb.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "resources": [
+        "src/assets/img/128_keri_logo.png"
+      ],
+      "use_dynamic_url": false
+    },
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "resources": [
+        "assets/signin-aa57d0a7.js",
+        "assets/utils-206316b5.js",
+        "assets/index.tsx-56b77b23.js"
+      ],
+      "use_dynamic_url": true
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'"
+  },
+  "description": "Signify Browser Extension"
+}
