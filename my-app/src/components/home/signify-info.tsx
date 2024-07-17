@@ -30,14 +30,14 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({ selectedId, signatureData }) => {
     <Grid container spacing={1}>
       <Grid item xs={12}>
         <Typography variant="h6" fontWeight="bold">
-          Signify Information
+          Credential
         </Typography>
       </Grid>
-      <Grid item xs={12}>
+      {/* <Grid item xs={12}>
         <Typography variant="body2">
           <strong>AID:</strong> {selectedId}
         </Typography>
-      </Grid>
+      </Grid> */}
       {showAlert && signatureData?.autoSignin ? (
         <Grid item xs={6}>
           <Alert
@@ -66,7 +66,7 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({ selectedId, signatureData }) => {
           }}
         >
           <Typography variant="body2">
-            <strong>Credential:</strong>
+            {/* <strong>Credential:</strong> */}
           </Typography>
           <Box>
             <Typography variant="body2">

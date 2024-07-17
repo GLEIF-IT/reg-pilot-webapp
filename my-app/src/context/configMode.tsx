@@ -6,7 +6,6 @@ interface IConfigModeProvider {
 }
 
 interface IConfigModeContext {
-  devMode: boolean;
   serverMode: boolean;
   toggleServerMode: () => void;
   extMode: boolean;
@@ -27,8 +26,6 @@ export const ConfigModeProvider = ({
   const [extMode, setExtMode] = useState<boolean>(
     localStorage.getItem(EXT_MODE) !== "false"
   );
-
-  const devMode = !serverMode;
 
   const { openSnackbar } = useSnackbar();
 
@@ -59,7 +56,6 @@ export const ConfigModeProvider = ({
   return (
     <ConfigModeContext.Provider
       value={{
-        devMode,
         serverMode,
         toggleServerMode,
         extMode,

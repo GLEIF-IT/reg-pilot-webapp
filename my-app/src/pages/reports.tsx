@@ -32,7 +32,7 @@ const ReportsPage = ({
   selectedAcdc,
   signatureData,
 }) => {
-  const { devMode } = useConfigMode();
+  const { serverMode } = useConfigMode();
   const navigate = useNavigate();
   const { openSnackbar } = useSnackbar();
 
@@ -77,7 +77,7 @@ const ReportsPage = ({
     const formData = new FormData();
     formData.append("upload", report, report.name);
 
-    if (!devMode) {
+    if (serverMode) {
       try {
         const lRequest = {
           method: "POST",

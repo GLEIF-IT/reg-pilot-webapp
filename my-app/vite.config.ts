@@ -11,6 +11,8 @@ const componentsDir = srcDir + "/components";
 const servicesDir = srcDir + "/services";
 const pagesDir = srcDir + "/pages";
 const contextDir = srcDir + "/context";
+const testDir = srcDir + "/test";
+
 
 
 export default defineConfig({
@@ -22,6 +24,7 @@ export default defineConfig({
       "@services": servicesDir,
       "@pages": pagesDir,
       "@context": contextDir,
+      "@test": testDir,
     },
   },
   plugins: [

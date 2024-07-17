@@ -4,7 +4,8 @@ import { Box, CircularProgress } from "@mui/material";
 import "./App.css";
 import { createClient } from "signify-polaris-web";
 import { regService } from "./services/reg-server.ts";
-import fakeSigData from "./test/fakeSigData.json";
+import fakeEcrCredential from "@test/credential/ecr.json";
+import fakeOorCredential from "@test/credential/oor.json";
 import { useConfigMode } from "@context/configMode.tsx";
 import { useSnackbar } from "@context/snackbar.tsx";
 
@@ -21,7 +22,7 @@ const signifyClient = createClient();
 
 const RegComponent = () => {
   const location = useLocation();
-  const { devMode } = useConfigMode();
+  const { extMode } = useConfigMode();
   const { openSnackbar } = useSnackbar();
   const [signatureData, setSignatureData] = useState<any>();
   const [isLoadingInitial, setIsLoadingInitial] = useState(false);
@@ -51,7 +52,6 @@ const RegComponent = () => {
 
   const handleInitialSignatureLoad = async () => {
     setIsLoadingInitial(true);
-    // await handleSignifyData(JSON.parse(localStorage.getItem("signify-data")));
     setIsLoadingInitial(false);
   };
 
@@ -88,28 +88,25 @@ const RegComponent = () => {
   };
 
   const handleSignifyData = async (data) => {
+    console.log("data received");
+    console.log(data);
+
     if (!data) {
       alert("Could not set signify data");
       return;
     }
 
     try {
-      if (devMode) {
-        openSnackbar("<Devmode> Response received: Verified", "success");
-      } else {
+      if (extMode) {
         await handleVerifyLogin(data);
+      } else {
+        openSnackbar("Response received: Verified", "success");
       }
 
       localStorage.setItem("signify-data", JSON.stringify(data));
       setSignatureData(data);
       setSelectedId(data?.headers?.["signify-resource"]);
       setSelectedAcdc(data.credential?.raw);
-      openSnackbar(
-        data?.autoSignin
-          ? "Success! Auto Signin Credential selected."
-          : "Success! Credential selected.",
-        "success"
-      );
     } catch (error) {
       if (typeof error?.message === "string")
         openSnackbar(error?.message, "error");
@@ -139,9 +136,7 @@ const RegComponent = () => {
   };
 
   const handleAutoSignin = async () => {
-    if (devMode) {
-      handleSignifyData(fakeSigData);
-    } else {
+    if (extMode) {
       // setAutoCredLoading(true);
       // try {
       //   const resp = await signifyClient.authorizeAutoSignin();
@@ -153,30 +148,35 @@ const RegComponent = () => {
       //   openSnackbar(error?.message, "error");
       // }
       // setAutoCredLoading(false);
+    } else {
+      handleSignifyData(fakeEcrCredential);
     }
   };
 
-  const handleCredSignin = async () => {
-    if (devMode) {
-      handleSignifyData(fakeSigData);
-    } else {
+  const handleCredSignin = async (credType: string) => {
+    if (extMode) {
       setCredLoading(true);
       const resp = await signifyClient.authorize();
       setCredLoading(false);
-      console.log("promised resp from signifyClient.authorizeCred()", resp);
+      console.log("promised resp from signifyClient.authorizeCred()");
+      console.log(resp);
       handleSignifyData(resp);
+    } else {
+      handleSignifyData(
+        credType === "oor" ? fakeOorCredential : fakeEcrCredential
+      );
     }
   };
 
   const handleAidSignin = async () => {
-    if (devMode) {
-      handleSignifyData(fakeSigData);
-    } else {
+    if (extMode) {
       // setAidLoading(true);
       // const resp = await signifyClient.authorizeAid();
       // setAidLoading(false);
       // console.log("promised resp from signifyClient.authorizeAid()", resp);
       // handleSignifyData(resp);
+    } else {
+      handleSignifyData(fakeEcrCredential);
     }
   };
 

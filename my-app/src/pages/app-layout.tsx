@@ -25,7 +25,6 @@ import {
   ExtensionOutlined,
 } from "@mui/icons-material";
 import { Config } from "../components/config";
-import { useConfigMode } from "@context/configMode";
 
 const SIDEBAR = [
   { path: "/", title: "Home", icon: <GridView /> },
@@ -36,7 +35,6 @@ const SIDEBAR = [
 
 const AppLayout = () => {
   const navigate = useNavigate();
-  const { devMode } = useConfigMode();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const toggleDrawer = (open: any) => (event: any) => {
@@ -82,28 +80,6 @@ const AppLayout = () => {
             }}
           ></Box>
           <Box>
-            <Button
-              sx={{
-                marginLeft: "auto",
-                backgroundColor: "lightblue",
-                color: "black",
-                "&:hover": {
-                  color: "white",
-                  backgroundColor: "midnightblue",
-                },
-              }}
-              size="small"
-              variant="contained"
-              startIcon={
-                <Circle
-                  sx={{
-                    color: devMode ? "green" : "red",
-                  }}
-                />
-              }
-            >
-              Dev Mode
-            </Button>
             <Config />
           </Box>
         </Toolbar>

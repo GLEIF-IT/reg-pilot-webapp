@@ -39,7 +39,7 @@ const SettingsPage = ({
   loginUrl: any;
   setLoginUrl: any;
 }) => {
-  const { devMode } = useConfigMode();
+  const { serverMode } = useConfigMode();
   const { openSnackbar } = useSnackbar();
 
   // Define the endpoint paths
@@ -100,9 +100,9 @@ const SettingsPage = ({
   };
 
   async function handlePing() {
-    if (devMode) {
+    if (!serverMode) {
       setPingResponse("PONG");
-      openSnackbar(`<Devmode> Response received: PONG`, "success");
+      openSnackbar(`<Mocked> Response received: PONG`, "success");
       return;
     }
 
@@ -116,9 +116,9 @@ const SettingsPage = ({
   }
 
   const handleLogin = async () => {
-    if (devMode) {
+    if (!serverMode) {
       setLoginResponse(fakeLoginResponse);
-      openSnackbar("<Devmode> Response received!", "success");
+      openSnackbar("<Mocked> Response received!", "success");
       return;
     }
 
@@ -140,9 +140,9 @@ const SettingsPage = ({
   };
 
   const handleVerify = async () => {
-    if (devMode) {
+    if (!serverMode) {
       setVerifyResponse("");
-      openSnackbar("<Devmode> Response received!", "success");
+      openSnackbar("<Mocked> Response received!", "success");
       return;
     }
 
@@ -160,7 +160,7 @@ const SettingsPage = ({
   };
 
   const handleStatus = async () => {
-    if (devMode) {
+    if (!serverMode) {
       const aid = "ECJLhLl1-xtrgi9SktH-8_Qc5yz2B24fT6fhdO9o3BdQ";
       if (Object.keys(fakeCheckStatus).includes(aid)) {
         const fakeStatueAid = fakeCheckStatus[aid] ?? [];
@@ -168,7 +168,7 @@ const SettingsPage = ({
       } else {
         alert("check status fake data: no data found for aid: " + aid);
       }
-      openSnackbar("<Devmode> Response received!", "success");
+      openSnackbar("<Mocked> Response received!", "success");
       return;
     }
 
@@ -186,7 +186,7 @@ const SettingsPage = ({
   };
 
   const handleReportUpload = async (report) => {
-    if (devMode) {
+    if (!serverMode) {
       const fakeFile = await getFakeFileResponse();
       setReportResponse(fakeFile);
       return;

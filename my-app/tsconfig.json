@@ -25,6 +25,7 @@
       "@services/*": ["src/services/*"],
       "@pages/*": ["src/pages/*"],
       "@context/*": ["src/context/*"],
+      "@test/*": ["src/test/*"],
       
     }
   },

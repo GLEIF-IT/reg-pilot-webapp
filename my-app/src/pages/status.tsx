@@ -32,7 +32,7 @@ import { useConfigMode } from "@context/configMode";
 const StatusPage = ({ selectedAid, serverUrl, statusPath, signatureData }) => {
   const navigate = useNavigate();
   const { openSnackbar } = useSnackbar();
-  const { devMode } = useConfigMode();
+  const { serverMode } = useConfigMode();
   const [data, setData] = useState<Array<any>>();
   const [loading, setLoading] = useState(false);
   const [hasError, setHasError] = useState("");
@@ -40,7 +40,7 @@ const StatusPage = ({ selectedAid, serverUrl, statusPath, signatureData }) => {
   // Function to perform the upload status request
   async function getStatus(_signatureData): Promise<any> {
     // Send signed request
-    if (!devMode) {
+    if (serverMode) {
       try {
         let sheads = new Headers();
         sheads.set("Content-Type", "application/json");
