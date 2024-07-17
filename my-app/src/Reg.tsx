@@ -5,7 +5,7 @@ import "./App.css";
 import { createClient } from "signify-polaris-web";
 import { regService } from "./services/reg-server.ts";
 import fakeSigData from "./test/fakeSigData.json";
-import { useDevMode } from "./context/devMode.tsx";
+import { useConfigMode } from "./context/configMode.tsx";
 import { useSnackbar } from "./context/snackbar.tsx";
 
 import ExtNotFound from "./components/ext-not-found.tsx";
@@ -21,7 +21,7 @@ const signifyClient = createClient();
 
 const RegComponent = () => {
   const location = useLocation();
-  const { devMode } = useDevMode();
+  const { devMode } = useConfigMode();
   const { openSnackbar } = useSnackbar();
   const [signatureData, setSignatureData] = useState<any>();
   const [isLoadingInitial, setIsLoadingInitial] = useState(false);

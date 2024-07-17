@@ -11,10 +11,10 @@ import {
   ExtensionOutlined,
   InfoOutlined,
 } from "@mui/icons-material";
-import { useDevMode } from "../../context/devMode";
+import { useConfigMode } from "../../context/configMode";
 
 export function Config() {
-  const { serverMode, toggleServerMode, extMode, toggleExtMode } = useDevMode();
+  const { serverMode, toggleServerMode, extMode, toggleExtMode } = useConfigMode();
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
     null
   );

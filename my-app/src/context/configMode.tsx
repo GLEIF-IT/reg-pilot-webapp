@@ -1,11 +1,11 @@
 import React, { createContext, useContext, useState } from "react";
 import { useSnackbar } from "./snackbar.tsx";
 
-interface IDevModeProvider {
+interface IConfigModeProvider {
   children?: React.ReactNode;
 }
 
-interface IDevModeContext {
+interface IConfigModeContext {
   devMode: boolean;
   serverMode: boolean;
   toggleServerMode: () => void;
@@ -13,13 +13,13 @@ interface IDevModeContext {
   toggleExtMode: () => void;
 }
 
-const DevModeContext = createContext<IDevModeContext | null>(null);
+const ConfigModeContext = createContext<IConfigModeContext | null>(null);
 const SERVER_MODE = "server-mode";
 const EXT_MODE = "ext-mode";
 
-export const DevModeProvider = ({
+export const ConfigModeProvider = ({
   children,
-}: IDevModeProvider): JSX.Element => {
+}: IConfigModeProvider): JSX.Element => {
   const [serverMode, setServerMode] = useState<boolean>(
     localStorage.getItem(SERVER_MODE) !== "false"
   );
@@ -57,7 +57,7 @@ export const DevModeProvider = ({
   };
 
   return (
-    <DevModeContext.Provider
+    <ConfigModeContext.Provider
       value={{
         devMode,
         serverMode,
@@ -67,14 +67,14 @@ export const DevModeProvider = ({
       }}
     >
       {children}
-    </DevModeContext.Provider>
+    </ConfigModeContext.Provider>
   );
 };
 
-export const useDevMode = () => {
-  const context = useContext(DevModeContext);
+export const useConfigMode = () => {
+  const context = useContext(ConfigModeContext);
   if (!context) {
-    throw new Error("useDevMode must be used within a DevModeProvider");
+    throw new Error("useConfigMode must be used within a ConfigModeProvider");
   }
   return context;
 };
