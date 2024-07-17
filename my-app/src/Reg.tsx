@@ -5,8 +5,8 @@ import "./App.css";
 import { createClient } from "signify-polaris-web";
 import { regService } from "./services/reg-server.ts";
 import fakeSigData from "./test/fakeSigData.json";
-import { useConfigMode } from "./context/configMode.tsx";
-import { useSnackbar } from "./context/snackbar.tsx";
+import { useConfigMode } from "@context/configMode.tsx";
+import { useSnackbar } from "@context/snackbar.tsx";
 
 import ExtNotFound from "./components/ext-not-found.tsx";
 import AppLayout from "./pages/app-layout.tsx";

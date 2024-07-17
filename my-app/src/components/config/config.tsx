@@ -11,7 +11,7 @@ import {
   ExtensionOutlined,
   InfoOutlined,
 } from "@mui/icons-material";
-import { useConfigMode } from "../../context/configMode";
+import { useConfigMode } from "@context/configMode";
 
 export function Config() {
   const { serverMode, toggleServerMode, extMode, toggleExtMode } = useConfigMode();
