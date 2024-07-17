@@ -21,7 +21,7 @@ const signifyClient = createClient();
 
 const RegComponent = () => {
   const location = useLocation();
-  const { devMode, toggleDevMode } = useDevMode();
+  const { devMode } = useDevMode();
   const { openSnackbar } = useSnackbar();
   const [signatureData, setSignatureData] = useState<any>();
   const [isLoadingInitial, setIsLoadingInitial] = useState(false);
@@ -31,7 +31,9 @@ const RegComponent = () => {
 
   const [selectedId, setSelectedId] = useState(""); // Step 2 Selection
   const [selectedAcdc, setSelectedAcdc] = useState(null); // Step 3 Selection
-  const [serverUrl, setServerUrl] = useState("https://reg-api.rootsid.cloud");
+  const [serverUrl, setServerUrl] = useState(
+    "https://reg-api-test.rootsid.cloud"
+  );
 
   const [vendorConf, setVendorConf] = useState(false);
 
@@ -161,7 +163,7 @@ const RegComponent = () => {
       handleSignifyData(fakeSigData);
     } else {
       setCredLoading(true);
-      const resp = await signifyClient.authorizeCred();
+      const resp = await signifyClient.authorize();
       setCredLoading(false);
       console.log("promised resp from signifyClient.authorizeCred()", resp);
       handleSignifyData(resp);
@@ -199,7 +201,7 @@ const RegComponent = () => {
 
   return (
     <Box display="flex" justifyContent="center" alignItems="center">
-      <AppLayout devMode={devMode} toggleDevMode={toggleDevMode} />
+      <AppLayout devMode={devMode} />
       <Box sx={{ marginTop: "60px", width: "100%" }}>
         <Routes>
           <Route

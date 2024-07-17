@@ -7,32 +7,65 @@ interface IDevModeProvider {
 
 interface IDevModeContext {
   devMode: boolean;
-  toggleDevMode: () => void;
+  serverMode: boolean;
+  toggleServerMode: () => void;
+  extMode: boolean;
+  toggleExtMode: () => void;
 }
 
 const DevModeContext = createContext<IDevModeContext | null>(null);
-const DEV_MODE = "dev-mode";
+const SERVER_MODE = "server-mode";
+const EXT_MODE = "ext-mode";
 
 export const DevModeProvider = ({
   children,
 }: IDevModeProvider): JSX.Element => {
-  const [devMode, setDevMode] = useState<boolean>(
-    localStorage.getItem(DEV_MODE) === "true"
+  const [serverMode, setServerMode] = useState<boolean>(
+    localStorage.getItem(SERVER_MODE) !== "false"
   );
+
+  const [extMode, setExtMode] = useState<boolean>(
+    localStorage.getItem(EXT_MODE) !== "false"
+  );
+
+  const devMode = !serverMode;
+
   const { openSnackbar } = useSnackbar();
 
-  const toggleDevMode = () => {
-    const toggledDevMode = !devMode;
-    localStorage.setItem(DEV_MODE, String(toggledDevMode));
-    setDevMode(toggledDevMode);
+  const toggleServerMode = () => {
+    const toggledServerMode = !serverMode;
+    localStorage.setItem(SERVER_MODE, String(toggledServerMode));
+    setServerMode(toggledServerMode);
     openSnackbar(
-      toggledDevMode ? "Dev Mode turned on" : "Dev Mode turned off",
-      toggledDevMode ? "warning" : "success"
+      toggledServerMode
+        ? "Server communication enabled"
+        : "Server communication disabled",
+      toggledServerMode ? "success" : "warning"
+    );
+  };
+
+  const toggleExtMode = () => {
+    const toggledExtMode = !extMode;
+    localStorage.setItem(EXT_MODE, String(toggledExtMode));
+    setExtMode(toggledExtMode);
+    openSnackbar(
+      toggledExtMode
+        ? "Extension communication enabled"
+        : "Extension communication disabled",
+      toggledExtMode ? "success" : "warning"
     );
   };
 
   return (
-    <DevModeContext.Provider value={{ devMode, toggleDevMode }}>
+    <DevModeContext.Provider
+      value={{
+        devMode,
+        serverMode,
+        toggleServerMode,
+        extMode,
+        toggleExtMode,
+      }}
+    >
       {children}
     </DevModeContext.Provider>
   );
