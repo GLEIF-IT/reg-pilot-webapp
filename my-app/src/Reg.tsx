@@ -88,8 +88,6 @@ const RegComponent = () => {
   };
 
   const handleSignifyData = async (data) => {
-    console.log(devMode ? "fake signify-data" : "signify-data", data);
-
     if (!data) {
       alert("Could not set signify data");
       return;
@@ -201,14 +199,13 @@ const RegComponent = () => {
 
   return (
     <Box display="flex" justifyContent="center" alignItems="center">
-      <AppLayout devMode={devMode} />
+      <AppLayout />
       <Box sx={{ marginTop: "60px", width: "100%" }}>
         <Routes>
           <Route
             path="/"
             element={
               <HomePage
-                devMode={devMode}
                 selectedId={selectedId}
                 selectedAcdc={selectedAcdc}
                 handleCredSignin={handleCredSignin}
@@ -230,7 +227,6 @@ const RegComponent = () => {
             element={
               <StatusPage
                 selectedAid={signatureData?.credential?.raw?.sad?.a?.i}
-                devMode={devMode}
                 serverUrl={serverUrl}
                 statusPath={statusPath}
                 signatureData={signatureData}
@@ -242,7 +238,6 @@ const RegComponent = () => {
             path="/reports"
             element={
               <ReportsPage
-                devMode={devMode}
                 serverUrl={serverUrl}
                 selectedAid={signatureData?.credential?.raw?.sad?.a?.i}
                 selectedAcdc={signatureData?.credential?.raw?.sad?.d}
@@ -254,7 +249,6 @@ const RegComponent = () => {
             path="/settings"
             element={
               <SettingsPage
-                devMode={devMode}
                 selectedId={selectedId}
                 selectedAcdc={selectedAcdc}
                 signatureData={signatureData}

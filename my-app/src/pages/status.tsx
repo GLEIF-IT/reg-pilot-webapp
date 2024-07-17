@@ -27,16 +27,12 @@ import CollapseAlert from "../components/collapse-alert.tsx";
 import { regService } from "../services/reg-server.ts";
 import fakeCheckStatus from "../test/fakeCheckStatus.json";
 import { useSnackbar } from "../context/snackbar.tsx";
+import { useConfigMode } from "@context/configMode";
 
-const StatusPage = ({
-  selectedAid,
-  devMode,
-  serverUrl,
-  statusPath,
-  signatureData,
-}) => {
+const StatusPage = ({ selectedAid, serverUrl, statusPath, signatureData }) => {
   const navigate = useNavigate();
   const { openSnackbar } = useSnackbar();
+  const { devMode } = useConfigMode();
   const [data, setData] = useState<Array<any>>();
   const [loading, setLoading] = useState(false);
   const [hasError, setHasError] = useState("");

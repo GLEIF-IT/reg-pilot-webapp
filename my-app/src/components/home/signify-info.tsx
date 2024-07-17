@@ -11,15 +11,12 @@ import {
   Alert,
 } from "@mui/material";
 import { Beenhere, LockOpenRounded } from "@mui/icons-material";
-import { regService } from "../../services/reg-server.ts";
-import { useSnackbar } from "../../context/snackbar.tsx";
 
 interface ISignifyInfo {
   selectedId: string;
   selectedAcdc: any;
   signatureData: any;
   loginUrl: string;
-  devMode: boolean;
 }
 
 const SignifyInfo: React.FC<ISignifyInfo> = ({ selectedId, signatureData }) => {

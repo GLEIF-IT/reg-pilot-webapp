@@ -25,6 +25,7 @@ import {
   ExtensionOutlined,
 } from "@mui/icons-material";
 import { Config } from "../components/config";
+import { useConfigMode } from "@context/configMode";
 
 const SIDEBAR = [
   { path: "/", title: "Home", icon: <GridView /> },
@@ -33,8 +34,9 @@ const SIDEBAR = [
   { path: "/settings", title: "Settings", icon: <Settings /> },
 ];
 
-const AppLayout = ({ devMode }) => {
+const AppLayout = () => {
   const navigate = useNavigate();
+  const { devMode } = useConfigMode();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const toggleDrawer = (open: any) => (event: any) => {

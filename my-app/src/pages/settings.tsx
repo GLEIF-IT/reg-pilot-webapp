@@ -3,6 +3,7 @@ import { Box, Grid } from "@mui/material";
 import { useSnackbar } from "../context/snackbar.tsx";
 import fakeLoginResponse from "../test/fakeLoginResponse.json";
 import ServerInfo from "../components/home/server-info.tsx";
+import { useConfigMode } from "@context/configMode";
 import { regService } from "../services/reg-server.ts";
 import fakeCheckStatus from "../test/fakeCheckStatus.json";
 import fakeFileUpload from "../test/fakeFileUpload.json";
@@ -16,7 +17,6 @@ const getFakeFileResponse = async () => {
 };
 
 const SettingsPage = ({
-  devMode,
   selectedId,
   selectedAcdc,
   signatureData,
@@ -28,7 +28,6 @@ const SettingsPage = ({
   loginUrl,
   setLoginUrl,
 }: {
-  devMode: boolean;
   selectedId: any;
   selectedAcdc: any;
   signatureData: any;
@@ -40,6 +39,7 @@ const SettingsPage = ({
   loginUrl: any;
   setLoginUrl: any;
 }) => {
+  const { devMode } = useConfigMode();
   const { openSnackbar } = useSnackbar();
 
   // Define the endpoint paths

@@ -10,13 +10,13 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { CheckCircleOutline, CancelOutlined } from "@mui/icons-material";
+import { useConfigMode } from "@context/configMode";
 
 interface IExtensionInfo {
   vendorConfigued: boolean;
   signedDataReceived: boolean;
   error?: string;
   removeData: () => void;
-  devMode: boolean;
   handleCredSignin: () => void;
   handleAutoSignin: () => void;
   handleAidSignin: () => void;
@@ -32,7 +32,6 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
   signedDataReceived,
   error,
   removeData,
-  devMode,
   handleCredSignin,
   handleAutoSignin,
   handleAidSignin,
@@ -41,8 +40,9 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
   aidLoading,
   credLoading,
   autoCredLoading,
-}) => (
-  <Grid
+}) => {
+  const { devMode } = useConfigMode();
+  return (<Grid
     container
     spacing={2}
     sx={{ borderRight: "1px solid grey", padding: "8px" }}
@@ -198,7 +198,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
         </Alert>
       )}
     </Grid>
-  </Grid>
-);
+  </Grid>)
+};
 
 export default ExtensionInfo;

@@ -4,6 +4,7 @@ import { Alert, Typography, Button, Box, Grid } from "@mui/material";
 import { UploadFile } from "@mui/icons-material";
 import { regService } from "../services/reg-server.ts";
 import { useSnackbar } from "../context/snackbar.tsx";
+import { useConfigMode } from "@context/configMode";
 import fakeFileUpload from "../test/fakeFileUpload.json";
 
 const uploadPath = "/upload";
@@ -26,12 +27,12 @@ const getFakeFileResponse = async () => {
 };
 
 const ReportsPage = ({
-  devMode,
   serverUrl,
   selectedAid,
   selectedAcdc,
   signatureData,
 }) => {
+  const { devMode } = useConfigMode();
   const navigate = useNavigate();
   const { openSnackbar } = useSnackbar();
 
