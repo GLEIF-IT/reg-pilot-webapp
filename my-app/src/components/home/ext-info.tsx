@@ -171,7 +171,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     }}
                   >
                     <Typography variant="body2" fontWeight="bold">
-                      Select OCR Credential
+                      Select test OCR Credential
                     </Typography>
 
                     {credLoading && (
