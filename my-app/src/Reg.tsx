@@ -251,7 +251,7 @@ const RegComponent = () => {
             path="/settings"
             element={
               <SettingsPage
-                selectedId={selectedId}
+                selectedId={signatureData?.credential?.raw?.sad?.a?.i}
                 selectedAcdc={selectedAcdc}
                 signatureData={signatureData}
                 aidName={signatureData?.credential?.raw?.issueeName}
