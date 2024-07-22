@@ -22,7 +22,7 @@ const signifyClient = createClient();
 
 const RegComponent = () => {
   const location = useLocation();
-  const { extMode } = useConfigMode();
+  const { extMode, serverMode } = useConfigMode();
   const { openSnackbar } = useSnackbar();
   const [signatureData, setSignatureData] = useState<any>();
   const [isLoadingInitial, setIsLoadingInitial] = useState(false);
@@ -97,7 +97,7 @@ const RegComponent = () => {
     }
 
     try {
-      if (extMode) {
+      if (serverMode) {
         await handleVerifyLogin(data);
       } else {
         openSnackbar("Response received: Verified", "success");
@@ -153,7 +153,7 @@ const RegComponent = () => {
     }
   };
 
-  const handleCredSignin = async (credType: string) => {
+  const handleCredSignin = async (credType?: string) => {
     if (extMode) {
       setCredLoading(true);
       const resp = await signifyClient.authorize();
@@ -227,6 +227,7 @@ const RegComponent = () => {
             element={
               <StatusPage
                 selectedAid={signatureData?.credential?.raw?.sad?.a?.i}
+                aidName={signatureData?.credential?.raw?.issueeName}
                 serverUrl={serverUrl}
                 statusPath={statusPath}
                 signatureData={signatureData}
@@ -240,6 +241,7 @@ const RegComponent = () => {
               <ReportsPage
                 serverUrl={serverUrl}
                 selectedAid={signatureData?.credential?.raw?.sad?.a?.i}
+                aidName={signatureData?.credential?.raw?.issueeName}
                 selectedAcdc={signatureData?.credential?.raw?.sad?.d}
                 signatureData={signatureData}
               />
@@ -252,6 +254,7 @@ const RegComponent = () => {
                 selectedId={selectedId}
                 selectedAcdc={selectedAcdc}
                 signatureData={signatureData}
+                aidName={signatureData?.credential?.raw?.issueeName}
                 extensionInstalled={extensionInstalled}
                 serverUrl={serverUrl}
                 setServerUrl={setServerUrl}

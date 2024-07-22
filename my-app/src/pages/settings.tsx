@@ -27,6 +27,7 @@ const SettingsPage = ({
   setPingUrl,
   loginUrl,
   setLoginUrl,
+  aidName,
 }: {
   selectedId: any;
   selectedAcdc: any;
@@ -39,7 +40,7 @@ const SettingsPage = ({
   loginUrl: any;
   setLoginUrl: any;
 }) => {
-  const { serverMode } = useConfigMode();
+  const { serverMode, extMode } = useConfigMode();
   const { openSnackbar } = useSnackbar();
 
   // Define the endpoint paths
@@ -147,7 +148,12 @@ const SettingsPage = ({
     }
 
     try {
-      const response = await regService.verify(verifyUrl, verifyRequest);
+      const response = await regService.verify(
+        verifyUrl,
+        verifyRequest,
+        extMode,
+        aidName
+      );
       const response_signed_data = await response.json();
       setVerifyResponse(response_signed_data);
       if (!response) return;
@@ -173,7 +179,12 @@ const SettingsPage = ({
     }
 
     try {
-      const response = await regService.getStatus(statusUrl, statusRequest);
+      const response = await regService.getStatus(
+        statusUrl,
+        statusRequest,
+        extMode,
+        aidName
+      );
       const response_signed_data = await response.json();
       setStatusResponse(response_signed_data);
       if (!response) return;
@@ -199,7 +210,12 @@ const SettingsPage = ({
         ...reportRequest,
         body: formData,
       };
-      const response = await regService.postReport(reportUrl, lRequest);
+      const response = await regService.postReport(
+        reportUrl,
+        lRequest,
+        extMode,
+        aidName
+      );
       const response_signed_data = await response.json();
       console.log("upload response", response_signed_data);
       setReportResponse(response_signed_data);

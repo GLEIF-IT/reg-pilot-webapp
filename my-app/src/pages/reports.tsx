@@ -30,9 +30,9 @@ const ReportsPage = ({
   serverUrl,
   selectedAid,
   selectedAcdc,
-  signatureData,
+  aidName,
 }) => {
-  const { serverMode } = useConfigMode();
+  const { serverMode, extMode } = useConfigMode();
   const navigate = useNavigate();
   const { openSnackbar } = useSnackbar();
 
@@ -85,7 +85,9 @@ const ReportsPage = ({
         };
         const response = await regService.postReport(
           `${serverUrl}${uploadPath}/${aid}/${said}`,
-          lRequest
+          lRequest,
+          extMode,
+          aidName
         );
         const response_signed_data = await response.json();
         console.log("upload response", response_signed_data);

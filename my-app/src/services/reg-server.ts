@@ -1,4 +1,6 @@
 import { createClient } from "signify-polaris-web";
+import { signifyService } from "@test/lib/signify";
+import dummyHeaders from "@test/credential/signed_header.json";
 
 const signifyClient = createClient();
 const RegServer = () => {
@@ -23,12 +25,28 @@ const RegServer = () => {
     return fetch(rurl, request);
   };
 
-  const postReport = async (rurl: string, request: any): Promise<any> => {
-    const resp = await signifyClient.signRequest({
-      url: rurl,
-      method: request.method,
-      headers: request.headers,
-    });
+  const postReport = async (
+    rurl: string,
+    request: any,
+    extMode: boolean,
+    aidName: string
+  ): Promise<any> => {
+    let resp;
+    if (extMode) {
+      resp = await signifyClient.signRequest({
+        url: rurl,
+        method: request.method,
+        headers: request.headers,
+      });
+    } else {
+      resp = await signifyService.getSignedHeaders({
+        rurl,
+        method: request.method,
+        headers: request.headers,
+        aidName,
+      });
+    }
+
     if (request.headers) {
       delete request.headers["content-type"];
     }
@@ -36,30 +54,78 @@ const RegServer = () => {
     return fetch(rurl, { ...request, headers: resp.headers });
   };
 
-  const checkReport = async (rurl: string, request: any): Promise<any> => {
-    const headers = await signifyClient.signRequest({
-      url: rurl,
-      method: request.method,
-      headers: request.headers,
-    });
-    return fetch(rurl, { ...request, headers });
+  const checkReport = async (
+    rurl: string,
+    request: any,
+    extMode: boolean,
+    aidName: string
+  ): Promise<any> => {
+    let resp;
+    if (extMode) {
+      resp = await signifyClient.signRequest({
+        url: rurl,
+        method: request.method,
+        headers: request.headers,
+      });
+    } else {
+      resp = await signifyService.getSignedHeaders({
+        rurl,
+        method: request.method,
+        headers: request.headers,
+        aidName,
+      });
+    }
+    return fetch(rurl, { ...request, headers: resp.headers });
   };
 
-  const verify = async (rurl: string, request: any): Promise<any> => {
-    const headers = await signifyClient.signRequest({
-      url: rurl,
-      method: request.method,
-      headers: request.headers,
-    });
-    return fetch(rurl, { ...request, headers });
+  const verify = async (
+    rurl: string,
+    request: any,
+    extMode: boolean,
+    aidName: string
+  ): Promise<any> => {
+    let resp;
+    if (extMode) {
+      resp = await signifyClient.signRequest({
+        url: rurl,
+        method: request.method,
+        headers: request.headers,
+      });
+    } else {
+      resp = await signifyService.getSignedHeaders({
+        rurl,
+        method: request.method,
+        headers: request.headers,
+        aidName,
+      });
+    }
+
+    return fetch(rurl, { ...request, headers: resp.headers });
   };
 
-  const getStatus = async (rurl: string, request: any): Promise<any> => {
-    const resp = await signifyClient.signRequest({
-      url: rurl,
-      method: request.method,
-      headers: request.headers,
-    });
+  const getStatus = async (
+    rurl: string,
+    request: any,
+    extMode: boolean,
+    aidName: string
+  ): Promise<any> => {
+    let resp;
+    if (extMode) {
+      resp = await signifyClient.signRequest({
+        url: rurl,
+        method: request.method,
+        headers: request.headers,
+      });
+      console.log("getStatus resp");
+      console.log(resp.headers);
+    } else {
+      resp = await signifyService.getSignedHeaders({
+        rurl,
+        method: request.method,
+        headers: request.headers,
+        aidName,
+      });
+    }
     return fetch(rurl, { ...request, headers: resp.headers });
   };
 
