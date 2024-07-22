@@ -152,7 +152,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     }}
                   >
                     <Typography variant="body2" fontWeight="bold">
-                      Select ECR Credential
+                      Select test ECR Credential
                     </Typography>
 
                     {credLoading && (
