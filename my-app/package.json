@@ -16,6 +16,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.3",
     "signify-polaris-web": "github:weboftrust/polaris-web",
+    "signify-ts": "github:WebOfTrust/signify-ts",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

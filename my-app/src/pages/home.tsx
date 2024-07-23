@@ -7,7 +7,6 @@ import SignifyInfo from "../components/home/signify-info.tsx";
 const extConf = "https://api.npoint.io/52639f849bb31823a8c0";
 
 const HomePage = ({
-  devMode,
   selectedId,
   selectedAcdc,
   handleCredSignin,
@@ -22,6 +21,7 @@ const HomePage = ({
   credLoading,
   autoCredLoading,
 }) => {
+
   return (
     <Grid container spacing={1} style={{ padding: "32px" }}>
       <Grid item xs={12}>
@@ -32,7 +32,6 @@ const HomePage = ({
           signedDataReceived={Boolean(signatureData)}
           vendorConfigued={vendorConf}
           removeData={removeData}
-          devMode={devMode}
           handleCredSignin={handleCredSignin}
           handleAutoSignin={handleAutoSignin}
           handleAidSignin={handleAidSignin}
@@ -49,7 +48,6 @@ const HomePage = ({
             <SignifyInfo
               selectedId={selectedId}
               selectedAcdc={selectedAcdc}
-              devMode={devMode}
               loginUrl={loginUrl}
               signatureData={signatureData}
             />

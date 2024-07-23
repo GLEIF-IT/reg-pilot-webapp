@@ -4,9 +4,10 @@ import { Box, CircularProgress } from "@mui/material";
 import "./App.css";
 import { createClient } from "signify-polaris-web";
 import { regService } from "./services/reg-server.ts";
-import fakeSigData from "./test/fakeSigData.json";
-import { useDevMode } from "./context/devMode.tsx";
-import { useSnackbar } from "./context/snackbar.tsx";
+import fakeEcrCredential from "@test/credential/ecr.json";
+import fakeOorCredential from "@test/credential/oor.json";
+import { useConfigMode } from "@context/configMode.tsx";
+import { useSnackbar } from "@context/snackbar.tsx";
 
 import ExtNotFound from "./components/ext-not-found.tsx";
 import AppLayout from "./pages/app-layout.tsx";
@@ -21,7 +22,7 @@ const signifyClient = createClient();
 
 const RegComponent = () => {
   const location = useLocation();
-  const { devMode, toggleDevMode } = useDevMode();
+  const { extMode, serverMode } = useConfigMode();
   const { openSnackbar } = useSnackbar();
   const [signatureData, setSignatureData] = useState<any>();
   const [isLoadingInitial, setIsLoadingInitial] = useState(false);
@@ -31,7 +32,9 @@ const RegComponent = () => {
 
   const [selectedId, setSelectedId] = useState(""); // Step 2 Selection
   const [selectedAcdc, setSelectedAcdc] = useState(null); // Step 3 Selection
-  const [serverUrl, setServerUrl] = useState("https://reg-api.rootsid.cloud");
+  const [serverUrl, setServerUrl] = useState(
+    "https://reg-api-test.rootsid.cloud"
+  );
 
   const [vendorConf, setVendorConf] = useState(false);
 
@@ -49,7 +52,6 @@ const RegComponent = () => {
 
   const handleInitialSignatureLoad = async () => {
     setIsLoadingInitial(true);
-    // await handleSignifyData(JSON.parse(localStorage.getItem("signify-data")));
     setIsLoadingInitial(false);
   };
 
@@ -86,7 +88,8 @@ const RegComponent = () => {
   };
 
   const handleSignifyData = async (data) => {
-    console.log(devMode ? "fake signify-data" : "signify-data", data);
+    console.log("data received");
+    console.log(data);
 
     if (!data) {
       alert("Could not set signify data");
@@ -94,22 +97,16 @@ const RegComponent = () => {
     }
 
     try {
-      if (devMode) {
-        openSnackbar("<Devmode> Response received: Verified", "success");
-      } else {
+      if (serverMode) {
         await handleVerifyLogin(data);
+      } else {
+        openSnackbar("Response received: Verified", "success");
       }
 
       localStorage.setItem("signify-data", JSON.stringify(data));
       setSignatureData(data);
       setSelectedId(data?.headers?.["signify-resource"]);
       setSelectedAcdc(data.credential?.raw);
-      openSnackbar(
-        data?.autoSignin
-          ? "Success! Auto Signin Credential selected."
-          : "Success! Credential selected.",
-        "success"
-      );
     } catch (error) {
       if (typeof error?.message === "string")
         openSnackbar(error?.message, "error");
@@ -139,9 +136,7 @@ const RegComponent = () => {
   };
 
   const handleAutoSignin = async () => {
-    if (devMode) {
-      handleSignifyData(fakeSigData);
-    } else {
+    if (extMode) {
       // setAutoCredLoading(true);
       // try {
       //   const resp = await signifyClient.authorizeAutoSignin();
@@ -153,30 +148,35 @@ const RegComponent = () => {
       //   openSnackbar(error?.message, "error");
       // }
       // setAutoCredLoading(false);
+    } else {
+      handleSignifyData(fakeEcrCredential);
     }
   };
 
-  const handleCredSignin = async () => {
-    if (devMode) {
-      handleSignifyData(fakeSigData);
-    } else {
+  const handleCredSignin = async (credType?: string) => {
+    if (extMode) {
       setCredLoading(true);
-      const resp = await signifyClient.authorizeCred();
+      const resp = await signifyClient.authorize();
       setCredLoading(false);
-      console.log("promised resp from signifyClient.authorizeCred()", resp);
+      console.log("promised resp from signifyClient.authorizeCred()");
+      console.log(resp);
       handleSignifyData(resp);
+    } else {
+      handleSignifyData(
+        credType === "oor" ? fakeOorCredential : fakeEcrCredential
+      );
     }
   };
 
   const handleAidSignin = async () => {
-    if (devMode) {
-      handleSignifyData(fakeSigData);
-    } else {
+    if (extMode) {
       // setAidLoading(true);
       // const resp = await signifyClient.authorizeAid();
       // setAidLoading(false);
       // console.log("promised resp from signifyClient.authorizeAid()", resp);
       // handleSignifyData(resp);
+    } else {
+      handleSignifyData(fakeEcrCredential);
     }
   };
 
@@ -199,14 +199,13 @@ const RegComponent = () => {
 
   return (
     <Box display="flex" justifyContent="center" alignItems="center">
-      <AppLayout devMode={devMode} toggleDevMode={toggleDevMode} />
+      <AppLayout />
       <Box sx={{ marginTop: "60px", width: "100%" }}>
         <Routes>
           <Route
             path="/"
             element={
               <HomePage
-                devMode={devMode}
                 selectedId={selectedId}
                 selectedAcdc={selectedAcdc}
                 handleCredSignin={handleCredSignin}
@@ -228,7 +227,7 @@ const RegComponent = () => {
             element={
               <StatusPage
                 selectedAid={signatureData?.credential?.raw?.sad?.a?.i}
-                devMode={devMode}
+                aidName={signatureData?.credential?.raw?.issueeName}
                 serverUrl={serverUrl}
                 statusPath={statusPath}
                 signatureData={signatureData}
@@ -240,9 +239,9 @@ const RegComponent = () => {
             path="/reports"
             element={
               <ReportsPage
-                devMode={devMode}
                 serverUrl={serverUrl}
                 selectedAid={signatureData?.credential?.raw?.sad?.a?.i}
+                aidName={signatureData?.credential?.raw?.issueeName}
                 selectedAcdc={signatureData?.credential?.raw?.sad?.d}
                 signatureData={signatureData}
               />
@@ -252,10 +251,10 @@ const RegComponent = () => {
             path="/settings"
             element={
               <SettingsPage
-                devMode={devMode}
-                selectedId={selectedId}
+                selectedId={signatureData?.credential?.raw?.sad?.a?.i}
                 selectedAcdc={selectedAcdc}
                 signatureData={signatureData}
+                aidName={signatureData?.credential?.raw?.issueeName}
                 extensionInstalled={extensionInstalled}
                 serverUrl={serverUrl}
                 setServerUrl={setServerUrl}

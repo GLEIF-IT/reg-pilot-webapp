@@ -4,6 +4,7 @@ import { Alert, Typography, Button, Box, Grid } from "@mui/material";
 import { UploadFile } from "@mui/icons-material";
 import { regService } from "../services/reg-server.ts";
 import { useSnackbar } from "../context/snackbar.tsx";
+import { useConfigMode } from "@context/configMode";
 import fakeFileUpload from "../test/fakeFileUpload.json";
 
 const uploadPath = "/upload";
@@ -26,12 +27,12 @@ const getFakeFileResponse = async () => {
 };
 
 const ReportsPage = ({
-  devMode,
   serverUrl,
   selectedAid,
   selectedAcdc,
-  signatureData,
+  aidName,
 }) => {
+  const { serverMode, extMode } = useConfigMode();
   const navigate = useNavigate();
   const { openSnackbar } = useSnackbar();
 
@@ -76,7 +77,7 @@ const ReportsPage = ({
     const formData = new FormData();
     formData.append("upload", report, report.name);
 
-    if (!devMode) {
+    if (serverMode) {
       try {
         const lRequest = {
           method: "POST",
@@ -84,7 +85,9 @@ const ReportsPage = ({
         };
         const response = await regService.postReport(
           `${serverUrl}${uploadPath}/${aid}/${said}`,
-          lRequest
+          lRequest,
+          extMode,
+          aidName
         );
         const response_signed_data = await response.json();
         console.log("upload response", response_signed_data);

@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter as Router } from "react-router-dom";
-import { DevModeProvider } from "./context/devMode.tsx";
+import { ConfigModeProvider } from "./context/configMode.tsx";
 import { SnackbarProvider } from "./context/snackbar.tsx";
 import RegComponent from "./Reg.tsx";
 import "./index.css";
@@ -12,9 +12,9 @@ root.render(
   <React.StrictMode>
     <Router>
       <SnackbarProvider>
-        <DevModeProvider>
+        <ConfigModeProvider>
           <RegComponent />
-        </DevModeProvider>
+        </ConfigModeProvider>
       </SnackbarProvider>
     </Router>
   </React.StrictMode>
