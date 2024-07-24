@@ -88,6 +88,8 @@ const StatusPage = ({ selectedAid, serverUrl, statusPath, signatureData, aidName
       // Replace this with your actual fetch URL
       setLoading(true);
       let newData = await getStatus(data);
+       console.log('newData');
+       console.log(newData);
       setData(newData ?? []);
       setLoading(false);
     } catch (error) {
@@ -110,6 +112,8 @@ const StatusPage = ({ selectedAid, serverUrl, statusPath, signatureData, aidName
 
   useEffect(() => {
     populateReportStatus();
+    console.log('signatureData')
+    console.log(signatureData)
   }, [signatureData]);
 
   return (
