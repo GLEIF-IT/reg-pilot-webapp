@@ -3,6 +3,7 @@ import { Box, Grid } from "@mui/material";
 import { useSnackbar } from "../context/snackbar.tsx";
 import fakeLoginResponse from "../test/fakeLoginResponse.json";
 import ServerInfo from "../components/home/server-info.tsx";
+import { useConfigMode } from "@context/configMode";
 import { regService } from "../services/reg-server.ts";
 import fakeCheckStatus from "../test/fakeCheckStatus.json";
 import fakeFileUpload from "../test/fakeFileUpload.json";
@@ -16,7 +17,6 @@ const getFakeFileResponse = async () => {
 };
 
 const SettingsPage = ({
-  devMode,
   selectedId,
   selectedAcdc,
   signatureData,
@@ -27,8 +27,8 @@ const SettingsPage = ({
   setPingUrl,
   loginUrl,
   setLoginUrl,
+  aidName,
 }: {
-  devMode: boolean;
   selectedId: any;
   selectedAcdc: any;
   signatureData: any;
@@ -40,6 +40,7 @@ const SettingsPage = ({
   loginUrl: any;
   setLoginUrl: any;
 }) => {
+  const { serverMode, extMode } = useConfigMode();
   const { openSnackbar } = useSnackbar();
 
   // Define the endpoint paths
@@ -100,9 +101,9 @@ const SettingsPage = ({
   };
 
   async function handlePing() {
-    if (devMode) {
+    if (!serverMode) {
       setPingResponse("PONG");
-      openSnackbar(`<Devmode> Response received: PONG`, "success");
+      openSnackbar(`<Mocked> Response received: PONG`, "success");
       return;
     }
 
@@ -116,9 +117,9 @@ const SettingsPage = ({
   }
 
   const handleLogin = async () => {
-    if (devMode) {
+    if (!serverMode) {
       setLoginResponse(fakeLoginResponse);
-      openSnackbar("<Devmode> Response received!", "success");
+      openSnackbar("<Mocked> Response received!", "success");
       return;
     }
 
@@ -140,14 +141,19 @@ const SettingsPage = ({
   };
 
   const handleVerify = async () => {
-    if (devMode) {
+    if (!serverMode) {
       setVerifyResponse("");
-      openSnackbar("<Devmode> Response received!", "success");
+      openSnackbar("<Mocked> Response received!", "success");
       return;
     }
 
     try {
-      const response = await regService.verify(verifyUrl, verifyRequest);
+      const response = await regService.verify(
+        verifyUrl,
+        verifyRequest,
+        extMode,
+        aidName
+      );
       const response_signed_data = await response.json();
       setVerifyResponse(response_signed_data);
       if (!response) return;
@@ -160,7 +166,7 @@ const SettingsPage = ({
   };
 
   const handleStatus = async () => {
-    if (devMode) {
+    if (!serverMode) {
       const aid = "ECJLhLl1-xtrgi9SktH-8_Qc5yz2B24fT6fhdO9o3BdQ";
       if (Object.keys(fakeCheckStatus).includes(aid)) {
         const fakeStatueAid = fakeCheckStatus[aid] ?? [];
@@ -168,12 +174,17 @@ const SettingsPage = ({
       } else {
         alert("check status fake data: no data found for aid: " + aid);
       }
-      openSnackbar("<Devmode> Response received!", "success");
+      openSnackbar("<Mocked> Response received!", "success");
       return;
     }
 
     try {
-      const response = await regService.getStatus(statusUrl, statusRequest);
+      const response = await regService.getStatus(
+        statusUrl,
+        statusRequest,
+        extMode,
+        aidName
+      );
       const response_signed_data = await response.json();
       setStatusResponse(response_signed_data);
       if (!response) return;
@@ -186,7 +197,7 @@ const SettingsPage = ({
   };
 
   const handleReportUpload = async (report) => {
-    if (devMode) {
+    if (!serverMode) {
       const fakeFile = await getFakeFileResponse();
       setReportResponse(fakeFile);
       return;
@@ -199,7 +210,12 @@ const SettingsPage = ({
         ...reportRequest,
         body: formData,
       };
-      const response = await regService.postReport(reportUrl, lRequest);
+      const response = await regService.postReport(
+        reportUrl,
+        lRequest,
+        extMode,
+        aidName
+      );
       const response_signed_data = await response.json();
       console.log("upload response", response_signed_data);
       setReportResponse(response_signed_data);

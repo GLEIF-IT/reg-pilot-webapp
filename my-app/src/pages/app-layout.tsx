@@ -12,7 +12,19 @@ import {
   Box,
   ListItemIcon,
 } from "@mui/material";
-import { Circle, FileUpload, Settings, Menu, GridView, Rule } from "@mui/icons-material";
+import {
+  Circle,
+  FileUpload,
+  Settings,
+  Menu,
+  GridView,
+  Rule,
+  WbCloudyOutlined,
+  CloudOffOutlined,
+  ExtensionOffOutlined,
+  ExtensionOutlined,
+} from "@mui/icons-material";
+import { Config } from "../components/config";
 
 const SIDEBAR = [
   { path: "/", title: "Home", icon: <GridView /> },
@@ -21,7 +33,7 @@ const SIDEBAR = [
   { path: "/settings", title: "Settings", icon: <Settings /> },
 ];
 
-const AppLayout = ({ devMode, toggleDevMode }) => {
+const AppLayout = () => {
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -68,29 +80,7 @@ const AppLayout = ({ devMode, toggleDevMode }) => {
             }}
           ></Box>
           <Box>
-            <Button
-              sx={{
-                marginLeft: "auto",
-                backgroundColor: "lightblue",
-                color: "black",
-                "&:hover": {
-                  color: "white",
-                  backgroundColor: "midnightblue",
-                },
-              }}
-              size="small"
-              onClick={toggleDevMode}
-              variant="contained"
-              startIcon={
-                <Circle
-                  sx={{
-                    color: devMode ? "green" : "red",
-                  }}
-                />
-              }
-            >
-              Dev Mode
-            </Button>
+            <Config />
           </Box>
         </Toolbar>
       </AppBar>

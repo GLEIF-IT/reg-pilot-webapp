@@ -27,16 +27,12 @@ import CollapseAlert from "../components/collapse-alert.tsx";
 import { regService } from "../services/reg-server.ts";
 import fakeCheckStatus from "../test/fakeCheckStatus.json";
 import { useSnackbar } from "../context/snackbar.tsx";
+import { useConfigMode } from "@context/configMode";
 
-const StatusPage = ({
-  selectedAid,
-  devMode,
-  serverUrl,
-  statusPath,
-  signatureData,
-}) => {
+const StatusPage = ({ selectedAid, serverUrl, statusPath, signatureData, aidName }) => {
   const navigate = useNavigate();
   const { openSnackbar } = useSnackbar();
+  const { serverMode, extMode } = useConfigMode();
   const [data, setData] = useState<Array<any>>();
   const [loading, setLoading] = useState(false);
   const [hasError, setHasError] = useState("");
@@ -44,7 +40,7 @@ const StatusPage = ({
   // Function to perform the upload status request
   async function getStatus(_signatureData): Promise<any> {
     // Send signed request
-    if (!devMode) {
+    if (serverMode) {
       try {
         let sheads = new Headers();
         sheads.set("Content-Type", "application/json");
@@ -55,7 +51,9 @@ const StatusPage = ({
         };
         const statusResp = await regService.getStatus(
           `${serverUrl}${statusPath}/${selectedAid}`,
-          lRequest
+          lRequest,
+          extMode,
+          aidName
         );
 
         const response_signed_data = await statusResp.json();
