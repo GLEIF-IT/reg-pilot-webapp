@@ -19,6 +19,7 @@ import SettingsPage from "./pages/settings.tsx";
 const statusPath = "/status";
 
 const signifyClient = createClient();
+window.signifyClient = signifyClient;
 
 const RegComponent = () => {
   const location = useLocation();
