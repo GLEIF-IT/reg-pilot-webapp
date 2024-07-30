@@ -109,6 +109,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
               {extMode ? (
                 <>
                   <Button
+                    data-testid="login--configure--extn"
                     size="small"
                     variant="contained"
                     color="success"
@@ -119,6 +120,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     </Typography>
                   </Button>
                   <Button
+                    data-testid="login--select--cred"
                     size="small"
                     variant="contained"
                     color="success"
