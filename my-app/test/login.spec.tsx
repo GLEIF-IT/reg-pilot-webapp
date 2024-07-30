@@ -5,6 +5,7 @@ import autoSignInData from "./AutoSignInData.json";
 const path = require('path');
 
 const { credWithInvalidRole, credWithDifOrg, validCred } = data;
+const credential = validCred.credential.raw.sad.d;
 
 async function mockAuthCred(page: Page, credential) {
   await page.evaluate((data) => {
@@ -19,21 +20,21 @@ test.describe('Tests Extension installation', () => {
     test('displays a message when the extension is not installed', async ({page}) => {
         await page.goto('/');
 
-        // Expect a title to have application title
-        await expect(page).toHaveTitle(/EBA Demo by RootsID/);
+         // Locate the element with the data-testid attribute
+        const titleElement = page.locator('[data-testid="webapp--title"]');
+        await expect(page).toHaveTitle(await titleElement.textContent());
 
         // Check if the message "Extension is not installed" is visible
-        await expect(page.getByText(`Extension is not installed`)).toBeVisible({
-            timeout: 10 * 1000
-        });
+        await page.getByTestId("extension--not-installed-message").waitFor();
 
         // Check if the reload button is present and click it
-        await expect(page.locator('button:text("Reload")')).toBeVisible();
-        await page.click('button:text("Reload")');
+        const reloadBtn = await page.getByTestId("webapp--reload");
+        await expect(reloadBtn).toBeVisible();
+        await reloadBtn.click;
 
         // ensuring the page is reloaded and the message still appears
         await page.waitForLoadState('load');
-        await expect(page.locator('text=Extension is not installed')).toBeVisible();
+        await expect(page.getByTestId("extension--not-installed-message")).toBeVisible();
     });
 
 
@@ -51,12 +52,10 @@ test.describe('Tests Extension installation', () => {
 
         const page = await context.newPage();
         await page.goto('/');
-        await expect(page.getByTestId("webapp.title")).toBeVisible();
+        await expect(page.getByTestId("webapp--header")).toBeVisible();
 
-        //await expect(page.locator('#configure-extension-btn')).toBeVisible();
-        await expect(page.locator('button:has-text("Configure Extension")')).toBeVisible();
-
-        await expect(page.locator('button:has-text("Select Credential")')).toBeVisible();
+        await expect(page.getByTestId('login--configure--extn')).toBeVisible();
+        await expect(page.getByTestId('login--select--cred')).toBeVisible();
 
         // Close the browser context
         await context.close();
@@ -93,7 +92,7 @@ test.describe('Customer portal', () => {
        // Expose the mocked function to the page context
        await mockAuthCred(page,credWithInvalidRole);
 
-        const selectCred = await page.locator('button:has-text("Select Credential")');
+        const selectCred = await page.getByTestId('login--select--cred');
         await selectCred.waitFor();
         await selectCred.click();
 
@@ -110,7 +109,7 @@ test.describe('Customer portal', () => {
        // Expose the mocked function to the page context
        await mockAuthCred(page,credWithDifOrg);
 
-        const selectCred = await page.locator('button:has-text("Select Credential")')
+        const selectCred = await page.getByTestId('login--select--cred')
         await selectCred.waitFor();
         await selectCred.click();
 
@@ -126,10 +125,10 @@ test.describe('Customer portal', () => {
 
         await mockAuthCred(page,validCred);
 
-        const selectCred = await page.locator('button:has-text("Select Credential")')
+        const selectCred = await page.getByTestId('login--select--cred')
         await selectCred.waitFor();
         await selectCred.click();
 
-        await page.locator('text=ENLSyUni5ARgCJTp-xMt96Rxu29FyhsqJIBBTM-Cn8nH is a valid credential').waitFor();
+        await page.locator(`text=${credential} is a valid credential`).waitFor();
         });
 });

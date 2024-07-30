@@ -22,13 +22,14 @@ const ExtNotFound = () => {
           alt="item not available"
         />
       </Box>
-      <Typography variant="h6" fontWeight="bold">
+      <Typography data-testid='extension--not-installed-message' variant="h6" fontWeight="bold">
         Extension is not installed
       </Typography>
       <Typography variant="body2">
         Download/Install a secure extension to proceed
       </Typography>
       <Button
+        data-testid='webapp--reload'
         variant="contained"
         color="primary"
         size="small"
