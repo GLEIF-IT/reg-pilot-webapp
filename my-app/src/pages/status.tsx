@@ -132,7 +132,7 @@ const StatusPage = ({ selectedAid, serverUrl, statusPath, signatureData, aidName
       )}
       {hasError && (
         <Grid item xs={12}>
-          <CollapseAlert
+          <CollapseAlert dataTestId="status--login-error"
             message={
               typeof hasError === "string" ? hasError : hasError?.message
             }

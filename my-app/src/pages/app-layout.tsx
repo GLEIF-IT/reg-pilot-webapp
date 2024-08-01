@@ -67,6 +67,7 @@ const AppLayout = () => {
             edge="start"
             color="inherit"
             aria-label="menu"
+            data-testid="webapp--menu"
             onClick={toggleDrawer(!drawerOpen)}
           >
             <Menu />
@@ -94,6 +95,7 @@ const AppLayout = () => {
           <List>
             {SIDEBAR.map((element) => (
               <ListItem
+                data-testid={`webapp--menu--${element.title}`}
                 key={element.title}
                 onClick={() => moveToPage(element.path)}
                 sx={{

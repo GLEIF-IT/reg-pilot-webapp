@@ -3,10 +3,10 @@ import { Alert, IconButton, Typography, Collapse } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
-const CollapseAlert = ({ severity = "error", message = "", details = "" }) => {
+const CollapseAlert = ({ severity = "error", message = "", details = "", dataTestId="" }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <Alert severity={severity} sx={{ display: "flex", alignItems: "center" }}>
+    <Alert data-testid={dataTestId} severity={severity} sx={{ display: "flex", alignItems: "center" }}>
       {message}
       {details && (
         <IconButton
