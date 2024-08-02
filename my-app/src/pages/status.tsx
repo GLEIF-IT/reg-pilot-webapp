@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useIntl } from "react-intl";
 import {
   Alert,
   Paper,
@@ -29,8 +30,15 @@ import fakeCheckStatus from "../test/fakeCheckStatus.json";
 import { useSnackbar } from "../context/snackbar.tsx";
 import { useConfigMode } from "@context/configMode";
 
-const StatusPage = ({ selectedAid, serverUrl, statusPath, signatureData, aidName }) => {
+const StatusPage = ({
+  selectedAid,
+  serverUrl,
+  statusPath,
+  signatureData,
+  aidName,
+}) => {
   const navigate = useNavigate();
+  const { formatMessage } = useIntl();
   const { openSnackbar } = useSnackbar();
   const { serverMode, extMode } = useConfigMode();
   const [data, setData] = useState<Array<any>>();
@@ -88,8 +96,8 @@ const StatusPage = ({ selectedAid, serverUrl, statusPath, signatureData, aidName
       // Replace this with your actual fetch URL
       setLoading(true);
       let newData = await getStatus(data);
-       console.log('newData');
-       console.log(newData);
+      console.log("newData");
+      console.log(newData);
       setData(newData ?? []);
       setLoading(false);
     } catch (error) {
@@ -113,14 +121,16 @@ const StatusPage = ({ selectedAid, serverUrl, statusPath, signatureData, aidName
 
   useEffect(() => {
     populateReportStatus();
-    console.log('signatureData')
-    console.log(signatureData)
+    console.log("signatureData");
+    console.log(signatureData);
   }, [signatureData]);
 
   return (
     <Grid container spacing={1} style={{ padding: "32px" }}>
       <Grid item xs={12}>
-        <Typography variant="h3">Check Status</Typography>
+        <Typography variant="h3">
+          {formatMessage({ id: "report.checkStatus" })}
+        </Typography>
       </Grid>
       {loading && (
         <Grid item xs={12}>
@@ -153,11 +163,11 @@ const StatusPage = ({ selectedAid, serverUrl, statusPath, signatureData, aidName
                   navigate("/reports");
                 }}
               >
-                Upload Report
+                {formatMessage({ id: "report.uploadReport" })}
               </Button>
             }
           >
-            You don't have any reports yet.
+            {formatMessage({ id: "report.noReports" })}
           </Alert>
         </Grid>
       )}
@@ -207,6 +217,7 @@ const StatusPage = ({ selectedAid, serverUrl, statusPath, signatureData, aidName
 
 function Row(props: { row: any }) {
   const { row } = props;
+  const { formatMessage } = useIntl();
   const [open, setOpen] = React.useState(false);
 
   return (
@@ -248,22 +259,31 @@ function Row(props: { row: any }) {
             <Card sx={{ background: "lightgrey" }}>
               <CardContent>
                 <Typography variant="h6" fontWeight="bold">
-                  Report Details
+                  {formatMessage({ id: "report.details" })}
                 </Typography>
                 <Typography variant="body2" gutterBottom>
-                  <strong>Filename:</strong> {row["filename"]}
+                  <strong>{formatMessage({ id: "report.filename" })}</strong>{" "}
+                  {row["filename"]}
                 </Typography>
                 <Typography variant="body2" gutterBottom>
-                  <strong>Size:</strong> {row["size"]}
+                  <strong>{formatMessage({ id: "report.size" })}</strong>{" "}
+                  {row["size"]}
                 </Typography>
                 <Typography variant="body2" gutterBottom>
-                  <strong>Status:</strong> {row["status"]}
+                  <strong>{formatMessage({ id: "report.status" })}</strong>{" "}
+                  {row["status"]}
                 </Typography>
                 <Typography variant="body2" gutterBottom>
-                  <strong>Message:</strong> {row["message"]}
+                  <strong>
+                    {formatMessage({ id: "report.message" })}Message:
+                  </strong>{" "}
+                  {row["message"]}
                 </Typography>
                 <Typography variant="body2" gutterBottom>
-                  <strong>Submitted by:</strong> {row["submitter"]}
+                  <strong>
+                    {formatMessage({ id: "report.submittedBy" })}Submitted by:
+                  </strong>{" "}
+                  {row["submitter"]}
                 </Typography>
               </CardContent>
             </Card>

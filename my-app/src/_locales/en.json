@@ -19,11 +19,19 @@
   "cta.reload": "Reload",
   "credential.heading": "Credential",
   "credential.showRaw": "Show Raw:",
-  "credential.aid":"AID:",
+  "credential.aid": "AID:",
   "report.upload": "Upload your report",
   "report.checkStatus": "Check Status",
   "report.failed": "Failed to submit the report",
   "report.success": "Successfuly submitted the report",
   "status.uploading": "Uploading",
-  "report.submit": "Submit Report"
+  "report.submit": "Submit Report",
+  "report.uploadReport": "Upload Report",
+  "report.noReports": "You don't have any reports yet.",
+  "report.details": "Report Details",
+  "report.filename": "Filename:",
+  "report.size": "Size:",
+  "report.status": "Status:",
+  "report.message": "Message:",
+  "report.submittedBy": "Submitted by:"
 }
