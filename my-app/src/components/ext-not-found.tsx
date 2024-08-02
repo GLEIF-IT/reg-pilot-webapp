@@ -1,8 +1,11 @@
 import React from "react";
+import { useIntl } from "react-intl";
 import { Box, Button, Typography } from "@mui/material";
 import ItemNotAvailable from "../assets/img/item_not_available.png";
 
 const ExtNotFound = () => {
+  const { formatMessage } = useIntl();
+
   const handleReload = () => {
     window.location.reload();
   };
@@ -22,20 +25,24 @@ const ExtNotFound = () => {
           alt="item not available"
         />
       </Box>
-      <Typography data-testid='extension--not-installed-message' variant="h6" fontWeight="bold">
-        Extension is not installed
+      <Typography
+        data-testid="extension--not-installed-message"
+        variant="h6"
+        fontWeight="bold"
+      >
+        {formatMessage({ id: "extInfo.notInstalled" })}
       </Typography>
       <Typography variant="body2">
-        Download/Install a secure extension to proceed
+        {formatMessage({ id: "extInfo.download" })}
       </Typography>
       <Button
-        data-testid='webapp--reload'
+        data-testid="webapp--reload"
         variant="contained"
         color="primary"
         size="small"
         onClick={handleReload}
       >
-        Reload
+        {formatMessage({ id: "cta.reload" })}
       </Button>
     </Box>
   );
