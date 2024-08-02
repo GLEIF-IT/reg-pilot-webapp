@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Box, Grid } from "@mui/material";
 import { useSnackbar } from "../context/snackbar.tsx";
 import fakeLoginResponse from "../test/fakeLoginResponse.json";
@@ -40,6 +41,7 @@ const SettingsPage = ({
   loginUrl: any;
   setLoginUrl: any;
 }) => {
+  const navigate = useNavigate();
   const { serverMode, extMode } = useConfigMode();
   const { openSnackbar } = useSnackbar();
 
@@ -64,6 +66,12 @@ const SettingsPage = ({
   );
   const [reportRequest, setReportRequest] = useState<any>("");
   const [reportResponse, setReportResponse] = useState<any>("");
+
+  useEffect(() => {
+    if (!signatureData) {
+      navigate("/?from=settings");
+    }
+  }, []);
 
   useEffect(() => {
     handleSetRequests();

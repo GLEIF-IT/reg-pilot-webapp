@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useIntl } from "react-intl";
 import Popover from "@mui/material/Popover";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
@@ -14,7 +15,9 @@ import {
 import { useConfigMode } from "@context/configMode";
 
 export function Config() {
-  const { serverMode, toggleServerMode, extMode, toggleExtMode } = useConfigMode();
+  const { formatMessage } = useIntl();
+  const { serverMode, toggleServerMode, extMode, toggleExtMode } =
+    useConfigMode();
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(
     null
   );
@@ -68,19 +71,25 @@ export function Config() {
       >
         <Box sx={{ p: 2 }}>
           <Box>
-            <Typography fontWeight="bold">Communication Mode</Typography>
+            <Typography fontWeight="bold">
+              {formatMessage({ id: "comm.heading" })}
+            </Typography>
           </Box>
           <Typography>
-            <CloudOffOutlined color="warning" /> Server is disabled
+            <CloudOffOutlined color="warning" />{" "}
+            {formatMessage({ id: "comm.serverDisabled" })}
           </Typography>
           <Typography>
-            <WbCloudyOutlined color="success" /> Server is enabled
+            <WbCloudyOutlined color="success" />{" "}
+            {formatMessage({ id: "comm.serverEnabled" })}
           </Typography>
           <Typography>
-            <ExtensionOffOutlined color="warning" /> Extension is disabled
+            <ExtensionOffOutlined color="warning" />{" "}
+            {formatMessage({ id: "comm.extEnabled" })}
           </Typography>
           <Typography>
-            <ExtensionOutlined color="success" /> Extension is enabled
+            <ExtensionOutlined color="success" />{" "}
+            {formatMessage({ id: "comm.extDisabled" })}
           </Typography>
         </Box>
       </Popover>
