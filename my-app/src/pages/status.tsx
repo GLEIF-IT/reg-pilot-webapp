@@ -103,10 +103,11 @@ const StatusPage = ({ selectedAid, serverUrl, statusPath, signatureData, aidName
     if (signatureData) {
       getReportStatus(signatureData);
     } else {
-      setHasError({
-        message: "Select Credential to Proceed",
-        details: "Select a credential from extension to fetch report status",
-      });
+      navigate("/?from=status");
+      // setHasError({
+      //   message: "Select Credential to Proceed",
+      //   details: "Select a credential from extension to fetch report status",
+      // });
     }
   };
 
