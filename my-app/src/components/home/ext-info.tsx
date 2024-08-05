@@ -138,13 +138,14 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     </Typography>
 
                     {credLoading && (
-                      <CircularProgress color="inherit" size="12px" />
+                      <CircularProgress data-testid="login--progressbar" color="inherit" size="12px" />
                     )}
                   </Button>
                 </>
               ) : (
                 <>
                   <Button
+                    data-testid="login--ecr-cred"
                     size="small"
                     variant="contained"
                     color="warning"

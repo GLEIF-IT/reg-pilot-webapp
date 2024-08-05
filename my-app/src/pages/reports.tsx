@@ -135,6 +135,7 @@ const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName }) => {
         <Grid item xs={12}>
           <Alert
             severity="error"
+            data-testid="reports--upload-error-msg"
             action={
               <Button
                 color="inherit"
@@ -155,6 +156,7 @@ const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName }) => {
         <Grid item xs={12}>
           <Alert
             severity="success"
+            data-testid="reports--upload-success-msg"
             action={
               <Button
                 color="inherit"
@@ -180,7 +182,7 @@ const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName }) => {
       )}
       {!error && selectedFile && !submitStatus && (
         <Grid item xs={12}>
-          <Alert severity="success">
+          <Alert data-testid="reports--load-success-msg" severity="success">
             Succesfully loaded report {filename}
             {<br />}
             Submit your report next.
@@ -231,6 +233,7 @@ const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName }) => {
         </Box>
         <Box>
           <Button
+            data-testid="reports--submit"
             variant="contained"
             color="primary"
             size="small"

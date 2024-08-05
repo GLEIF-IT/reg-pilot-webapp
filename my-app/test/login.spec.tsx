@@ -1,6 +1,5 @@
 import {test, expect, chromium} from '@playwright/test';
 import data from "./SignData.json";
-import autoSignInData from "./AutoSignInData.json";
 
 const path = require('path');
 
@@ -85,6 +84,34 @@ test.describe('Customer portal', () => {
         console.log('Tests have finished, cleaning up...');
         await context.close();
     })
+
+    test('User comes that does not have a valid wallet url/secret combination', async ({}) => {
+        await page.goto('/');
+
+        const selectCred = await page.getByTestId('login--select--cred');
+        await selectCred.waitFor();
+        await selectCred.click();
+
+        const loginMsg = await page.locator("text='Sign in with Keria'");
+        await loginMsg.waitFor();
+
+        // Selector for the loading spinner within the button
+        const spinnerSelector = '[data-testid="login--progressbar"]';
+
+        // Wait for the spinner to appear
+        await page.waitForSelector(spinnerSelector, { state: 'visible' });
+
+        // Check if the spinner is still present after some time
+        await page.waitForSelector(spinnerSelector, { state: 'visible', timeout: 5000 }).catch(() => false);
+
+        const menuBtn = await page.getByTestId("webapp--menu");
+        await menuBtn.click()
+
+        const liElement = await page.getByTestId("webapp--menu--Status");
+        await liElement.click()
+
+        await page.getByTestId("status--login-error").waitFor();
+    });
 
     test('User has a valid wallet url but does not have the "EBA Submitter" role', async ({}) => {
         await page.goto('/');

@@ -40,7 +40,7 @@ export function Config() {
         variant="outlined"
         aria-label="Basic button group"
       >
-        <IconButton onClick={toggleExtMode}>
+        <IconButton data-testid="demo--extension-mode" onClick={toggleExtMode}>
           {extMode ? (
             <ExtensionOutlined color="success" />
           ) : (
