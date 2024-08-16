@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useIntl } from "react-intl";
 import {
   Typography,
   Grid,
@@ -21,6 +22,7 @@ interface ISignifyInfo {
 
 const SignifyInfo: React.FC<ISignifyInfo> = ({ selectedId, signatureData }) => {
   const sigString = JSON.stringify(signatureData, null, 2);
+  const { formatMessage } = useIntl();
   const [showRaw, setShowRaw] = useState(false);
   const [showAlert, setShowAlert] = useState(true);
 
@@ -30,7 +32,7 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({ selectedId, signatureData }) => {
     <Grid container spacing={1}>
       <Grid item xs={12}>
         <Typography variant="h6" fontWeight="bold">
-          Credential
+          {formatMessage({ id: "credential.heading" })}
         </Typography>
       </Grid>
       {/* <Grid item xs={12}>
@@ -70,7 +72,7 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({ selectedId, signatureData }) => {
           </Typography>
           <Box>
             <Typography variant="body2">
-              <strong>Show Raw:</strong>
+              <strong>{formatMessage({ id: "credential.showRaw" })}</strong>
               <Switch
                 checked={showRaw}
                 onClick={() => setShowRaw(!showRaw)}
@@ -133,7 +135,8 @@ const SignifyInfo: React.FC<ISignifyInfo> = ({ selectedId, signatureData }) => {
                     </Box>
                   </Box>
                   <Typography variant="caption">
-                    <strong>AID:</strong> {selectedId}
+                    <strong>{formatMessage({ id: "credential.aid" })}</strong>{" "}
+                    {selectedId}
                   </Typography>
                   <Typography variant="caption">
                     {credential?.raw?.schema?.credentialType}

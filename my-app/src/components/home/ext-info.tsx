@@ -9,6 +9,7 @@ import {
   CardContent,
   CircularProgress,
 } from "@mui/material";
+import { useIntl } from "react-intl";
 import { CheckCircleOutline, CancelOutlined } from "@mui/icons-material";
 import { useConfigMode } from "@context/configMode";
 
@@ -38,6 +39,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
   credLoading,
 }) => {
   const { extMode } = useConfigMode();
+  const { formatMessage } = useIntl();
   return (
     <Grid
       container
@@ -46,7 +48,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
     >
       <Grid item xs={12}>
         <Typography variant="body1" fontWeight="bold">
-          Please start by signing in with a secure extension.
+          {formatMessage({ id: "extInfo.heading" })}
         </Typography>
       </Grid>
       <Grid
@@ -59,13 +61,13 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
         <Card elevation={2}>
           <CardContent>
             <Typography variant="body1" fontWeight="bold">
-              Extension Config
+              {formatMessage({ id: "extInfo.config" })}
             </Typography>
             <Typography
               variant="body2"
               style={{ display: "flex", columnGap: "8px" }}
             >
-              Vendor set:{" "}
+              {formatMessage({ id: "extInfo.vendorSet" })}
               {vendorConfigued ? (
                 <CheckCircleOutline color="success" fontSize="small" />
               ) : (
@@ -76,7 +78,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
               variant="body2"
               style={{ display: "flex", columnGap: "8px" }}
             >
-              Signed data:{" "}
+              {formatMessage({ id: "extInfo.signedData" })}{" "}
               {signedDataReceived ? (
                 <CheckCircleOutline color="success" fontSize="small" />
               ) : (
@@ -102,7 +104,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
               color="error"
               onClick={removeData}
             >
-              Clear
+              {formatMessage({ id: "cta.clear" })}
             </Button>
           ) : (
             <>
@@ -116,7 +118,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     onClick={handleConfigExt}
                   >
                     <Typography variant="body2" fontWeight="bold">
-                      Configure Extension
+                      {formatMessage({ id: "cta.configureExtension" })}
                     </Typography>
                   </Button>
                   <Button
@@ -132,7 +134,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     }}
                   >
                     <Typography variant="body2" fontWeight="bold">
-                      Select Credential
+                      {formatMessage({ id: "cta.selectCredential" })}
                     </Typography>
 
                     {credLoading && (
@@ -155,7 +157,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     }}
                   >
                     <Typography variant="body2" fontWeight="bold">
-                      Select test ECR Credential
+                      {formatMessage({ id: "cta.selectTestEcrCredential" })}
                     </Typography>
 
                     {credLoading && (
@@ -174,7 +176,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     }}
                   >
                     <Typography variant="body2" fontWeight="bold">
-                      Select test OCR Credential
+                      {formatMessage({ id: "cta.selectTestOcrCredential" })}
                     </Typography>
 
                     {credLoading && (

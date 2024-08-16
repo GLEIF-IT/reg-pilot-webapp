@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useIntl } from "react-intl";
 import { Alert, Typography, Button, Box, Grid } from "@mui/material";
 import { UploadFile } from "@mui/icons-material";
 import { regService } from "../services/reg-server.ts";
@@ -26,12 +27,8 @@ const getFakeFileResponse = async () => {
   });
 };
 
-const ReportsPage = ({
-  serverUrl,
-  selectedAid,
-  selectedAcdc,
-  aidName,
-}) => {
+const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName }) => {
+  const { formatMessage } = useIntl();
   const { serverMode, extMode } = useConfigMode();
   const navigate = useNavigate();
   const { openSnackbar } = useSnackbar();
@@ -125,7 +122,9 @@ const ReportsPage = ({
   return (
     <Grid container spacing={1} style={{ padding: "32px" }}>
       <Grid item xs={12}>
-        <Typography variant="h3">Upload your report</Typography>
+        <Typography variant="h3">
+          {formatMessage({ id: "report.upload" })}
+        </Typography>
       </Grid>
       {error && (
         <Grid item xs={12}>
@@ -145,11 +144,11 @@ const ReportsPage = ({
                   navigate("/status");
                 }}
               >
-                Check Status
+                {formatMessage({ id: "report.checkStatus" })}
               </Button>
             }
           >
-            Failed to submit the report {filename}
+            {formatMessage({ id: "report.failed" })} {filename}
           </Alert>
         </Grid>
       )}
@@ -166,17 +165,19 @@ const ReportsPage = ({
                   navigate("/status");
                 }}
               >
-                Check Status
+                {formatMessage({ id: "report.checkStatus" })}
               </Button>
             }
           >
-            Successfuly submitted the report {filename}
+            {formatMessage({ id: "report.success" })} {filename}
           </Alert>
         </Grid>
       )}
       {submitStatus === "loading" && (
         <Grid item xs={12}>
-          <Alert severity="info">Uploading {selectedFile.name}</Alert>
+          <Alert severity="info">
+            {formatMessage({ id: "status.uploading" })} {selectedFile.name}
+          </Alert>
         </Grid>
       )}
       {!error && selectedFile && !submitStatus && (
@@ -239,7 +240,7 @@ const ReportsPage = ({
             onClick={handleSubmit}
             disabled={!selectedFile}
           >
-            Submit Report
+            {formatMessage({ id: "report.submit" })}
           </Button>
         </Box>
       </Grid>

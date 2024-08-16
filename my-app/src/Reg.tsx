@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { Box, CircularProgress } from "@mui/material";
 import "./App.css";
 import { createClient } from "signify-polaris-web";
@@ -23,6 +23,9 @@ window.signifyClient = signifyClient;
 
 const RegComponent = () => {
   const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const from = params.get("from");
+  const navigate = useNavigate();
   const { extMode, serverMode } = useConfigMode();
   const { openSnackbar } = useSnackbar();
   const [signatureData, setSignatureData] = useState<any>();
@@ -110,6 +113,8 @@ window.signifyClient = signifyClient;
       setSignatureData(data);
       setSelectedId(data?.headers?.["signify-resource"]);
       setSelectedAcdc(data.credential?.raw);
+      from && navigate(from);
+      
     } catch (error) {
       if (typeof error?.message === "string")
         openSnackbar(error?.message, "error");
