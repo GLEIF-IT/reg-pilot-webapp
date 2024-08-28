@@ -174,7 +174,7 @@ const StatusPage = ({
       <Grid item xs={12}>
         <Box>
           {data && !loading && (
-            <TableContainer component={Paper}>
+            <TableContainer component={Paper} data-testid="status--grid">
               <Table aria-label="collapsible-status-table">
                 <TableHead>
                   <TableRow>
@@ -225,6 +225,7 @@ function Row(props: { row: any }) {
       <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
         <TableCell>
           <IconButton
+            data-testid="status--details"
             aria-label="expand row"
             size="small"
             onClick={() => setOpen(!open)}

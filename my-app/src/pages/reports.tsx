@@ -161,6 +161,7 @@ const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName }) => {
               <Button
                 color="inherit"
                 size="small"
+                data-testid="check--status"
                 onClick={() => {
                   navigate("/status");
                 }}
