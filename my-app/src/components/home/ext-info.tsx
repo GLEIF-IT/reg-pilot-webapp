@@ -19,7 +19,7 @@ interface IExtensionInfo {
   error?: string;
   removeData: () => void;
   handleCredSignin: (credType?: string) => void;
-  handleAutoSignin: () => void;
+  requestCredentialOnce: () => void;
   handleAidSignin: () => void;
   signatureData: any;
   handleConfigExt: () => void;
@@ -37,6 +37,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
   signatureData,
   handleConfigExt,
   credLoading,
+  requestCredentialOnce,
 }) => {
   const { extMode } = useConfigMode();
   const { formatMessage } = useIntl();
@@ -138,8 +139,28 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     </Typography>
 
                     {credLoading && (
-                      <CircularProgress data-testid="login--progressbar" color="inherit" size="12px" />
+                      <CircularProgress
+                        data-testid="login--progressbar"
+                        color="inherit"
+                        size="12px"
+                      />
                     )}
+                  </Button>
+                  <Button
+                    data-testid="login--select--cred"
+                    size="small"
+                    variant="contained"
+                    color="success"
+                    onClick={requestCredentialOnce}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      columnGap: "8px",
+                    }}
+                  >
+                    <Typography variant="body2" fontWeight="bold">
+                      One Time Credential Request
+                    </Typography>
                   </Button>
                 </>
               ) : (

@@ -10,7 +10,7 @@ const HomePage = ({
   selectedId,
   selectedAcdc,
   handleCredSignin,
-  handleAutoSignin,
+  requestCredentialOnce,
   handleAidSignin,
   removeData,
   signatureData,
@@ -33,7 +33,7 @@ const HomePage = ({
           vendorConfigued={vendorConf}
           removeData={removeData}
           handleCredSignin={handleCredSignin}
-          handleAutoSignin={handleAutoSignin}
+          requestCredentialOnce={requestCredentialOnce}
           handleAidSignin={handleAidSignin}
           signatureData={signatureData}
           handleConfigExt={() => handleSettingVendorUrl(extConf)}
