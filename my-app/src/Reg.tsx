@@ -29,7 +29,7 @@ const RegComponent = () => {
   const { extMode, serverMode } = useConfigMode();
   const { openSnackbar } = useSnackbar();
   const [signatureData, setSignatureData] = useState<any>();
-  const [isLoadingInitial, setIsLoadingInitial] = useState(false);
+  const [sessionInfoLoaded, setSessionInfoLoaded] = useState(false);
   const [extensionInstalled, setExtensionInstalled] = useState<null | boolean>(
     null
   );
@@ -56,10 +56,6 @@ const RegComponent = () => {
 
 window.signifyClient = signifyClient;
 
-  const handleInitialSignatureLoad = async () => {
-    setIsLoadingInitial(true);
-    setIsLoadingInitial(false);
-  };
 
   const handleSettingVendorUrl = async (url: string) => {
     await signifyClient.configureVendor({ url });
@@ -109,12 +105,10 @@ window.signifyClient = signifyClient;
         openSnackbar("Response received: Verified", "success");
       }
 
-      localStorage.setItem("signify-data", JSON.stringify(data));
       setSignatureData(data);
       setSelectedId(data?.headers?.["signify-resource"]);
       setSelectedAcdc(data.credential?.raw);
       from && navigate(from);
-      
     } catch (error) {
       if (typeof error?.message === "string")
         openSnackbar(error?.message, "error");
@@ -127,10 +121,15 @@ window.signifyClient = signifyClient;
     const extensionId = await signifyClient.isExtensionInstalled();
     setExtensionInstalled(Boolean(extensionId));
     if (extensionId) {
-      if (localStorage.getItem("signify-data")) {
-        handleInitialSignatureLoad();
-      } else if (location.pathname !== "/") {
-        handleCredSignin();
+      console.log("extensionId", extensionId);
+      try {
+        const sessionObj = await signifyClient.getSessionInfo();
+        await handleSignifyData(sessionObj);
+        console.log("sessionObj", sessionObj);
+        setSessionInfoLoaded(true);
+      } catch (error) {
+        console.log("error", error);
+        setSessionInfoLoaded(true);
       }
     }
   };
@@ -138,26 +137,20 @@ window.signifyClient = signifyClient;
     populateExtensionStatus();
   }, []);
 
-  const removeData = () => {
-    localStorage.removeItem("signify-data");
-    setSignatureData("");
+  const removeData = async () => {
+    try {
+      await signifyClient.clearSession();
+    } catch (error) {
+      setSignatureData("");
+      openSnackbar("Session cleared!", "success");
+    }
   };
 
-  const handleAutoSignin = async () => {
+  const requestCredentialOnce = async () => {
     if (extMode) {
-      // setAutoCredLoading(true);
-      // try {
-      //   const resp = await signifyClient.authorizeAutoSignin();
-      //   console.log("data received", resp);
-      //   if (resp) {
-      //     handleSignifyData(resp);
-      //   }
-      // } catch (error) {
-      //   openSnackbar(error?.message, "error");
-      // }
-      // setAutoCredLoading(false);
-    } else {
-      handleSignifyData(fakeEcrCredential);
+      const resp = await signifyClient.authorize({
+        session: { oneTime: true },
+      });
     }
   };
 
@@ -188,7 +181,7 @@ window.signifyClient = signifyClient;
     }
   };
 
-  if (extensionInstalled === null || isLoadingInitial) {
+  if (extensionInstalled === null || !sessionInfoLoaded) {
     return (
       <Box
         display="flex"
@@ -217,7 +210,7 @@ window.signifyClient = signifyClient;
                 selectedId={selectedId}
                 selectedAcdc={selectedAcdc}
                 handleCredSignin={handleCredSignin}
-                handleAutoSignin={handleAutoSignin}
+                requestCredentialOnce={requestCredentialOnce}
                 handleAidSignin={handleAidSignin}
                 aidLoading={aidLoading}
                 credLoading={credLoading}
