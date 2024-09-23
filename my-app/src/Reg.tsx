@@ -131,6 +131,8 @@ window.signifyClient = signifyClient;
         console.log("error", error);
         setSessionInfoLoaded(true);
       }
+    } else {
+      setSessionInfoLoaded(true);
     }
   };
   useEffect(() => {
