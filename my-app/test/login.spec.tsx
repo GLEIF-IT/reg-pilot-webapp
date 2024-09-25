@@ -35,30 +35,6 @@ test.describe('Tests Extension installation', () => {
         await page.waitForLoadState('load');
         await expect(page.getByTestId("extension--not-installed-message")).toBeVisible();
     });
-
-
-    test('Display customer portal when extension is installed', async ({}) => {
-        const extensionPath = path.resolve('extension/chrome/');
-        const userDataDir = path.resolve('user-data');
-
-        const context = await chromium.launchPersistentContext(userDataDir, { // Launch the browser with the extension
-            headless: false,
-            args: [
-                `--disable-extensions-except=${extensionPath}`,
-                `--load-extension=${extensionPath}`
-            ]
-        });
-
-        const page = await context.newPage();
-        await page.goto('/');
-        await expect(page.getByTestId("webapp--header")).toBeVisible();
-
-        await expect(page.getByTestId('login--configure--extn')).toBeVisible();
-        await expect(page.getByTestId('login--select--cred')).toBeVisible();
-
-        // Close the browser context
-        await context.close();
-    });
 });
 
 test.describe('Customer portal', () => {
@@ -85,6 +61,16 @@ test.describe('Customer portal', () => {
         await context.close();
     })
 
+test('Display customer portal when extension is installed', async ({}) => {
+
+        await page.goto('/');
+        await expect(page.getByTestId("webapp--header")).toBeVisible();
+
+        await expect(page.getByTestId('login--configure--extn')).toBeVisible();
+        await expect(page.getByTestId('login--select--cred')).toBeVisible();
+
+     });
+
     test('User comes that does not have a valid wallet url/secret combination', async ({}) => {
         await page.goto('/');
 
@@ -110,7 +96,7 @@ test.describe('Customer portal', () => {
         const liElement = await page.getByTestId("webapp--menu--Status");
         await liElement.click()
 
-        await page.getByTestId("status--login-error").waitFor();
+        await expect(page).toHaveURL(/.*\?from=status/);
     });
 
     test('User has a valid wallet url but does not have the "EBA Submitter" role', async ({}) => {
@@ -127,7 +113,7 @@ test.describe('Customer portal', () => {
         await alert.waitFor();
 
         // Assert that the alert contains the error message
-        await expect(alert).toContainText('request was not found');
+        await expect(alert).toContainText('request did not verify');
     });
 
     test('User has a valid wallet url and role but from unexpected organization', async ({}) => {
@@ -144,7 +130,7 @@ test.describe('Customer portal', () => {
         await alert.waitFor();
 
         // Assert that the alert contains the error message
-        await expect(alert).toContainText('request was not found');
+        await expect(alert).toContainText('request did not verify');
     });
 
     test('User has a valid wallet url, role and is from expected organization', async ({}) => {
