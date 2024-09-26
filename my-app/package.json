@@ -23,7 +23,8 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "ui-tests": "npx playwright test --max-failures=1 --headed"
   },
   "eslintConfig": {
     "extends": [
