@@ -1,8 +1,9 @@
 export async function generateFileDigest(buffer: ArrayBuffer): Promise<string> {
-  const algo = "SHA-256";
-  const digest = await hash(buffer, algo);
-  const prefixeDigest = `${algo.toLowerCase()}-${digest}`;
-  return prefixeDigest;
+  const algoBrowser = "SHA-256";
+  const digest = await hash(buffer, algoBrowser);
+  const algoServer = "sha256";
+  const prefixDigest = `${algoServer}-${digest}`;
+  return prefixDigest;
 }
 
 async function hash(data: ArrayBuffer, algo: string): Promise<string> {

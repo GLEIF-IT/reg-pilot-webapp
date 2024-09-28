@@ -97,7 +97,7 @@ const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName }) => {
 
           if (response.status >= 400) {
             throw new Error(
-              `${response_signed_data?.msg ?? response_signed_data?.title}`
+              `${response_signed_data?.detail ?? response_signed_data?.title}`
             );
           }
           openSnackbar(
