@@ -6,6 +6,7 @@ import fakeLoginResponse from "../test/fakeLoginResponse.json";
 import ServerInfo from "../components/home/server-info.tsx";
 import { useConfigMode } from "@context/configMode";
 import { regService } from "../services/reg-server.ts";
+import { generateFileDigest } from "@services/utils.ts";
 import fakeCheckStatus from "../test/fakeCheckStatus.json";
 import fakeFileUpload from "../test/fakeFileUpload.json";
 
@@ -62,7 +63,7 @@ const SettingsPage = ({
   const [statusResponse, setStatusResponse] = useState<any>("");
 
   const [reportUrl, setReportUrl] = useState(
-    `${serverUrl}/upload/${selectedId}/${selectedAcdc?.anchor?.pre}`
+    `${serverUrl}/upload/${selectedId}`
   );
   const [reportRequest, setReportRequest] = useState<any>("");
   const [reportResponse, setReportResponse] = useState<any>("");
@@ -81,7 +82,7 @@ const SettingsPage = ({
     setVerifyUrl(`${serverUrl}/verify/headers`);
     setStatusUrl(`${serverUrl}/status/${selectedId}`);
     setReportUrl(
-      `${serverUrl}/upload/${selectedId}/${selectedAcdc?.anchor?.pre}`
+      `${serverUrl}/upload/${selectedId}`
     );
   }, [serverUrl]);
 
@@ -98,7 +99,7 @@ const SettingsPage = ({
       headers: heads,
       method: "POST",
       body: JSON.stringify({
-        said: selectedAcdc?.raw?.sad?.d,
+        said: selectedAcdc?.sad?.d,
         vlei: vlei_cesr,
       }),
     });
@@ -211,32 +212,44 @@ const SettingsPage = ({
       return;
     }
 
-    try {
+    const reader = new FileReader();
+    reader.onload = async function () {
+      const signedZipBuf = reader?.result as ArrayBuffer;
+      const signedZipDig = await generateFileDigest(signedZipBuf);
       const formData = new FormData();
-      formData.append("upload", report);
-      const lRequest = {
-        ...reportRequest,
-        body: formData,
-      };
-      const response = await regService.postReport(
-        reportUrl,
-        lRequest,
-        extMode,
-        aidName
-      );
-      const response_signed_data = await response.json();
-      console.log("upload response", response_signed_data);
-      setReportResponse(response_signed_data);
-      if (response.status >= 400) {
-        throw new Error(
-          `${response_signed_data?.msg ?? response_signed_data?.title}`
+      const ctype = "application/zip";
+      const blob = new Blob([signedZipBuf], { type: ctype });
+      formData.append("upload", blob, report.name);
+      try {
+        const lRequest = {
+          method: "POST",
+          body: formData,
+        };
+        const response = await regService.postReport(
+          `${reportUrl}/${signedZipDig}`,
+          lRequest,
+          extMode,
+          aidName
         );
+        const response_signed_data = await response.json();
+        setReportResponse(response_signed_data);
+        if (response.status >= 400) {
+          throw new Error(
+            `${response_signed_data?.detail ?? response_signed_data?.title}`
+          );
+        }
+        openSnackbar(
+          response_signed_data?.message,
+          response_signed_data?.status === "failed" ? "warning" : "success"
+        );
+
+        return response_signed_data;
+      } catch (error) {
+        console.error("Error uploading report", error);
+        openSnackbar(error?.message, "error");
       }
-      return response_signed_data;
-    } catch (error) {
-      console.error("Error uploading report", error);
-      openSnackbar(error?.message, "error");
-    }
+    };
+    reader.readAsArrayBuffer(report);
   };
 
   return (

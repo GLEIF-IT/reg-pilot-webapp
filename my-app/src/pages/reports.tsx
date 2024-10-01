@@ -6,6 +6,7 @@ import { UploadFile } from "@mui/icons-material";
 import { regService } from "../services/reg-server.ts";
 import { useSnackbar } from "../context/snackbar.tsx";
 import { useConfigMode } from "@context/configMode";
+import { generateFileDigest } from "@services/utils.ts";
 import fakeFileUpload from "../test/fakeFileUpload.json";
 
 const uploadPath = "/upload";
@@ -71,17 +72,27 @@ const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName }) => {
 
   // Function to perform the upload request
   async function upload(aid: string, said: string, report: File): Promise<any> {
-    const formData = new FormData();
-    formData.append("upload", report, report.name);
+    if (!serverMode) {
+      const fakeFile = await getFakeFileResponse();
+      setSubmitStatus("success");
+      return fakeFile;
+    }
 
-    if (serverMode) {
+    const reader = new FileReader();
+    reader.onload = async function () {
+      const signedZipBuf = reader?.result as ArrayBuffer;
+      const signedZipDig = await generateFileDigest(signedZipBuf);
+      const formData = new FormData();
+      const ctype = "application/zip";
+      const blob = new Blob([signedZipBuf], { type: ctype });
+      formData.append("upload", blob, report.name);
       try {
         const lRequest = {
           method: "POST",
           body: formData,
         };
         const response = await regService.postReport(
-          `${serverUrl}${uploadPath}/${aid}/${said}`,
+          `${serverUrl}${uploadPath}/${aid}/${signedZipDig}`,
           lRequest,
           extMode,
           aidName
@@ -91,7 +102,7 @@ const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName }) => {
 
         if (response.status >= 400) {
           throw new Error(
-            `${response_signed_data?.msg ?? response_signed_data?.title}`
+            `${response_signed_data?.detail ?? response_signed_data?.title}`
           );
         }
         openSnackbar(
@@ -106,11 +117,8 @@ const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName }) => {
         setSubmitStatus("error");
         setSelectedFile(null);
       }
-    } else {
-      const fakeFile = await getFakeFileResponse();
-      setSubmitStatus("success");
-      return fakeFile;
-    }
+    };
+    reader.readAsArrayBuffer(report);
   }
 
   const handleSubmit = async () => {

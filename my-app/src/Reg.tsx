@@ -37,7 +37,7 @@ const RegComponent = () => {
   const [selectedId, setSelectedId] = useState(""); // Step 2 Selection
   const [selectedAcdc, setSelectedAcdc] = useState(null); // Step 3 Selection
   const [serverUrl, setServerUrl] = useState(
-    "https://reg-api-test.rootsid.cloud"
+    "https://reg-api-dev.rootsid.cloud"
   );
 
   const [vendorConf, setVendorConf] = useState(false);
