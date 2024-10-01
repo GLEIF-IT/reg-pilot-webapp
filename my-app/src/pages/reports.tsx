@@ -72,53 +72,53 @@ const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName }) => {
 
   // Function to perform the upload request
   async function upload(aid: string, said: string, report: File): Promise<any> {
-    if (serverMode) {
-      const reader = new FileReader();
-      reader.onload = async function () {
-        const signedZipBuf = reader?.result as ArrayBuffer;
-        const signedZipDig = await generateFileDigest(signedZipBuf);
-        const formData = new FormData();
-        const ctype = "application/zip";
-        const blob = new Blob([signedZipBuf], { type: ctype });
-        formData.append("upload", blob, report.name);
-        try {
-          const lRequest = {
-            method: "POST",
-            body: formData,
-          };
-          const response = await regService.postReport(
-            `${serverUrl}${uploadPath}/${aid}/${signedZipDig}`,
-            lRequest,
-            extMode,
-            aidName
-          );
-          const response_signed_data = await response.json();
-          console.log("upload response", response_signed_data);
-
-          if (response.status >= 400) {
-            throw new Error(
-              `${response_signed_data?.detail ?? response_signed_data?.title}`
-            );
-          }
-          openSnackbar(
-            response_signed_data?.message,
-            response_signed_data?.status === "failed" ? "warning" : "success"
-          );
-          setSubmitStatus("success");
-          return response_signed_data;
-        } catch (error) {
-          console.error("Error uploading report", error);
-          openSnackbar(error?.message, "error");
-          setSubmitStatus("error");
-          setSelectedFile(null);
-        }
-      };
-      reader.readAsArrayBuffer(report);
-    } else {
+    if (!serverMode) {
       const fakeFile = await getFakeFileResponse();
       setSubmitStatus("success");
       return fakeFile;
     }
+
+    const reader = new FileReader();
+    reader.onload = async function () {
+      const signedZipBuf = reader?.result as ArrayBuffer;
+      const signedZipDig = await generateFileDigest(signedZipBuf);
+      const formData = new FormData();
+      const ctype = "application/zip";
+      const blob = new Blob([signedZipBuf], { type: ctype });
+      formData.append("upload", blob, report.name);
+      try {
+        const lRequest = {
+          method: "POST",
+          body: formData,
+        };
+        const response = await regService.postReport(
+          `${serverUrl}${uploadPath}/${aid}/${signedZipDig}`,
+          lRequest,
+          extMode,
+          aidName
+        );
+        const response_signed_data = await response.json();
+        console.log("upload response", response_signed_data);
+
+        if (response.status >= 400) {
+          throw new Error(
+            `${response_signed_data?.detail ?? response_signed_data?.title}`
+          );
+        }
+        openSnackbar(
+          response_signed_data?.message,
+          response_signed_data?.status === "failed" ? "warning" : "success"
+        );
+        setSubmitStatus("success");
+        return response_signed_data;
+      } catch (error) {
+        console.error("Error uploading report", error);
+        openSnackbar(error?.message, "error");
+        setSubmitStatus("error");
+        setSelectedFile(null);
+      }
+    };
+    reader.readAsArrayBuffer(report);
   }
 
   const handleSubmit = async () => {

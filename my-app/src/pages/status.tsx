@@ -276,13 +276,13 @@ function Row(props: { row: any }) {
                 </Typography>
                 <Typography variant="body2" gutterBottom>
                   <strong>
-                    {formatMessage({ id: "report.message" })}Message:
+                    {formatMessage({ id: "report.message" })}
                   </strong>{" "}
                   {row["message"]}
                 </Typography>
                 <Typography variant="body2" gutterBottom>
                   <strong>
-                    {formatMessage({ id: "report.submittedBy" })}Submitted by:
+                    {formatMessage({ id: "report.submittedBy" })}
                   </strong>{" "}
                   {row["submitter"]}
                 </Typography>
