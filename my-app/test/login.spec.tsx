@@ -8,7 +8,7 @@ const credential = validCred.credential.raw.sad.d;
 
 async function mockAuthCred(page: Page, credential) {
   await page.evaluate((data) => {
-                      window.signifyClient.authorize = async () => {
+                      window.signifyClient.authorizeCred = async () => {
                         return data;
                       };
                     }, credential);

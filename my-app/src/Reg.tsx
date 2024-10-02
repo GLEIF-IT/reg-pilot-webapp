@@ -150,7 +150,7 @@ window.signifyClient = signifyClient;
 
   const requestCredentialOnce = async () => {
     if (extMode) {
-      const resp = await signifyClient.authorize({
+      const resp = await signifyClient.authorizeCred({
         session: { oneTime: true },
       });
     }
@@ -159,7 +159,7 @@ window.signifyClient = signifyClient;
   const handleCredSignin = async (credType?: string) => {
     if (extMode) {
       setCredLoading(true);
-      const resp = await signifyClient.authorize();
+      const resp = await signifyClient.authorizeCred();
       setCredLoading(false);
       console.log("promised resp from signifyClient.authorizeCred()");
       console.log(resp);
