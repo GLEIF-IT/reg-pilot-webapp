@@ -37,7 +37,7 @@ const RegComponent = () => {
   const [selectedId, setSelectedId] = useState(""); // Step 2 Selection
   const [selectedAcdc, setSelectedAcdc] = useState(null); // Step 3 Selection
   const [serverUrl, setServerUrl] = useState(
-    "https://reg-api-test.rootsid.cloud"
+    "https://reg-api-dev.rootsid.cloud"
   );
 
   const [vendorConf, setVendorConf] = useState(false);
@@ -53,9 +53,6 @@ const RegComponent = () => {
     setPingUrl(serverUrl + "/ping");
     setLoginUrl(serverUrl + "/login");
   }, [serverUrl]);
-
-window.signifyClient = signifyClient;
-
 
   const handleSettingVendorUrl = async (url: string) => {
     await signifyClient.configureVendor({ url });
@@ -117,13 +114,24 @@ window.signifyClient = signifyClient;
     }
   };
 
+  const getSessionInfo = async () => {
+    return new Promise(async (resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(null);
+      }, 3000);
+  
+      const sessionObj = await signifyClient.getSessionInfo();
+      clearTimeout(timer);
+      resolve(sessionObj);
+    })
+  };
   const populateExtensionStatus = async () => {
     const extensionId = await signifyClient.isExtensionInstalled();
     setExtensionInstalled(Boolean(extensionId));
     if (extensionId) {
       console.log("extensionId", extensionId);
       try {
-        const sessionObj = await signifyClient.getSessionInfo();
+        const sessionObj = await getSessionInfo();
         await handleSignifyData(sessionObj);
         console.log("sessionObj", sessionObj);
         setSessionInfoLoaded(true);
@@ -135,6 +143,7 @@ window.signifyClient = signifyClient;
       setSessionInfoLoaded(true);
     }
   };
+
   useEffect(() => {
     populateExtensionStatus();
   }, []);
@@ -150,7 +159,7 @@ window.signifyClient = signifyClient;
 
   const requestCredentialOnce = async () => {
     if (extMode) {
-      const resp = await signifyClient.authorize({
+      const resp = await signifyClient.authorizeCred({
         session: { oneTime: true },
       });
     }
@@ -159,7 +168,7 @@ window.signifyClient = signifyClient;
   const handleCredSignin = async (credType?: string) => {
     if (extMode) {
       setCredLoading(true);
-      const resp = await signifyClient.authorize();
+      const resp = await signifyClient.authorizeCred();
       setCredLoading(false);
       console.log("promised resp from signifyClient.authorizeCred()");
       console.log(resp);
