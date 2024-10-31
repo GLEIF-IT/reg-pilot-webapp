@@ -8,7 +8,11 @@ import {
   Collapse,
   IconButton,
 } from "@mui/material";
-import { KeyboardArrowUp, KeyboardArrowDown, UploadFile } from "@mui/icons-material";
+import {
+  KeyboardArrowUp,
+  KeyboardArrowDown,
+  UploadFile,
+} from "@mui/icons-material";
 
 interface IServerInfo {
   serverUrl: string;
@@ -100,8 +104,10 @@ const ServerInfo: React.FC<IServerInfo> = ({
   reportRequest,
   reportResponse,
   handleReportUpload,
+  checkloginUrl,
+  setCheckloginUrl,
+  handleCheckLogin,
 }) => {
-
   const [selectedFile, setSelectedFile] = useState(null);
   const [error, setError] = useState("");
   const [filename, setFilename] = useState("");
@@ -351,6 +357,75 @@ const ServerInfo: React.FC<IServerInfo> = ({
           </Grid>
         </ApiWidget>
       </Grid>
+      <Grid item xs={12} lg={12}>
+        <ApiWidget
+          title={
+            <Typography variant="h6">
+              <strong>Check Login</strong>{" "}
+              <Typography variant="caption">
+                After Login, returns information about the login
+              </Typography>
+            </Typography>
+          }
+        >
+          <Grid container spacing={1}>
+            <Grid item xs={12}>
+              <Box
+                sx={{ display: "flex", flexDirection: "row", columnGap: "8px" }}
+              >
+                <TextField
+                  id="outlined-basic"
+                  label="Login server URl"
+                  variant="outlined"
+                  fullWidth
+                  size="small"
+                  value={checkloginUrl}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                    setCheckloginUrl(event.target.value);
+                  }}
+                />
+                <Box>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={handleCheckLogin}
+                  >
+                    Check Login
+                  </Button>
+                </Box>
+              </Box>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="body2">
+                <strong>Request:</strong>
+              </Typography>
+              <textarea
+                className="textarea-data"
+                id="login-post"
+                rows={12}
+                cols={120}
+                placeholder={"login post"}
+                value={JSON.stringify({ headers: {}, body: {} }, null, 2)}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="body2">
+                <strong>Response:</strong>
+              </Typography>
+              <textarea
+                className="textarea-data"
+                id="login-response"
+                rows={12}
+                cols={120}
+                placeholder={"login response"}
+                value={JSON.stringify(loginResponse, null, 2)}
+              />
+            </Grid>
+          </Grid>
+        </ApiWidget>
+      </Grid>
+
       <Grid item xs={12}>
         <br />
       </Grid>
