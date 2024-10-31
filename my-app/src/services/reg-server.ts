@@ -1,6 +1,6 @@
 import { createClient } from "signify-polaris-web";
 import { signifyService } from "@test/lib/signify";
-import dummyHeaders from "@test/credential/signed_header.json";
+import { ErrorMessages } from "@services/constants.ts";
 
 const signifyClient = createClient();
 const RegServer = () => {
@@ -106,6 +106,32 @@ const RegServer = () => {
     return fetch(rurl, { ...request, headers: resp.headers });
   };
 
+  const checkLogin = async (rurl: string, request: any) => {
+    return new Promise(async (resolve, reject) => {
+      const checkLoginResp = await fetch(rurl, request);
+      const checkLoginRespData = await checkLoginResp.json();
+      if (checkLoginResp.status >= 400) {
+        reject(checkLoginRespData);
+      } else {
+        if (checkLoginRespData?.msg?.includes(ErrorMessages.pending_auth)) {
+          const interloopCheckLogin = setInterval(async () => {
+            const _resp = await fetch(rurl, request);
+            const _respData = await _resp.json();
+            if (
+              _respData.status < 400 &&
+              !_respData?.msg?.includes(ErrorMessages.pending_auth)
+            ) {
+              clearInterval(interloopCheckLogin);
+              resolve(_respData);
+            }
+          }, 3000);
+        } else {
+          resolve(checkLoginRespData);
+        }
+      }
+    });
+  };
+
   const verify = async (
     rurl: string,
     request: any,
@@ -165,6 +191,7 @@ const RegServer = () => {
     dropReportStatusByAid,
     checkReport,
     getStatus,
+    checkLogin,
   };
 };
 
