@@ -147,7 +147,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     )}
                   </Button>
                   <Button
-                    data-testid="login--select--cred"
+                    data-testid="login--one--time"
                     size="small"
                     variant="contained"
                     color="success"
