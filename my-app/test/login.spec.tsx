@@ -3,8 +3,9 @@ import data from "./SignData.json";
 
 const path = require('path');
 
-const { credWithInvalidRole, credWithDifOrg, validCred } = data;
-const credential = validCred.credential.raw.sad.d;
+const { credWithInvalidRole, credWithInvalidSchema, cryptInvalidCred, credWithDifOrg, validCred } = data;
+const credential = validCred.credential.raw.sad.a.i;
+const lei = validCred.credential.raw.sad.a.LEI;
 
 async function mockAuthCred(page: Page, credential) {
   await page.evaluate((data) => {
@@ -15,7 +16,7 @@ async function mockAuthCred(page: Page, credential) {
 }
 
 test.describe('Tests Extension installation', () => {
-    test.describe.configure({ mode: 'serial' })
+    //test.describe.configure({ mode: 'serial' })
     test('displays a message when the extension is not installed', async ({page}) => {
         await page.goto('/');
 
@@ -78,9 +79,6 @@ test('Display customer portal when extension is installed', async ({}) => {
         await selectCred.waitFor();
         await selectCred.click();
 
-        const loginMsg = await page.locator("text='Sign in with Keria'");
-        await loginMsg.waitFor();
-
         // Selector for the loading spinner within the button
         const spinnerSelector = '[data-testid="login--progressbar"]';
 
@@ -113,14 +111,16 @@ test('Display customer portal when extension is installed', async ({}) => {
         await alert.waitFor();
 
         // Assert that the alert contains the error message
-        await expect(alert).toContainText('request did not verify');
+        await expect(alert).toContainText('status Credential unauthorized, info: Incorrect Role is not a valid submitter role');
     });
 
-    test('User has a valid wallet url and role but from unexpected organization', async ({}) => {
+    test('User logins in with credential with Invalid schema', async ({}) => {
         await page.goto('/');
+        const identifier = credWithInvalidSchema.credential.raw.sad.a.i;
+        const cred = credWithInvalidSchema.credential.raw.sad.d;
 
        // Expose the mocked function to the page context
-       await mockAuthCred(page,credWithDifOrg);
+       await mockAuthCred(page,credWithInvalidSchema);
 
         const selectCred = await page.getByTestId('login--select--cred')
         await selectCred.waitFor();
@@ -130,7 +130,26 @@ test('Display customer portal when extension is installed', async ({}) => {
         await alert.waitFor();
 
         // Assert that the alert contains the error message
-        await expect(alert).toContainText('request did not verify');
+        await expect(alert).toContainText(`identifier ${identifier} presented credentials ${cred}, w/ status Credential unauthorized, info: Can't authorize cred with OOR schema`);
+    });
+
+    test('User logins in with cryptographically invalid credential', async ({}) => {
+        await page.goto('/');
+        const credential = cryptInvalidCred.credential.raw.sad.d;
+        const cred = credWithInvalidSchema.credential.raw.sad.d;
+
+       // Expose the mocked function to the page context
+       await mockAuthCred(page,cryptInvalidCred);
+
+        const selectCred = await page.getByTestId('login--select--cred')
+        await selectCred.waitFor();
+        await selectCred.click();
+
+        const alert = page.locator('[role="alert"]');
+        await alert.waitFor();
+
+        // Assert that the alert contains the error message
+        await expect(alert).toContainText(`credential ${credential} from body of request did not cryptographically verify`);
     });
 
     test('User has a valid wallet url, role and is from expected organization', async ({}) => {
@@ -142,6 +161,6 @@ test('Display customer portal when extension is installed', async ({}) => {
         await selectCred.waitFor();
         await selectCred.click();
 
-        await page.locator(`text=${credential} is a valid credential`).waitFor();
+        await page.locator(`text=AID ${credential} w/ lei ${lei} has valid login account`).waitFor();
         });
 });

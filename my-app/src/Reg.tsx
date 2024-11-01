@@ -55,6 +55,9 @@ const RegComponent = () => {
     setCheckloginUrl(serverUrl + "/checklogin");
   }, [serverUrl]);
 
+window.signifyClient = signifyClient;
+
+
   const handleSettingVendorUrl = async (url: string) => {
     await signifyClient.configureVendor({ url });
     setVendorConf(true);

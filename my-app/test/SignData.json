@@ -766,6 +766,7 @@
               "o": "I2I"
             }
           },
+          "i": "EMmvyQsuTCQ_HIxgeKc7XqQaeE8USvSHUqgbtuDOMXoa",
           "r": {
             "d": "EGZ97EjPSINR-O-KHDN_uw4fdrTxeuRXrqT5ZHHQJujQ",
             "usageDisclaimer": {
@@ -830,8 +831,12 @@
                 {
                   "$id": "ELDXjQ-FnKApK1DJhzmtKDcnfoJ9qusQr1Qz5g9MFt0o",
                   "description": "Attributes block",
-                  "type": "object",
                   "properties": {
+                    "LEI": {
+                      "description": "LEI of the Legal Entity",
+                      "format": "ISO 17442",
+                      "type": "string"
+                    },
                     "d": {
                       "description": "Attributes block SAID",
                       "type": "string"
@@ -859,7 +864,6 @@
                       "type": "string"
                     }
                   },
-                  "additionalProperties": false,
                   "required": [
                     "i",
                     "dt",
@@ -870,6 +874,10 @@
                 }
               ]
             },
+            "d": {
+              "description": "Credential SAID",
+              "type": "string"
+            },
             "e": {
               "oneOf": [
                 {
@@ -879,15 +887,10 @@
                 {
                   "$id": "EMsSqaJsthSBA4OINZ1_fxfNVkgEPF-Sg5fq-vXM7Z6b",
                   "description": "Edges block",
-                  "type": "object",
                   "properties": {
-                    "d": {
-                      "description": "Edges block SAID",
-                      "type": "string"
-                    },
                     "auth": {
+                      "additionalProperties": false,
                       "description": "Chain to Auth vLEI credential from legal entity",
-                      "type": "object",
                       "properties": {
                         "n": {
                           "description": "SAID of the ACDC to which the edge connects",
@@ -912,6 +915,10 @@
                   "required": ["d", "auth"]
                 }
               ]
+            },
+            "i": {
+              "description": "QVI or LE Issuer AID",
+              "type": "string"
             },
             "r": {
               "oneOf": [
