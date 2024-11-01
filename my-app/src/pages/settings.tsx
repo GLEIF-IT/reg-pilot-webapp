@@ -29,6 +29,7 @@ const SettingsPage = ({
   setPingUrl,
   loginUrl,
   setLoginUrl,
+  checkloginUrl,
   aidName,
 }: {
   selectedId: any;
@@ -41,6 +42,7 @@ const SettingsPage = ({
   setPingUrl: any;
   loginUrl: any;
   setLoginUrl: any;
+  checkloginUrl: any;
 }) => {
   const navigate = useNavigate();
   const { serverMode, extMode } = useConfigMode();
@@ -51,6 +53,10 @@ const SettingsPage = ({
 
   const [loginRequest, setLoginRequest] = useState<any>("");
   const [loginResponse, setLoginResponse] = useState<any>("");
+
+  const [checkloginRequest, setCheckLoginRequest] = useState<any>("");
+  const [_checkloginUrl, setCheckloginUrl] = useState<any>(`${checkloginUrl}/${selectedId}`);
+  const [checkloginResponse, setCheckLoginResponse] = useState<any>("");
 
   const [verifyUrl, setVerifyUrl] = useState(`${serverUrl}/verify/headers`);
   const [verifyRequest, setVerifyRequest] = useState<any>("");
@@ -104,6 +110,12 @@ const SettingsPage = ({
       }),
     });
 
+    setCheckLoginRequest({
+      headers: heads,
+      method: "GET",
+      body: null,
+    });
+
     setVerifyRequest({ method: "GET", headers: signatureData?.headers });
     setStatusRequest({ method: "GET", headers: signatureData?.headers });
     setReportRequest({ method: "POST", headers: signatureData?.headers });
@@ -142,7 +154,31 @@ const SettingsPage = ({
       if (response.status >= 400) {
         throw new Error(data.msg);
       }
-      openSnackbar("Credential verified!", "success");
+      openSnackbar(data?.msg, "success");
+    } catch (error) {
+      openSnackbar(error?.message, "error");
+      console.error("Error in login", error);
+    }
+  };
+
+  const handleCheckLogin = async () => {
+    if (!serverMode) {
+      setLoginResponse(fakeLoginResponse);
+      openSnackbar("<Mocked> Response received!", "success");
+      return;
+    }
+
+    try {
+      const response = await regService.postLogin(_checkloginUrl, {
+        ...checkloginRequest,
+      });
+      const data = await response.json();
+      setLoginResponse(data);
+
+      if (response.status >= 400) {
+        throw new Error(data.msg);
+      }
+      openSnackbar(data?.msg, "success");
     } catch (error) {
       openSnackbar(error?.message, "error");
       console.error("Error in login", error);
@@ -285,6 +321,9 @@ const SettingsPage = ({
                 reportRequest={reportRequest}
                 reportResponse={reportResponse}
                 handleReportUpload={handleReportUpload}
+                checkloginUrl={_checkloginUrl}
+                setCheckloginUrl={setCheckloginUrl}
+                handleCheckLogin={handleCheckLogin}
               />
             </>
           ) : (

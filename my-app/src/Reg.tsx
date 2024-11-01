@@ -4,17 +4,16 @@ import { Box, CircularProgress } from "@mui/material";
 import "./App.css";
 import { createClient } from "signify-polaris-web";
 import { regService } from "./services/reg-server.ts";
-import fakeEcrCredential from "@test/credential/ecr.json";
-import fakeOorCredential from "@test/credential/oor.json";
 import { useConfigMode } from "@context/configMode.tsx";
 import { useSnackbar } from "@context/snackbar.tsx";
-
+import { ErrorMessages } from "@services/constants.ts";
 import ExtNotFound from "./components/ext-not-found.tsx";
 import AppLayout from "./pages/app-layout.tsx";
 import HomePage from "./pages/home.tsx";
 import ReportsPage from "./pages/reports.tsx";
 import StatusPage from "./pages/status.tsx";
 import SettingsPage from "./pages/settings.tsx";
+import signData from "../test/SignData.json";
 
 const statusPath = "/status";
 
@@ -44,6 +43,7 @@ const RegComponent = () => {
 
   const [pingUrl, setPingUrl] = useState(serverUrl + "/ping");
   const [loginUrl, setLoginUrl] = useState(serverUrl + "/login");
+  const [checkloginUrl, setCheckloginUrl] = useState(serverUrl + "/checklogin");
 
   const [aidLoading, setAidLoading] = useState(false);
   const [credLoading, setCredLoading] = useState(false);
@@ -52,6 +52,7 @@ const RegComponent = () => {
   useEffect(() => {
     setPingUrl(serverUrl + "/ping");
     setLoginUrl(serverUrl + "/login");
+    setCheckloginUrl(serverUrl + "/checklogin");
   }, [serverUrl]);
 
   const handleSettingVendorUrl = async (url: string) => {
@@ -74,15 +75,33 @@ const RegComponent = () => {
     };
     // loginUrl
     const response = await regService.postLogin(loginUrl, lRequest);
+
     const responseData = await response.json();
 
     if (response.status >= 400) {
+      await removeData();
       throw new Error(responseData.msg);
     }
     if (!response) return;
+    console.log("responseData.msg", responseData.msg);
+    if (responseData.msg?.includes(ErrorMessages.cred_crypt_valid)) {
+      try {
+        const checkLoginResp = await regService.checkLogin(
+          `${checkloginUrl}/${data?.credential?.raw?.sad?.a?.i}`,
+          {
+            method: "GET",
+            body: null,
+          }
+        );
 
-    if (responseData.msg) {
-      openSnackbar(responseData.msg, "success");
+        openSnackbar(checkLoginResp.msg, "success");
+      } catch (error) {
+        console.log("error", error);
+        await removeData();
+        throw new Error(error?.msg);
+      }
+    } else {
+      throw new Error(responseData.msg);
     }
   };
 
@@ -103,7 +122,7 @@ const RegComponent = () => {
       }
 
       setSignatureData(data);
-      setSelectedId(data?.headers?.["signify-resource"]);
+      setSelectedId(data?.credential?.raw?.sad?.a?.i);
       setSelectedAcdc(data.credential?.raw);
       from && navigate(from);
     } catch (error) {
@@ -119,11 +138,11 @@ const RegComponent = () => {
       const timer = setTimeout(() => {
         reject(null);
       }, 3000);
-  
+
       const sessionObj = await signifyClient.getSessionInfo();
       clearTimeout(timer);
       resolve(sessionObj);
-    })
+    });
   };
   const populateExtensionStatus = async () => {
     const extensionId = await signifyClient.isExtensionInstalled();
@@ -131,9 +150,11 @@ const RegComponent = () => {
     if (extensionId) {
       console.log("extensionId", extensionId);
       try {
-        const sessionObj = await getSessionInfo();
-        await handleSignifyData(sessionObj);
-        console.log("sessionObj", sessionObj);
+        if (extMode) {
+          const sessionObj = await getSessionInfo();
+          await handleSignifyData(sessionObj);
+          console.log("sessionObj", sessionObj);
+        }
         setSessionInfoLoaded(true);
       } catch (error) {
         console.log("error", error);
@@ -174,9 +195,18 @@ const RegComponent = () => {
       console.log(resp);
       handleSignifyData(resp);
     } else {
-      handleSignifyData(
-        credType === "oor" ? fakeOorCredential : fakeEcrCredential
-      );
+      console.log("credType", credType);
+      if (credType === "invalid-role") {
+        handleSignifyData(signData.credWithInvalidRole);
+      } else if (credType === "invalid-schema") {
+        handleSignifyData(signData.credWithInvalidSchema);
+      } else if (credType === "invalid-crypt") {
+        handleSignifyData(signData.cryptInvalidCred);
+      } else if (credType === "diff-org") {
+        handleSignifyData(signData.credWithDifOrg);
+      } else if (credType === "valid-role") {
+        handleSignifyData(signData.validCred);
+      }
     }
   };
 
@@ -188,7 +218,7 @@ const RegComponent = () => {
       // console.log("promised resp from signifyClient.authorizeAid()", resp);
       // handleSignifyData(resp);
     } else {
-      handleSignifyData(fakeEcrCredential);
+      handleSignifyData(signData.validCred);
     }
   };
 
@@ -274,6 +304,8 @@ const RegComponent = () => {
                 setPingUrl={setPingUrl}
                 loginUrl={loginUrl}
                 setLoginUrl={setLoginUrl}
+                checkloginUrl={checkloginUrl}
+                setCheckloginUrl={setCheckloginUrl}
               />
             }
           />

@@ -166,11 +166,10 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
               ) : (
                 <>
                   <Button
-                    data-testid="login--ecr-cred"
                     size="small"
                     variant="contained"
                     color="warning"
-                    onClick={() => handleCredSignin("ecr")}
+                    onClick={() => handleCredSignin("valid-role")}
                     sx={{
                       display: "flex",
                       flexDirection: "row",
@@ -178,7 +177,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     }}
                   >
                     <Typography variant="body2" fontWeight="bold">
-                      {formatMessage({ id: "cta.selectTestEcrCredential" })}
+                      Valid Role
                     </Typography>
 
                     {credLoading && (
@@ -189,7 +188,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     size="small"
                     variant="contained"
                     color="warning"
-                    onClick={() => handleCredSignin("oor")}
+                    onClick={() => handleCredSignin("invalid-role")}
                     sx={{
                       display: "flex",
                       flexDirection: "row",
@@ -197,7 +196,45 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     }}
                   >
                     <Typography variant="body2" fontWeight="bold">
-                      {formatMessage({ id: "cta.selectTestOcrCredential" })}
+                      Invalid Role
+                    </Typography>
+
+                    {credLoading && (
+                      <CircularProgress color="inherit" size="12px" />
+                    )}
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="warning"
+                    onClick={() => handleCredSignin("invalid-schema")}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      columnGap: "8px",
+                    }}
+                  >
+                    <Typography variant="body2" fontWeight="bold">
+                      Invalid Schema
+                    </Typography>
+
+                    {credLoading && (
+                      <CircularProgress color="inherit" size="12px" />
+                    )}
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="warning"
+                    onClick={() => handleCredSignin("invalid-crypt")}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      columnGap: "8px",
+                    }}
+                  >
+                    <Typography variant="body2" fontWeight="bold">
+                      Invalid Crypt
                     </Typography>
 
                     {credLoading && (
