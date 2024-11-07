@@ -25,31 +25,6 @@ const RegServer = () => {
     return fetch(rurl, request);
   };
 
-  const dropReportStatusByAid = async (
-    rurl: string,
-    request: any,
-    extMode: boolean,
-    aidName: string
-  ): Promise<Response> => {
-    let resp;
-    if (extMode) {
-      resp = await signifyClient.signRequest({
-        url: rurl,
-        method: request.method,
-        headers: request.headers,
-      });
-    } else {
-      resp = await signifyService.getSignedHeaders({
-        rurl,
-        method: request.method,
-        headers: request.headers,
-        aidName,
-      });
-    }
-    const sresp = fetch(rurl, { ...request, headers: resp.headers });
-    return sresp;
-  };
-
   const postReport = async (
     rurl: string,
     request: any,
@@ -188,7 +163,6 @@ const RegServer = () => {
     verify,
     postLogin,
     postReport,
-    dropReportStatusByAid,
     checkReport,
     getStatus,
     checkLogin,

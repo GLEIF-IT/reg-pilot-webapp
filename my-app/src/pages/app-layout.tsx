@@ -19,12 +19,10 @@ import {
   Menu,
   GridView,
   Rule,
-  WbCloudyOutlined,
-  CloudOffOutlined,
-  ExtensionOffOutlined,
-  ExtensionOutlined,
+  Cancel,
 } from "@mui/icons-material";
 import { Config } from "../components/config";
+import Logger from "./logger";
 
 const SIDEBAR = [
   { path: "/", title: "Home", icon: <GridView /> },
@@ -33,9 +31,10 @@ const SIDEBAR = [
   { path: "/settings", title: "Settings", icon: <Settings /> },
 ];
 
-const AppLayout = () => {
+const AppLayout = ({ logger }) => {
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [loggerOpen, setLoggerOpen] = useState(false);
 
   const toggleDrawer = (open: any) => (event: any) => {
     if (
@@ -49,6 +48,16 @@ const AppLayout = () => {
   const moveToPage = (path: string) => {
     setDrawerOpen(false);
     navigate(path);
+  };
+
+  const toggleLogger = (open: any) => (event: any) => {
+    if (
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+    setLoggerOpen(open);
   };
 
   return (
@@ -81,7 +90,7 @@ const AppLayout = () => {
             }}
           ></Box>
           <Box>
-            <Config />
+            <Config handleLoggerOpen={() => setLoggerOpen(true)} />
           </Box>
         </Toolbar>
       </AppBar>
@@ -110,6 +119,19 @@ const AppLayout = () => {
               </ListItem>
             ))}
           </List>
+        </Box>
+      </Drawer>
+      <Drawer anchor="right" open={loggerOpen} onClose={toggleLogger(false)}>
+        <Box
+          role="presentation"
+          // onClick={toggleLogger(false)}
+          onKeyDown={toggleLogger(false)}
+          sx={{ width: "100vw" }}
+        >
+          <IconButton onClick={toggleLogger(false)}>
+            <Cancel />
+          </IconButton>
+          <Logger logger={logger} />
         </Box>
       </Drawer>
     </>

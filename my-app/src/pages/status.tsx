@@ -36,6 +36,8 @@ const StatusPage = ({
   statusPath,
   signatureData,
   aidName,
+  logger,
+  setLogger,
 }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
@@ -49,16 +51,17 @@ const StatusPage = ({
   async function getStatus(_signatureData): Promise<any> {
     // Send signed request
     if (serverMode) {
+      let sheads = new Headers();
+      sheads.set("Content-Type", "application/json");
+      const lRequest = {
+        // headers: sheads,
+        method: "GET",
+        body: null,
+      };
+      const status_path = `${serverUrl}${statusPath}/${selectedAid}`;
       try {
-        let sheads = new Headers();
-        sheads.set("Content-Type", "application/json");
-        const lRequest = {
-          // headers: sheads,
-          method: "GET",
-          body: null,
-        };
         const statusResp = await regService.getStatus(
-          `${serverUrl}${statusPath}/${selectedAid}`,
+          status_path,
           lRequest,
           extMode,
           aidName
@@ -66,6 +69,17 @@ const StatusPage = ({
 
         const response_signed_data = await statusResp.json();
         if (statusResp.status >= 400) {
+          setLogger([
+            ...logger,
+            {
+              origin: status_path,
+              req: lRequest,
+              res: response_signed_data,
+              time: new Date().toLocaleString(),
+              msg: response_signed_data?.msg,
+              success: false,
+            },
+          ]);
           throw new Error(
             `${response_signed_data?.msg ?? response_signed_data?.title}`
           );
@@ -74,6 +88,20 @@ const StatusPage = ({
         return response_signed_data;
       } catch (error) {
         if (typeof error?.message === "string") {
+          console.log(typeof error);
+          console.log(error);
+          console.log(JSON.stringify(error))
+          setLogger([
+            ...logger,
+            {
+              origin: status_path,
+              req: lRequest,
+              res: error?.stack,
+              time: new Date().toLocaleString(),
+              msg: error?.message,
+              success: false,
+            },
+          ]);
           setHasError(error);
         } else {
           openSnackbar("Unable to connect with server", "error");
@@ -143,7 +171,8 @@ const StatusPage = ({
       )}
       {hasError && (
         <Grid item xs={12}>
-          <CollapseAlert dataTestId="status--login-error"
+          <CollapseAlert
+            dataTestId="status--login-error"
             message={
               typeof hasError === "string" ? hasError : hasError?.message
             }
@@ -275,15 +304,11 @@ function Row(props: { row: any }) {
                   {row["status"]}
                 </Typography>
                 <Typography variant="body2" gutterBottom>
-                  <strong>
-                    {formatMessage({ id: "report.message" })}
-                  </strong>{" "}
+                  <strong>{formatMessage({ id: "report.message" })}</strong>{" "}
                   {row["message"]}
                 </Typography>
                 <Typography variant="body2" gutterBottom>
-                  <strong>
-                    {formatMessage({ id: "report.submittedBy" })}
-                  </strong>{" "}
+                  <strong>{formatMessage({ id: "report.submittedBy" })}</strong>{" "}
                   {row["submitter"]}
                 </Typography>
               </CardContent>
