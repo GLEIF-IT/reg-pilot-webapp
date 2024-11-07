@@ -38,7 +38,7 @@ const RegComponent = () => {
   const [serverUrl, setServerUrl] = useState(
     "https://reg-api-dev.rootsid.cloud"
   );
-
+  const [logger, setLogger] = useState([]);
   const [vendorConf, setVendorConf] = useState(false);
 
   const [pingUrl, setPingUrl] = useState(serverUrl + "/ping");
@@ -55,8 +55,7 @@ const RegComponent = () => {
     setCheckloginUrl(serverUrl + "/checklogin");
   }, [serverUrl]);
 
-window.signifyClient = signifyClient;
-
+  window.signifyClient = signifyClient;
 
   const handleSettingVendorUrl = async (url: string) => {
     await signifyClient.configureVendor({ url });
@@ -83,27 +82,72 @@ window.signifyClient = signifyClient;
 
     if (response.status >= 400) {
       await removeData();
+      setLogger([
+        ...logger,
+        {
+          origin: loginUrl,
+          req: lRequest,
+          res: responseData,
+          success: response.status < 400,
+          msg: responseData.msg,
+          time: new Date().toLocaleString(),
+        },
+      ]);
       throw new Error(responseData.msg);
     }
     if (!response) return;
-    console.log("responseData.msg", responseData.msg);
     if (responseData.msg?.includes(ErrorMessages.cred_crypt_valid)) {
+      const checkLogin_endpoint = `${checkloginUrl}/${data?.credential?.raw?.sad?.a?.i}`;
+      const checkLogin_headers = {
+        method: "GET",
+        body: null,
+      };
       try {
         const checkLoginResp = await regService.checkLogin(
-          `${checkloginUrl}/${data?.credential?.raw?.sad?.a?.i}`,
-          {
-            method: "GET",
-            body: null,
-          }
+          checkLogin_endpoint,
+          checkLogin_headers
         );
-
+        console.log("checkLoginResp", checkLoginResp);
+        setLogger([
+          ...logger,
+          {
+            origin: checkLogin_endpoint,
+            req: checkLogin_headers,
+            res: checkLoginResp,
+            success: true,
+            msg: checkLoginResp.msg,
+            time: new Date().toLocaleString(),
+          },
+        ]);
         openSnackbar(checkLoginResp.msg, "success");
       } catch (error) {
         console.log("error", error);
         await removeData();
+        setLogger([
+          ...logger,
+          {
+            origin: checkLogin_endpoint,
+            req: checkLogin_headers,
+            res: error,
+            success: false,
+            msg: error.msg,
+            time: new Date().toLocaleString(),
+          },
+        ]);
         throw new Error(error?.msg);
       }
     } else {
+      setLogger([
+        ...logger,
+        {
+          origin: loginUrl,
+          req: lRequest,
+          res: responseData,
+          success: response.status < 400,
+          msg: responseData.msg,
+          time: new Date().toLocaleString(),
+        },
+      ]);
       throw new Error(responseData.msg);
     }
   };
@@ -244,7 +288,7 @@ window.signifyClient = signifyClient;
 
   return (
     <Box display="flex" justifyContent="center" alignItems="center">
-      <AppLayout />
+      <AppLayout logger={logger} />
       <Box sx={{ marginTop: "60px", width: "100%" }}>
         <Routes>
           <Route
@@ -277,6 +321,8 @@ window.signifyClient = signifyClient;
                 statusPath={statusPath}
                 signatureData={signatureData}
                 handleSignifyData={handleSignifyData}
+                logger={logger}
+                setLogger={setLogger}
               />
             }
           />
@@ -289,6 +335,8 @@ window.signifyClient = signifyClient;
                 aidName={signatureData?.credential?.raw?.issueeName}
                 selectedAcdc={signatureData?.credential?.raw?.sad?.d}
                 signatureData={signatureData}
+                logger={logger}
+                setLogger={setLogger}
               />
             }
           />

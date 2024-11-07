@@ -11,10 +11,11 @@ import {
   ExtensionOffOutlined,
   ExtensionOutlined,
   InfoOutlined,
+  NotificationImportantOutlined
 } from "@mui/icons-material";
 import { useConfigMode } from "@context/configMode";
 
-export function Config() {
+export function Config({handleLoggerOpen}) {
   const { formatMessage } = useIntl();
   const { serverMode, toggleServerMode, extMode, toggleExtMode } =
     useConfigMode();
@@ -56,6 +57,9 @@ export function Config() {
         </IconButton>
         <IconButton aria-describedby={id} onClick={handleClick} size="small">
           <InfoOutlined color="info" />
+        </IconButton>
+        <IconButton onClick={handleLoggerOpen} size="small">
+          <NotificationImportantOutlined color="error" />
         </IconButton>
       </ButtonGroup>
 

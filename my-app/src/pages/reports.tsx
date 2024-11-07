@@ -28,7 +28,14 @@ const getFakeFileResponse = async () => {
   });
 };
 
-const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName }) => {
+const ReportsPage = ({
+  serverUrl,
+  selectedAid,
+  selectedAcdc,
+  aidName,
+  logger,
+  setLogger,
+}) => {
   const { formatMessage } = useIntl();
   const { serverMode, extMode } = useConfigMode();
   const navigate = useNavigate();
@@ -86,13 +93,14 @@ const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName }) => {
       const ctype = "application/zip";
       const blob = new Blob([signedZipBuf], { type: ctype });
       formData.append("upload", blob, report.name);
+      const lRequest = {
+        method: "POST",
+        body: formData,
+      };
+      const report_url = `${serverUrl}${uploadPath}/${aid}/${signedZipDig}`;
       try {
-        const lRequest = {
-          method: "POST",
-          body: formData,
-        };
         const response = await regService.postReport(
-          `${serverUrl}${uploadPath}/${aid}/${signedZipDig}`,
+          report_url,
           lRequest,
           extMode,
           aidName
@@ -101,10 +109,32 @@ const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName }) => {
         console.log("upload response", response_signed_data);
 
         if (response.status >= 400) {
+          setLogger([
+            ...logger,
+            {
+              origin: report_url,
+              req: lRequest,
+              res: response_signed_data,
+              success: false,
+              msg: response_signed_data?.detail ?? response_signed_data?.title,
+              time: new Date().toLocaleString(),
+            },
+          ]);
           throw new Error(
             `${response_signed_data?.detail ?? response_signed_data?.title}`
           );
         }
+        setLogger([
+          ...logger,
+          {
+            origin: report_url,
+            req: lRequest,
+            res: response_signed_data,
+            success: response_signed_data?.status === "failed" ? false : true,
+            msg: response_signed_data?.message,
+            time: new Date().toLocaleString(),
+          },
+        ]);
         openSnackbar(
           response_signed_data?.message,
           response_signed_data?.status === "failed" ? "warning" : "success"
@@ -113,6 +143,17 @@ const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName }) => {
         return response_signed_data;
       } catch (error) {
         console.error("Error uploading report", error);
+        setLogger([
+          ...logger,
+          {
+            origin: report_url,
+            req: lRequest,
+            res: error,
+            success: false,
+            msg: error?.message,
+            time: new Date().toLocaleString(),
+          },
+        ]);
         openSnackbar(error?.message, "error");
         setSubmitStatus("error");
         setSelectedFile(null);
