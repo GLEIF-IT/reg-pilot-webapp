@@ -236,11 +236,16 @@ const RegComponent = () => {
   const handleCredSignin = async (credType?: string) => {
     if (extMode) {
       setCredLoading(true);
-      const resp = await signifyClient.authorizeCred();
-      setCredLoading(false);
-      console.log("promised resp from signifyClient.authorizeCred()");
-      console.log(resp);
-      handleSignifyData(resp);
+      try {
+        const resp = await signifyClient.authorizeCred();
+        setCredLoading(false);
+        console.log("promised resp from signifyClient.authorizeCred()");
+        console.log(resp);
+        handleSignifyData(resp);
+      } catch (error) {
+        setCredLoading(false);
+        openSnackbar(error?.message, "error");
+      }
     } else {
       console.log("credType", credType);
       if (credType === "invalid-role") {
