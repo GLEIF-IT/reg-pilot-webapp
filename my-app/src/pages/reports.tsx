@@ -28,14 +28,7 @@ const getFakeFileResponse = async () => {
   });
 };
 
-const ReportsPage = ({
-  serverUrl,
-  selectedAid,
-  selectedAcdc,
-  aidName,
-  logger,
-  setLogger,
-}) => {
+const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName, logger, setLogger }) => {
   const { formatMessage } = useIntl();
   const { serverMode, extMode } = useConfigMode();
   const navigate = useNavigate();
@@ -99,12 +92,7 @@ const ReportsPage = ({
       };
       const report_url = `${serverUrl}${uploadPath}/${aid}/${signedZipDig}`;
       try {
-        const response = await regService.postReport(
-          report_url,
-          lRequest,
-          extMode,
-          aidName
-        );
+        const response = await regService.postReport(report_url, lRequest, extMode, aidName);
         const response_signed_data = await response.json();
         console.log("upload response", response_signed_data);
 
@@ -120,9 +108,7 @@ const ReportsPage = ({
               time: new Date().toLocaleString(),
             },
           ]);
-          throw new Error(
-            `${response_signed_data?.detail ?? response_signed_data?.title}`
-          );
+          throw new Error(`${response_signed_data?.detail ?? response_signed_data?.title}`);
         }
         setLogger([
           ...logger,
@@ -137,7 +123,8 @@ const ReportsPage = ({
         ]);
         openSnackbar(
           response_signed_data?.message,
-          response_signed_data?.status === "failed" ? "warning" : "success"
+          response_signed_data?.status === "failed" ? "warning" : "success",
+          "reports--upload-msg"
         );
         setSubmitStatus("success");
         return response_signed_data;
@@ -154,10 +141,14 @@ const ReportsPage = ({
             time: new Date().toLocaleString(),
           },
         ]);
-        openSnackbar(error?.message, "error");
+        openSnackbar(error?.message, "error", "reports--upload-msg");
         setSubmitStatus("error");
         setSelectedFile(null);
       }
+    };
+    reader.onerror = function (error) {
+      console.error("Error reading file:", error);
+      openSnackbar(error?.message, "error", "reports--upload-msg");
     };
     reader.readAsArrayBuffer(report);
   }
@@ -171,9 +162,7 @@ const ReportsPage = ({
   return (
     <Grid container spacing={1} style={{ padding: "32px" }}>
       <Grid item xs={12}>
-        <Typography variant="h3">
-          {formatMessage({ id: "report.upload" })}
-        </Typography>
+        <Typography variant="h3">{formatMessage({ id: "report.upload" })}</Typography>
       </Grid>
       {error && (
         <Grid item xs={12}>
@@ -264,8 +253,7 @@ const ReportsPage = ({
             <>
               <UploadFile />
               <p>
-                Drag and drop a file here or <br /> click the button to select a
-                file.
+                Drag and drop a file here or <br /> click the button to select a file.
               </p>
             </>
           )}
@@ -273,6 +261,7 @@ const ReportsPage = ({
             type="file"
             id="file-input"
             style={{ display: "none" }}
+            data-testid="reports--file-input"
             onChange={handleFileSelect}
           />
           <label htmlFor="file-input">

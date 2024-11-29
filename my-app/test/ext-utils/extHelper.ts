@@ -39,7 +39,6 @@ export async function waitForExtensionWorker(
   return workerTarget.worker();
 }
 
-
 /**
  * Attempts to open the browser popup.
  *
@@ -78,7 +77,7 @@ export function getPopup(browser, backgroundPage): Promise<puppeteer.Page> {
 
 export default class ExtHelper {
   readonly url: string;
-  // #popup: Page;
+  #popup: Page;
   // // setter getter for popup
   // get popup(): Page {
   //   this.#popup.is
@@ -89,23 +88,38 @@ export default class ExtHelper {
   // }
 
   constructor(
-    public readonly popup: Page,
+    // public readonly popup: Page,
     public readonly webapp: Page,
-    public readonly context: BrowserContext,
+    public readonly browser: puppeteer.Browser,
+    public readonly backgroundPage: puppeteer.WebWorker,
+    // public readonly context: BrowserContext,
     public readonly extensionId: string
   ) {
     this.url = `chrome-extension://${extensionId}/src/pages/popup/index.html`;
+    // this.initializePopup();
   }
 
+  async initializePopup(): Promise<void> {
+    this.#popup = await getPopup(this.browser, this.backgroundPage);
+  }
+
+  async getOpenedPopup(): Promise<Page> {
+    return new Promise(async (resolve) => {
+      if(!this.#popup || this.#popup.isClosed()){
+        await this.initializePopup();
+      }
+      resolve(this.#popup);
+    });
+  }
   //   async setViewportSize(): Promise<void> {
   //     return this.popup.setViewportSize({ width: 640, height: 400 }) // { width: 640, height: 386 }
   //   }
 
   async goToStartPage(bringToFront = true): Promise<void> {
     if (bringToFront) {
-      await this.popup.bringToFront();
+      await this.#popup.bringToFront();
     }
-    await this.popup.goto(this.url);
+    await this.#popup.goto(this.url);
   }
 
   // async closePopup(): Promise<void> {
