@@ -122,7 +122,7 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
     await popupPage.close();
   });
 
-  test("webapp > make a select credential request", async () => {
+  test("webapp > make a FAILED select credential request with OOR", async () => {
     const { extHelper } = fixtures;
     const webapp = extHelper.webapp;
     await webapp.waitForSelector('[data-testid="login--select--cred"]');
@@ -130,7 +130,7 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
     await webapp.click('[data-testid="login--select--cred"]');
     await webapp.waitForSelector('[data-testid="dialog-title"]');
     const popupPage = await extHelper.getOpenedPopup();
-    await popupPage.locator('[data-testid="select-credential-1"]').click();
+    await popupPage.locator('[data-testid="select-credential-0"]').click();
 
     await webapp.waitForSelector('[data-testid="select-signin-0"]', { timeout: 40_000 });
     await webapp.click('[data-testid="select-signin-0"]');
@@ -141,7 +141,38 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
     await webapp.click('[data-testid="select-signin-button"]');
   });
 
-  test("webapp > see success message after login request", async () => {
+  test("webapp > see FAILURE message after login request", async () => {
+    const { extHelper } = fixtures;
+    const webapp = extHelper.webapp;
+    await webapp.waitForNetworkIdle({ timeout: 15_000 });
+    await webapp.waitForSelector('[role="alert"]', { timeout: 10_000, visible: true });
+    const alertEle = await webapp.$('[role="alert"]');
+    expect(alertEle).not.toBeNull();
+    const alertText = await webapp.evaluate((el) => el?.textContent, alertEle);
+    expect(alertText).toContain("status Credential unauthorized, info: Can't authorize cred with OOR schema");
+    await webapp.locator('[data-testid="alert-close-btn"]').click();
+  });
+
+  test("webapp > make a SUCCESSFUL select credential request with ECR", async () => {
+    const { extHelper } = fixtures;
+    const webapp = extHelper.webapp;
+    await webapp.waitForSelector('[data-testid="login--select--cred"]');
+    await webapp.click('[data-testid="login--select--cred"]');
+    await webapp.click('[data-testid="login--select--cred"]');
+    await webapp.waitForSelector('[data-testid="dialog-title"]');
+    const popupPage = await extHelper.getOpenedPopup();
+    await popupPage.locator('[data-testid="select-credential-1"]').click();
+
+    await webapp.waitForSelector('[data-testid="select-signin-1"]', { timeout: 40_000 });
+    await webapp.click('[data-testid="select-signin-1"]');
+    await webapp.click('[data-testid="select-signin-1"]');
+
+    await webapp.waitForSelector('[data-testid="select-signin-button"]', { timeout: 10_000 });
+    await webapp.click('[data-testid="select-signin-button"]');
+    await webapp.click('[data-testid="select-signin-button"]');
+  });
+
+  test("webapp > see SUCCESS message after login request", async () => {
     const { extHelper } = fixtures;
     const webapp = extHelper.webapp;
     await webapp.waitForNetworkIdle({ timeout: 15_000 });
@@ -216,9 +247,9 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
     await webapp.locator('[data-testid="alert-close-btn"]').click();
   });
 
-  test("temp > temp waiting for invalid element", async () => {
-    const { extHelper } = fixtures;
-    const webapp = extHelper.webapp;
-    await webapp.waitForSelector('[data-testid="login--select--temp"]', { timeout: 3_000 });
-  });
+  // test("temp > temp waiting for invalid element", async () => {
+  //   const { extHelper } = fixtures;
+  //   const webapp = extHelper.webapp;
+  //   await webapp.waitForSelector('[data-testid="login--select--temp"]', { timeout: 3_000 });
+  // });
 });

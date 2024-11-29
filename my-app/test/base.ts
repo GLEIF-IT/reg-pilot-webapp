@@ -27,7 +27,6 @@ export const getFixutes = async (): Promise<ExtTestFixtures> => {
     headless: false,
     timeout: 0,
     slowMo: 5,
-    devtools: true,
     args: [
       "--no-sandbox",
       "--disable-setuid-sandbox",
