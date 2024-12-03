@@ -11,7 +11,7 @@ export type ExtTestFixtures = {
   context: puppeteer.BrowserContext;
   extensionId: string;
   extHelper: ExtHelper;
-  backgroundPage: puppeteer.WebWorker; // Page;
+  backgroundPage: puppeteer.WebWorker;
   teardown: () => Promise<void>;
 };
 

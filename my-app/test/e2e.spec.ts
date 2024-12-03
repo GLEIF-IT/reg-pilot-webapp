@@ -3,6 +3,12 @@ import path from "path";
 import { getFixutes, ExtTestFixtures } from "./base";
 
 let fixtures: ExtTestFixtures;
+
+const AGENT_URL = "https://keria-dev.rootsid.cloud/admin";
+const BOOT_URL = "https://keria-dev.rootsid.cloud";
+const INVALID_PASSCODE = "nf98hUHUy8Vt5tvdyaYV1";
+const VALID_PASSCODE = "Ap31Xt-FGcNXpkxmBYMQn";
+
 beforeAll(async () => {
   fixtures = await getFixutes();
 });
@@ -68,17 +74,9 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
   test("settings > should proceed to Signin page with valid agent and boot url", async () => {
     const { extHelper } = fixtures;
     const popupPage = await extHelper.getOpenedPopup();
-    // https://keria-dev.rootsid.cloud/admin
-    // https://keria-dev.rootsid.cloud
-    await popupPage
-      .locator('[data-testid="settings-agent-url"]')
-      .fill("https://keria-dev.rootsid.cloud/admin");
-    await popupPage
-      .locator('[data-testid="settings-boot-url"]')
-      .fill("https://keria-dev.rootsid.cloud");
-    await popupPage
-      .locator('[data-testid="settings-boot-url"]')
-      .fill("https://keria-dev.rootsid.cloud");
+    await popupPage.locator('[data-testid="settings-agent-url"]').fill(AGENT_URL);
+    await popupPage.locator('[data-testid="settings-boot-url"]').fill(BOOT_URL);
+    await popupPage.locator('[data-testid="settings-boot-url"]').fill(BOOT_URL);
     await popupPage.waitForSelector('[data-testid="settings-save"]');
     await popupPage.click('[data-testid="settings-save"]');
     await popupPage.click('[data-testid="settings-save"]');
@@ -101,7 +99,7 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
   test("singin > should throw error for invalid passcode", async () => {
     const { extHelper } = fixtures;
     const popupPage = await extHelper.getOpenedPopup();
-    await popupPage.locator('[data-testid="signin-passcode"]').fill("nf98hUHUy8Vt5tvdyaYV1");
+    await popupPage.locator('[data-testid="signin-passcode"]').fill(INVALID_PASSCODE);
     await popupPage.waitForSelector('[data-testid="signin-connect"]');
     await popupPage.click('[data-testid="signin-connect"]');
     await popupPage.click('[data-testid="signin-connect"]');
@@ -114,7 +112,7 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
   test("singin > signin user with correct passcode", async () => {
     const { extHelper } = fixtures;
     const popupPage = await extHelper.getOpenedPopup();
-    await popupPage.locator('[data-testid="signin-passcode"]').fill("Ap31Xt-FGcNXpkxmBYMQn");
+    await popupPage.locator('[data-testid="signin-passcode"]').fill(VALID_PASSCODE);
     await popupPage.waitForSelector('[data-testid="signin-connect"]');
     await popupPage.click('[data-testid="signin-connect"]');
     await popupPage.click('[data-testid="signin-connect"]');
@@ -149,7 +147,9 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
     const alertEle = await webapp.$('[role="alert"]');
     expect(alertEle).not.toBeNull();
     const alertText = await webapp.evaluate((el) => el?.textContent, alertEle);
-    expect(alertText).toContain("status Credential unauthorized, info: Can't authorize cred with OOR schema");
+    expect(alertText).toContain(
+      "status Credential unauthorized, info: Can't authorize cred with OOR schema"
+    );
     await webapp.locator('[data-testid="alert-close-btn"]').click();
   });
 
@@ -197,16 +197,12 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
       }),
       await webapp.locator('[data-testid="webapp--menu--Reports"]').click(),
     ]);
-
-    // await webapp.locator('[data-testid="webapp--menu--Reports"]').click();
-
     await webapp.waitForSelector("text=Upload your report");
   });
 
   test("webapp > report > upload file with success", async () => {
     const { extHelper } = fixtures;
     const webapp = extHelper.webapp;
-    // await webapp.waitForSelector('[for="file-input"]', { timeout: 10_000 });
     const elementHandle = await webapp.$("input[type=file]");
     const FILE_PATH_SUCCESS = path.resolve(
       __dirname,
@@ -228,7 +224,6 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
   test("webapp > report > upload file with invalid signature", async () => {
     const { extHelper } = fixtures;
     const webapp = extHelper.webapp;
-    // await webapp.waitForSelector('[for="file-input"]', { timeout: 10_000 });
     const elementHandle = await webapp.$("input[type=file]");
     const FILE_PATH_FAILURE = path.resolve(
       __dirname,
