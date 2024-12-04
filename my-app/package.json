@@ -12,6 +12,7 @@
     "@testing-library/user-event": "^13.5.0",
     "eslint": "^8.56.0",
     "nanoid": "^5.0.7",
+    "puppeteer": "^23.9.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-intl": "^6.6.8",
@@ -24,7 +25,8 @@
     "start": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "ui-tests": "npx playwright test login.spec --max-failures=1 --headed"
+    "ui-test-pw": "npx playwright test login.spec --max-failures=1 --headed",
+    "e2e-tests": "vitest run e2e.spec --passWithNoTests"
   },
   "eslintConfig": {
     "extends": [
@@ -51,9 +53,12 @@
     "@playwright/test": "^1.44.1",
     "@types/react": "^18.2.79",
     "@vitejs/plugin-react": "^4.3.1",
+    "@vitest/coverage-c8": "^0.33.0",
     "typescript": "^5.4.5",
     "vite": "^5.2.13",
     "vite-plugin-svgr": "^4.2.0",
-    "vite-tsconfig-paths": "^4.3.2"
+    "vite-tsconfig-paths": "^4.3.2",
+    "vitest": "^2.1.6",
+    "wait-on": "^8.0.1"
   }
 }

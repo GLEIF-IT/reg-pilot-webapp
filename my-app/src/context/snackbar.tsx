@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState } from "react";
-import { Snackbar, Alert, AlertProps } from "@mui/material";
+import { Snackbar, Alert, AlertProps, IconButton } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
 
 interface ISnackbarProvider {
   children?: React.ReactNode;
 }
 
 interface ISnackbarContext {
-  openSnackbar: (message: string, sev?: AlertProps["severity"]) => void;
+  openSnackbar: (message: string, sev?: AlertProps["severity"], id?: string) => void;
   isSnackbarOpen: boolean;
   snackbarMessage: string;
   setSnackbarMessage: (message: string) => void;
@@ -15,17 +16,13 @@ interface ISnackbarContext {
 
 const SnackbarContext = createContext<ISnackbarContext | null>(null);
 
-export const SnackbarProvider = ({
-  children,
-}: ISnackbarProvider): JSX.Element => {
+export const SnackbarProvider = ({ children }: ISnackbarProvider): JSX.Element => {
   const [isSnackbarOpen, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [severity, setSeverity] = useState<AlertProps["severity"]>("info");
+  const [alertId, setAlertId] = useState("alert-message");
 
-  const handleClose = (
-    event: React.SyntheticEvent | Event,
-    reason?: string
-  ) => {
+  const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === "clickaway") {
       return;
     }
@@ -33,10 +30,13 @@ export const SnackbarProvider = ({
     setOpenSnackbar(false);
   };
 
-  const openSnackbar = (message: string, sev?: "info") => {
+  const openSnackbar = (message: string, sev?: "info", id?: string) => {
     setSnackbarMessage(message);
     if (sev) {
       setSeverity(sev);
+    }
+    if (id) {
+      setAlertId(id);
     }
     setOpenSnackbar(true);
   };
@@ -62,10 +62,15 @@ export const SnackbarProvider = ({
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
         <Alert
-          onClose={handleClose}
+          action={
+            <IconButton data-testid="alert-close-btn" onClick={handleClose} color="inherit" size="small">
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          }
           severity={severity}
           variant="filled"
           sx={{ width: "100%" }}
+          id={alertId}
         >
           {snackbarMessage}
         </Alert>
