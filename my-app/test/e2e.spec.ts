@@ -1,8 +1,8 @@
 import { test, beforeAll, describe, expect, afterAll } from "vitest";
 import path from "path";
-import { getFixutes, ExtTestFixtures } from "./base";
+import { getFixutes, TestFixtures } from "./base";
 
-let fixtures: ExtTestFixtures;
+let fixtures: TestFixtures;
 
 const AGENT_URL = "https://keria-dev.rootsid.cloud/admin";
 const BOOT_URL = "https://keria-dev.rootsid.cloud";
@@ -121,8 +121,7 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
   });
 
   test("webapp > make a FAILED select credential request with OOR", async () => {
-    const { extHelper } = fixtures;
-    const webapp = extHelper.webapp;
+    const { extHelper, webapp } = fixtures;
     await webapp.waitForSelector('[data-testid="login--select--cred"]');
     await webapp.click('[data-testid="login--select--cred"]');
     await webapp.click('[data-testid="login--select--cred"]');
@@ -140,8 +139,7 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
   });
 
   test("webapp > see FAILURE message after login request", async () => {
-    const { extHelper } = fixtures;
-    const webapp = extHelper.webapp;
+    const { webapp } = fixtures;
     await webapp.waitForNetworkIdle({ timeout: 15_000 });
     await webapp.waitForSelector('[role="alert"]', { timeout: 10_000, visible: true });
     const alertEle = await webapp.$('[role="alert"]');
@@ -154,8 +152,7 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
   });
 
   test("webapp > make a SUCCESSFUL select credential request with ECR", async () => {
-    const { extHelper } = fixtures;
-    const webapp = extHelper.webapp;
+    const { extHelper, webapp } = fixtures;
     await webapp.waitForSelector('[data-testid="login--select--cred"]');
     await webapp.click('[data-testid="login--select--cred"]');
     await webapp.click('[data-testid="login--select--cred"]');
@@ -173,8 +170,7 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
   });
 
   test("webapp > see SUCCESS message after login request", async () => {
-    const { extHelper } = fixtures;
-    const webapp = extHelper.webapp;
+    const { extHelper, webapp } = fixtures;
     await webapp.waitForNetworkIdle({ timeout: 15_000 });
     await webapp.waitForSelector('[role="alert"]', { timeout: 10_000, visible: true });
     const alertEle = await webapp.$('[role="alert"]');
@@ -185,8 +181,7 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
   });
 
   test("webapp > go to reports after login", async () => {
-    const { extHelper } = fixtures;
-    const webapp = extHelper.webapp;
+    const { webapp } = fixtures;
     await webapp.waitForSelector('[data-testid="webapp--menu"]');
     await webapp.click('[data-testid="webapp--menu"]');
 
@@ -201,8 +196,7 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
   });
 
   test("webapp > report > upload file with success", async () => {
-    const { extHelper } = fixtures;
-    const webapp = extHelper.webapp;
+    const { webapp } = fixtures;
     const elementHandle = await webapp.$("input[type=file]");
     const FILE_PATH_SUCCESS = path.resolve(
       __dirname,
@@ -222,8 +216,7 @@ describe("Onboarding > progressively onboard, starting with error conditions", (
   });
 
   test("webapp > report > upload file with invalid signature", async () => {
-    const { extHelper } = fixtures;
-    const webapp = extHelper.webapp;
+    const { webapp } = fixtures;
     const elementHandle = await webapp.$("input[type=file]");
     const FILE_PATH_FAILURE = path.resolve(
       __dirname,

@@ -170,6 +170,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     variant="contained"
                     color="warning"
                     onClick={() => handleCredSignin("valid-role")}
+                    data-testid="login--select--valid-role"
                     sx={{
                       display: "flex",
                       flexDirection: "row",
@@ -189,6 +190,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     variant="contained"
                     color="warning"
                     onClick={() => handleCredSignin("invalid-role")}
+                    data-testid="login--select--invalid-role"
                     sx={{
                       display: "flex",
                       flexDirection: "row",
@@ -208,6 +210,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     variant="contained"
                     color="warning"
                     onClick={() => handleCredSignin("invalid-schema")}
+                    data-testid="login--select--invalid-schema"
                     sx={{
                       display: "flex",
                       flexDirection: "row",
@@ -227,6 +230,7 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                     variant="contained"
                     color="warning"
                     onClick={() => handleCredSignin("invalid-crypt")}
+                    data-testid="login--select--invalid-crypt"
                     sx={{
                       display: "flex",
                       flexDirection: "row",
@@ -235,6 +239,26 @@ const ExtensionInfo: React.FC<IExtensionInfo> = ({
                   >
                     <Typography variant="body2" fontWeight="bold">
                       Invalid Crypt
+                    </Typography>
+
+                    {credLoading && (
+                      <CircularProgress color="inherit" size="12px" />
+                    )}
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="warning"
+                    onClick={() => handleCredSignin("diff-org")}
+                    data-testid="login--select--diff-org"
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      columnGap: "8px",
+                    }}
+                  >
+                    <Typography variant="body2" fontWeight="bold">
+                      Different Org
                     </Typography>
 
                     {credLoading && (

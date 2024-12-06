@@ -6,50 +6,43 @@ import path from "path";
 // import kill from "tree-kill"
 import ExtHelper, { waitForExtensionWorker } from "./ext-utils/extHelper";
 
-export type ExtTestFixtures = {
+export type TestFixtures = {
   browser: puppeteer.Browser;
   context: puppeteer.BrowserContext;
-  extensionId: string;
-  extHelper: ExtHelper;
-  backgroundPage: puppeteer.WebWorker;
+  webapp: puppeteer.Page;
   teardown: () => Promise<void>;
+  extHelper: ExtHelper;
 };
+
+export type TestFixturesExcludingExt = Omit<TestFixtures, "extHelper">;
 
 const EXTENSTION_PATH = path.resolve("extension/chrome");
 const WEBAPP_URL = "http://localhost:3000";
 
-export const getFixutes = async (): Promise<ExtTestFixtures> => {
+const loadBrowserFixutes = async (loadExtension = false): Promise<TestFixturesExcludingExt> => {
   // const serverProcess = exec("npm run start");
 
   // await waitOn({ resources: [WEBAPP_URL] });
+  const args = ["--no-sandbox", "--disable-setuid-sandbox"];
+  if (loadExtension) {
+    args.push(`--disable-extensions-except=${EXTENSTION_PATH}`);
+    args.push(`--load-extension=${EXTENSTION_PATH}`);
+  }
 
   const browser = await puppeteer.launch({
     headless: false,
     timeout: 0,
     slowMo: 5,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      `--disable-extensions-except=${EXTENSTION_PATH}`,
-      `--load-extension=${EXTENSTION_PATH}`,
-    ],
+    args,
   });
   const version = await browser.version();
   console.log(`Puppeteer Chromium version: ${version}`);
 
   const context = await browser.createBrowserContext();
-  const backgroundPage = await waitForExtensionWorker(browser);
-  const extensionId = backgroundPage.url().split("/")[2];
   const webapp = await browser.newPage();
-  // backgroundPage.evaluate("chrome.tabs.query = () => ([{ id: 1 }])");
   await webapp.goto(WEBAPP_URL);
   const title = await webapp.title();
   console.log("Page title:", title);
-
-  // const popup = await getPopup(browser, backgroundPage);
-
-  // Perform actions on the app page
-  const extHelper = new ExtHelper(webapp, browser, backgroundPage, extensionId);
 
   const teardown = async () => {
     await browser.close();
@@ -61,5 +54,22 @@ export const getFixutes = async (): Promise<ExtTestFixtures> => {
     //   }
     // });
   };
-  return { browser, context, extensionId, extHelper, backgroundPage, teardown };
+
+  return { browser, context, teardown, webapp };
+};
+
+export const getFixutesExcludingExt = async (): Promise<TestFixturesExcludingExt> => {
+  const { browser, context, teardown, webapp } = await loadBrowserFixutes();
+  return { browser, context,  teardown, webapp };
+};
+
+export const getFixutes = async (): Promise<TestFixtures> => {
+  const { browser, context, teardown, webapp } = await loadBrowserFixutes(true);
+  const backgroundPage = await waitForExtensionWorker(browser);
+  const extensionId = backgroundPage.url().split("/")[2];
+
+  // extension helper class
+  const extHelper = new ExtHelper(browser, backgroundPage, extensionId);
+
+  return { browser, context, extHelper, teardown, webapp };
 };
