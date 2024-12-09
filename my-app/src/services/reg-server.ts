@@ -145,8 +145,6 @@ const RegServer = () => {
         method: request.method,
         headers: request.headers,
       });
-      console.log("getStatus resp");
-      console.log(resp.headers);
     } else {
       resp = await signifyService.getSignedHeaders({
         rurl,

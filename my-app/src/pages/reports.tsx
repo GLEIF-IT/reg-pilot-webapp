@@ -97,6 +97,10 @@ const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName, logger, se
         console.log("upload response", response_signed_data);
 
         if (response.status >= 400) {
+          const error_msg =
+            typeof response_signed_data === "string"
+              ? response_signed_data
+              : response_signed_data?.detail ?? response_signed_data?.title;
           setLogger([
             ...logger,
             {
@@ -104,11 +108,11 @@ const ReportsPage = ({ serverUrl, selectedAid, selectedAcdc, aidName, logger, se
               req: lRequest,
               res: response_signed_data,
               success: false,
-              msg: response_signed_data?.detail ?? response_signed_data?.title,
+              msg: response_signed_data,
               time: new Date().toLocaleString(),
             },
           ]);
-          throw new Error(`${response_signed_data?.detail ?? response_signed_data?.title}`);
+          throw new Error(`${response_signed_data}`);
         }
         setLogger([
           ...logger,

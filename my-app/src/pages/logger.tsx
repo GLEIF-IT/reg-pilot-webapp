@@ -30,7 +30,7 @@ const Logger = ({ logger }) => {
       <Grid item xs={12}>
         <Box>
           {logger?.length ? (
-            <TableContainer component={Paper} data-testid="status--grid">
+            <TableContainer component={Paper} data-testid="logger--grid">
               <Table aria-label="collapsible-status-table">
                 <TableHead>
                   <TableRow>

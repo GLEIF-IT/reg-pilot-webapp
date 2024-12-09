@@ -60,15 +60,13 @@ const StatusPage = ({
       };
       const status_path = `${serverUrl}${statusPath}/${selectedAid}`;
       try {
-        const statusResp = await regService.getStatus(
-          status_path,
-          lRequest,
-          extMode,
-          aidName
-        );
-
+        const statusResp = await regService.getStatus(status_path, lRequest, extMode, aidName);
         const response_signed_data = await statusResp.json();
         if (statusResp.status >= 400) {
+          const error_msg =
+            typeof response_signed_data === "string"
+              ? response_signed_data
+              : response_signed_data?.msg ?? response_signed_data?.title;
           setLogger([
             ...logger,
             {
@@ -76,21 +74,18 @@ const StatusPage = ({
               req: lRequest,
               res: response_signed_data,
               time: new Date().toLocaleString(),
-              msg: response_signed_data?.msg,
+              msg: error_msg,
               success: false,
             },
           ]);
-          throw new Error(
-            `${response_signed_data?.msg ?? response_signed_data?.title}`
-          );
+          throw new Error(`${error_msg}`);
         }
-        console.log("response_signed_data", response_signed_data);
         return response_signed_data;
       } catch (error) {
         if (typeof error?.message === "string") {
           console.log(typeof error);
           console.log(error);
-          console.log(JSON.stringify(error))
+          console.log(JSON.stringify(error));
           setLogger([
             ...logger,
             {
@@ -156,9 +151,7 @@ const StatusPage = ({
   return (
     <Grid container spacing={1} style={{ padding: "32px" }}>
       <Grid item xs={12}>
-        <Typography variant="h3">
-          {formatMessage({ id: "report.checkStatus" })}
-        </Typography>
+        <Typography variant="h3">{formatMessage({ id: "report.checkStatus" })}</Typography>
       </Grid>
       {loading && (
         <Grid item xs={12}>
@@ -173,9 +166,7 @@ const StatusPage = ({
         <Grid item xs={12}>
           <CollapseAlert
             dataTestId="status--login-error"
-            message={
-              typeof hasError === "string" ? hasError : hasError?.message
-            }
+            message={typeof hasError === "string" ? hasError : hasError?.message}
             details={hasError?.details}
           />
         </Grid>
@@ -229,10 +220,7 @@ const StatusPage = ({
               aria-label="add"
               style={{ position: "fixed", bottom: "20px", right: "20px" }}
               onClick={() => {
-                setData(
-                  fakeCheckStatus[selectedAid]?.map((ele) => JSON.parse(ele)) ??
-                    []
-                );
+                setData(fakeCheckStatus[selectedAid]?.map((ele) => JSON.parse(ele)) ?? []);
               }}
             >
               <AddIcon />
@@ -263,9 +251,7 @@ function Row(props: { row: any }) {
           </IconButton>
         </TableCell>
         <TableCell>
-          {row.filename === undefined
-            ? "unknown"
-            : row.filename.substring(0, 75)}
+          {row.filename === undefined ? "unknown" : row.filename.substring(0, 75)}
         </TableCell>
         <TableCell>{row.size === undefined ? "unknown" : row.size}</TableCell>
         <TableCell
@@ -292,24 +278,19 @@ function Row(props: { row: any }) {
                   {formatMessage({ id: "report.details" })}
                 </Typography>
                 <Typography variant="body2" gutterBottom>
-                  <strong>{formatMessage({ id: "report.filename" })}</strong>{" "}
-                  {row["filename"]}
+                  <strong>{formatMessage({ id: "report.filename" })}</strong> {row["filename"]}
                 </Typography>
                 <Typography variant="body2" gutterBottom>
-                  <strong>{formatMessage({ id: "report.size" })}</strong>{" "}
-                  {row["size"]}
+                  <strong>{formatMessage({ id: "report.size" })}</strong> {row["size"]}
                 </Typography>
                 <Typography variant="body2" gutterBottom>
-                  <strong>{formatMessage({ id: "report.status" })}</strong>{" "}
-                  {row["status"]}
+                  <strong>{formatMessage({ id: "report.status" })}</strong> {row["status"]}
                 </Typography>
                 <Typography variant="body2" gutterBottom>
-                  <strong>{formatMessage({ id: "report.message" })}</strong>{" "}
-                  {row["message"]}
+                  <strong>{formatMessage({ id: "report.message" })}</strong> {row["message"]}
                 </Typography>
                 <Typography variant="body2" gutterBottom>
-                  <strong>{formatMessage({ id: "report.submittedBy" })}</strong>{" "}
-                  {row["submitter"]}
+                  <strong>{formatMessage({ id: "report.submittedBy" })}</strong> {row["submitter"]}
                 </Typography>
               </CardContent>
             </Card>

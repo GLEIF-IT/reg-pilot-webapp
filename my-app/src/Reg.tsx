@@ -13,7 +13,7 @@ import HomePage from "./pages/home.tsx";
 import ReportsPage from "./pages/reports.tsx";
 import StatusPage from "./pages/status.tsx";
 import SettingsPage from "./pages/settings.tsx";
-import signData from "../test/SignData.json";
+import signData from "../test/SignData_rootsid_test.json";
 
 const statusPath = "/status";
 
@@ -36,7 +36,7 @@ const RegComponent = () => {
   const [selectedId, setSelectedId] = useState(""); // Step 2 Selection
   const [selectedAcdc, setSelectedAcdc] = useState(null); // Step 3 Selection
   const [serverUrl, setServerUrl] = useState(
-    "https://reg-api-dev.rootsid.cloud"
+    "https://reg-api-test.rootsid.cloud"
   );
   const [logger, setLogger] = useState([]);
   const [vendorConf, setVendorConf] = useState(false);

@@ -26,7 +26,12 @@
     "build": "vite build",
     "serve": "vite preview",
     "ui-test-pw": "npx playwright test login.spec --max-failures=1 --headed",
-    "e2e-tests": "vitest run e2e.spec --passWithNoTests"
+    "e2e-tests": "vitest run e2e.spec --passWithNoTests",
+    "login-tests": "vitest run login2.spec --passWithNoTests",
+    "without-ext-tests": "vitest run without-ext.spec --passWithNoTests",
+    "disabled-ext-tests": "vitest run disabled-ext.spec --passWithNoTests",
+    "status-tests": "vitest run status2.spec --passWithNoTests",
+    "report-tests": "vitest run upload2.spec --passWithNoTests"
   },
   "eslintConfig": {
     "extends": [
