@@ -1,7 +1,7 @@
 This is the regulatory customer pilot webapp.
-It requires a signify enabled browser extension, like [this open source one](https://github.com/WebOfTrust/signify-browser-extension), to provide signed headers.
+It requires a signify enabled browser extension, like the open-source [signify-brower-extension](https://github.com/WebOfTrust/signify-browser-extension), to provide signed headers.
 When run in developer mode it uses hardcoded data to test the UI.
-Otherwise it should configured to point to the [reg-pilot-api](https://github.com/GLEIF-IT/reg-pilot-api) which uses the (vlei-verifier)[https://github.com/2byrds/vlei-verifier] service.
+Otherwise it should configured to point to the [reg-pilot-api](https://github.com/GLEIF-IT/reg-pilot-api) which uses the [vlei-verifier](https://github.com/GLEIF-IT/vlei-verifier) service.
 
 # Local development
 ## Build
